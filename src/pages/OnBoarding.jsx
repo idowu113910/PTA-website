@@ -48,40 +48,30 @@ const OnBoarding = () => {
   };
 
   return (
-    <div className="w-full overflow-hidden">
-      {/* FULL HEIGHT FIX (Safari + all browsers) */}
+    <div className="min-h-screen w-full overflow-x-hidden">
       <div
-        className="w-full flex flex-col justify-between px-4 
-                   pt-[env(safe-area-inset-top)] 
-                   pb-[calc(env(safe-area-inset-bottom)+16px)]"
-        style={{
-          minHeight: "100vh", // fallback
-          height: "100dvh", // modern browsers (Safari fixed)
-          backgroundImage: `url(${slides[currentSlide].image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
+        className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+        style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
       >
-        {/* TOP */}
+        {/* TOP (Skip) */}
         <div className="flex justify-end">
           {currentSlide < slides.length - 1 && (
             <p
               onClick={handleSkip}
-              className="text-white text-[13px] sm:text-sm border-b border-white cursor-pointer"
+              className="text-white text-sm border-b border-white cursor-pointer"
             >
               Skip
             </p>
           )}
         </div>
 
-        {/* CENTER */}
-        <div className="flex flex-col items-center text-center gap-3 sm:gap-4 px-2">
-          <h2 className="font-bold text-[18px] sm:text-[20px] text-white">
+        {/* CENTER CONTENT */}
+        <div className="flex flex-col items-center text-center gap-4 px-4">
+          <h2 className="font-bold text-lg text-white">
             {slides[currentSlide].title}
           </h2>
 
-          <p className="text-[13px] sm:text-[14px] text-white max-w-[320px] sm:max-w-sm leading-relaxed">
+          <p className="text-sm text-white max-w-sm">
             {slides[currentSlide].description}
           </p>
 
@@ -98,11 +88,11 @@ const OnBoarding = () => {
           </div>
         </div>
 
-        {/* BOTTOM */}
+        {/* BOTTOM BUTTONS */}
         <div className="flex flex-col items-center gap-3">
           <button
             onClick={handleNext}
-            className="w-full max-w-md bg-[#FF7B17] text-white rounded-lg py-3 sm:py-4 font-bold text-[15px] sm:text-base"
+            className="w-full max-w-md bg-[#FF7B17] text-white rounded-lg py-3 font-bold text-base"
           >
             {currentSlide === slides.length - 1 ? "Get Started" : "Next"}
           </button>
@@ -110,7 +100,7 @@ const OnBoarding = () => {
           {currentSlide > 0 && (
             <button
               onClick={handleBack}
-              className="text-white font-semibold text-[14px] sm:text-base"
+              className="text-white font-semibold text-base"
             >
               Back
             </button>
