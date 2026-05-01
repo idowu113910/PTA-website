@@ -16,117 +16,48 @@ const BottomNavigation = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("home");
 
-  // Update activeTab based on current route
   useEffect(() => {
     const path = location.pathname.substring(1) || "home";
     setActiveTab(path);
   }, [location]);
 
+  const tabs = [
+    { key: "home", label: "Home", icon: hmm, activeIcon: home },
+    { key: "report", label: "Report", icon: rp, activeIcon: rpp },
+    { key: "message", label: "Message", icon: ms, activeIcon: mss },
+    { key: "calendar", label: "Calendar", icon: ca, activeIcon: caa },
+    { key: "profile", label: "Profile", icon: pr, activeIcon: prr },
+  ];
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-[#C1C1C1] flex gap-[20px] w-full border-t-[1px] pt-[18px] pb-[18px] z-50 pl-10">
-      <div
-        className="flex flex-col items-center justify-center cursor-pointer gap-1"
-        onClick={() => {
-          setActiveTab("home");
-          navigate("/home");
-        }}
-      >
-        <img
-          src={activeTab === "home" ? home : hmm}
-          alt=""
-          className="w-[24px] h-[24px]"
-        />
-        <p
-          className={`font-normal text-[14px] ${
-            activeTab === "home" ? "text-[#FF7B17]" : "text-black"
-          }`}
-        >
-          Home
-        </p>
-      </div>
-
-      <div
-        className="flex flex-col items-center justify-center cursor-pointer gap-1"
-        onClick={() => {
-          setActiveTab("report");
-          navigate("/report");
-        }}
-      >
-        <img
-          src={activeTab === "report" ? rpp : rp}
-          alt=""
-          className="w-[24px] h-[24px]"
-        />
-        <p
-          className={`font-normal text-[14px] ${
-            activeTab === "report" ? "text-[#FF7B17]" : "text-black"
-          }`}
-        >
-          Report
-        </p>
-      </div>
-
-      <div
-        className="flex flex-col items-center justify-center cursor-pointer gap-1"
-        onClick={() => {
-          setActiveTab("message");
-          navigate("/message");
-        }}
-      >
-        <img
-          src={activeTab === "message" ? mss : ms}
-          alt=""
-          className="w-[24px] h-[24px]"
-        />
-        <p
-          className={`font-normal text-[14px] ${
-            activeTab === "message" ? "text-[#FF7B17]" : "text-black"
-          }`}
-        >
-          Message
-        </p>
-      </div>
-
-      <div
-        className="flex flex-col items-center justify-center cursor-pointer gap-1"
-        onClick={() => {
-          setActiveTab("calendar");
-          navigate("/calendar");
-        }}
-      >
-        <img
-          src={activeTab === "calendar" ? caa : ca}
-          alt=""
-          className="w-[24px] h-[24px]"
-        />
-        <p
-          className={`font-normal text-[14px] ${
-            activeTab === "calendar" ? "text-[#FF7B17]" : "text-black"
-          }`}
-        >
-          Calendar
-        </p>
-      </div>
-
-      <div
-        className="flex flex-col items-center justify-center cursor-pointer gap-1"
-        onClick={() => {
-          setActiveTab("profile");
-          navigate("/profile");
-        }}
-      >
-        <img
-          src={activeTab === "profile" ? prr : pr}
-          alt=""
-          className="w-[24px] h-[24px]"
-        />
-        <p
-          className={`font-normal text-[14px] ${
-            activeTab === "profile" ? "text-[#FF7B17]" : "text-black"
-          }`}
-        >
-          Profile
-        </p>
+    <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#C1C1C1] z-50">
+      <div className="flex items-center justify-around w-full py-3 px-2">
+        {tabs.map(({ key, label, icon, activeIcon }) => {
+          const isActive = activeTab === key;
+          return (
+            <button
+              key={key}
+              onClick={() => {
+                setActiveTab(key);
+                navigate(`/${key}`);
+              }}
+              className="flex flex-col items-center justify-center gap-1 flex-1 min-w-0 bg-transparent border-none outline-none cursor-pointer"
+            >
+              <img
+                src={isActive ? activeIcon : icon}
+                alt={label}
+                className="w-6 h-6 flex-shrink-0"
+              />
+              <p
+                className={`text-[11px] font-normal leading-tight truncate ${
+                  isActive ? "text-[#FF7B17]" : "text-black"
+                }`}
+              >
+                {label}
+              </p>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

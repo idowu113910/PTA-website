@@ -31,16 +31,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
 import enGB from "date-fns/locale/en-GB";
 import ch from "../assets/choose.svg";
-import hmm from "../assets/home.svg";
-import rp from "../assets/report.svg";
-import ms from "../assets/message.svg";
-import ca from "../assets/calendar.svg";
-import pr from "../assets/pro.svg";
-import home from "../assets/home1.svg";
-import rpp from "../assets/report2.svg";
-import caa from "../assets/calendar3.svg";
-import prr from "../assets/pro2.svg";
-import mss from "../assets/message2.svg";
 import BottomNavigation from "../components/BottomNavigation";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
@@ -48,7 +38,7 @@ import parentImg1 from "../assets/divine.svg";
 import parentImg2 from "../assets/Shayla.svg";
 import parentImg3 from "../assets/Tamara.svg";
 
-registerLocale("en-GB", enGB); // format DD/MM/YYYY
+registerLocale("en-GB", enGB);
 
 const HomePaget = () => {
   const [percentage, setPercentage] = useState(0);
@@ -56,7 +46,7 @@ const HomePaget = () => {
   const [percentage22, setPercentage22] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date("2025-06-30"));
-  const [screen, setScreen] = useState("home"); // home | post-homework | mark-attendance | add-grade
+  const [screen, setScreen] = useState("home");
   const mainScreens = ["home", "report", "message", "calendar", "profile"];
   const [isOn, setIsOn] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
@@ -72,24 +62,18 @@ const HomePaget = () => {
   const [selectedGrade, setSelectedGrade] = useState("");
   const [totalMark, setTotalMark] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+
   // Add Student form states
   const [studentNameAdd, setStudentNameAdd] = useState("");
   const [studentDOB, setStudentDOB] = useState(null);
   const [studentID, setStudentID] = useState("");
-
   const [studentClass, setStudentClass] = useState("");
   const [academicSession, setAcademicSession] = useState("");
-
-  // Add Student dropdown states
-
   const [isDOBOpen, setIsDOBOpen] = useState(false);
 
-  // File input ref
-
-  // Success notification for Add Student
+  // Success states
   const [showStudentSuccess, setShowStudentSuccess] = useState(false);
-
-  // Data arrays
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Dropdown states
   const [isSubjectOpen, setIsSubjectOpen] = useState(false);
@@ -98,6 +82,8 @@ const HomePaget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isTermOpen, setIsTermOpen] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState("");
+  const [isGenderOpen, setIsGenderOpen] = useState(false);
+  const [selectedGender, setSelectedGender] = useState("");
 
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
@@ -105,14 +91,13 @@ const HomePaget = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Update activeTab based on current route
   useEffect(() => {
     const path = location.pathname.substring(1) || "home";
     setActiveTab(path);
   }, [location]);
 
   const handleFileClick = () => {
-    fileInputRef.current.click(); // Trigger the hidden file input
+    fileInputRef.current.click();
   };
 
   useEffect(() => {
@@ -124,21 +109,13 @@ const HomePaget = () => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      console.log("Selected file:", file.name);
     }
   };
-
-  const [isGenderOpen, setIsGenderOpen] = useState(false);
-  const [selectedGender, setSelectedGender] = useState("");
-
-  // Success notification state
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const targetPercentage = 100;
   const targetPercentage89 = 89;
   const targetPercentage22 = 22;
 
-  // Track attendance status for each student by their ID
   const [studentAttendance, setStudentAttendance] = useState({
     "06201": null,
     "06202": null,
@@ -150,32 +127,23 @@ const HomePaget = () => {
   const [counts, setCounts] = useState({ present: 0, absent: 0, late: 0 });
 
   const handleStatusClick = (studentId, status) => {
-    // Get the previous status of this student
     const previousStatus = studentAttendance[studentId];
 
-    // Update the student's attendance status
     setStudentAttendance((prev) => ({
       ...prev,
       [studentId]: status,
     }));
 
-    // Update counts
     setCounts((prev) => {
       const newCounts = { ...prev };
-
-      // Decrease count for previous status if it exists
       if (previousStatus) {
         newCounts[previousStatus] = Math.max(0, newCounts[previousStatus] - 1);
       }
-
-      // Increase count for new status
       newCounts[status] = newCounts[status] + 1;
-
       return newCounts;
     });
   };
 
-  // Data arrays
   const subjects = [
     "Biology",
     "Chemistry",
@@ -207,7 +175,6 @@ const HomePaget = () => {
   ];
 
   const genders = ["Male", "Female"];
-
   const terms = ["Term 1", "Term 2", "Term 3"];
 
   const handleSelect = (type, value) => {
@@ -224,16 +191,15 @@ const HomePaget = () => {
   };
 
   const handleSelectGender = (gender) => {
-    setSelectedGender(gender); // ✅ Save the selected gender
-    setIsGenderOpen(false); // ✅ Close the dropdown
+    setSelectedGender(gender);
+    setIsGenderOpen(false);
   };
 
   const handleSelectTerm = (term) => {
-    setSelectedTerm(term); // ✅ Save the selected gender
-    setIsTermOpen(false); // ✅ Close the dropdown
+    setSelectedTerm(term);
+    setIsTermOpen(false);
   };
 
-  // Check if all Add Student fields are filled
   const isStudentFormValid =
     studentNameAdd.trim() !== "" &&
     studentDOB !== null &&
@@ -246,7 +212,6 @@ const HomePaget = () => {
 
   const handleSaveStudent = () => {
     const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-
     const newStudent = {
       id: studentID,
       name: studentNameAdd,
@@ -258,14 +223,9 @@ const HomePaget = () => {
       gender: selectedGender,
       dob: studentDOB,
     };
-
     const updatedStudents = [...storedStudents, newStudent];
-
     localStorage.setItem("students", JSON.stringify(updatedStudents));
-
     setShowStudentSuccess(true);
-
-    // Optional: reset form
     setStudentNameAdd("");
     setStudentID("");
     setSelectedFile(null);
@@ -277,7 +237,6 @@ const HomePaget = () => {
 
   const handleCloseStudentSuccess = () => {
     setShowStudentSuccess(false);
-    // Reset Add Student form
     setStudentNameAdd("");
     setStudentDOB(null);
     setSelectedGender("");
@@ -288,7 +247,6 @@ const HomePaget = () => {
     setSelectedTerm("");
   };
 
-  // Check if all fields are filled
   const isFormValid =
     studentName.trim() !== "" &&
     selectedSubject !== "" &&
@@ -305,7 +263,6 @@ const HomePaget = () => {
 
   const handleCloseSuccess = () => {
     setShowSuccess(false);
-    // Reset form
     setStudentName("");
     setSelectedSubject("");
     setSelectedAssessment("");
@@ -314,30 +271,25 @@ const HomePaget = () => {
     setSelectedDate(null);
   };
 
-  const handleToggle = () => {
-    setIsOn(!isOn);
-  };
+  const handleToggle = () => setIsOn(!isOn);
 
   useEffect(() => {
-    // Start animation after component mounts
-    const duration = 2000; // 2 seconds
-    const steps = 60; // 60 steps for smooth animation
+    const duration = 2000;
+    const steps = 60;
     const increment = targetPercentage / steps;
     const stepDuration = duration / steps;
     let currentStep = 0;
     const timer = setInterval(() => {
       currentStep++;
-      const newPercentage = Math.min(currentStep * increment, targetPercentage);
-      setPercentage(Math.round(newPercentage));
-      if (currentStep >= steps) {
-        clearInterval(timer);
-      }
+      setPercentage(
+        Math.round(Math.min(currentStep * increment, targetPercentage)),
+      );
+      if (currentStep >= steps) clearInterval(timer);
     }, stepDuration);
     return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
-    // Animation for 89% circle
     const duration = 2000;
     const steps = 60;
     const increment = targetPercentage89 / steps;
@@ -345,20 +297,15 @@ const HomePaget = () => {
     let currentStep = 0;
     const timer = setInterval(() => {
       currentStep++;
-      const newPercentage = Math.min(
-        currentStep * increment,
-        targetPercentage89,
+      setPercentage89(
+        Math.round(Math.min(currentStep * increment, targetPercentage89)),
       );
-      setPercentage89(Math.round(newPercentage));
-      if (currentStep >= steps) {
-        clearInterval(timer);
-      }
+      if (currentStep >= steps) clearInterval(timer);
     }, stepDuration);
     return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
-    // Animation for 22% circle
     const duration = 2000;
     const steps = 60;
     const increment = targetPercentage22 / steps;
@@ -366,21 +313,16 @@ const HomePaget = () => {
     let currentStep = 0;
     const timer = setInterval(() => {
       currentStep++;
-      const newPercentage = Math.min(
-        currentStep * increment,
-        targetPercentage22,
+      setPercentage22(
+        Math.round(Math.min(currentStep * increment, targetPercentage22)),
       );
-      setPercentage22(Math.round(newPercentage));
-      if (currentStep >= steps) {
-        clearInterval(timer);
-      }
+      if (currentStep >= steps) clearInterval(timer);
     }, stepDuration);
     return () => clearInterval(timer);
   }, []);
 
-  // Calculate circle properties
-  const radius = 48;
-  const strokeWidth = 16;
+  const radius = 40;
+  const strokeWidth = 12;
   const normalizedRadius = radius - strokeWidth / 2;
   const circumference = normalizedRadius * 2 * Math.PI;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -403,34 +345,40 @@ const HomePaget = () => {
 
   const formatDate = (date) => {
     const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
+      weekday: "short",
+      month: "short",
       day: "numeric",
+      year: "numeric",
     };
     return date.toLocaleDateString("en-US", options);
   };
 
+  // Shared input class
+  const inputClass =
+    "w-full h-[52px] rounded-[8px] border border-[#0000001F] py-2 px-3 text-[14px] font-normal placeholder:text-[14px] placeholder:text-gray-400 focus:outline-none focus:border-[#FF7B17]";
+
+  // Shared dropdown button class
+  const dropdownBtnClass =
+    "w-full h-[52px] px-3 border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between text-[14px]";
+
   return (
-    <div>
-      {/* ================= NOTIFICATIONS (GLOBAL) ================= */}
+    <div className="w-full max-w-[430px] mx-auto min-h-screen bg-white">
+      {/* ================= NOTIFICATIONS ================= */}
       {showNotifications && (
         <>
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setShowNotifications(false)}
           />
-
-          <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
-            <div className="p-6">
+          <div className="fixed inset-0 bg-white z-50 overflow-y-auto max-w-[430px] mx-auto">
+            <div className="p-5">
               <div className="flex items-center gap-4 mb-6">
                 <button onClick={() => setShowNotifications(false)}>
                   <img src={back} alt="back" />
                 </button>
                 <h2 className="text-[20px] font-medium">Notifications</h2>
               </div>
-
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {[
                   ["Unread Messages", "2 unread messages from Parents"],
                   ["Upcoming Events", "Spelling Drill - July 15th"],
@@ -456,199 +404,147 @@ const HomePaget = () => {
 
       {/* ================= HOME SCREEN ================= */}
       {screen === "home" && (
-        <div className="h-[1050px]">
-          <div className="flex justify-between items-center px-6 mt-6">
-            <div className="flex gap-4">
-              <img src={edith} alt="" />
+        <div className="pb-24">
+          {/* Header */}
+          <div className="flex justify-between items-center px-5 pt-6">
+            <div className="flex gap-3 items-center">
+              <img src={edith} alt="" className="w-10 h-10 flex-shrink-0" />
               <div>
-                <p className="text-[14px]">Welcome,</p>
-                <p className="text-[16px] font-semibold">{fullName}</p>
-                <p className="text-[14px]">
-                  {grade && room
-                    ? `Grade ${grade}. Room ${room}. ${fullName}`
-                    : ""}
+                <p className="text-[13px]">Welcome,</p>
+                <p className="text-[15px] font-semibold leading-tight">
+                  {fullName}
                 </p>
+                {grade && room && (
+                  <p className="text-[12px] text-gray-500">
+                    Grade {grade}. Room {room}.
+                  </p>
+                )}
               </div>
             </div>
-
             <FaRegBell
-              className="w-[18px] h-[21px] cursor-pointer"
+              className="w-5 h-5 cursor-pointer flex-shrink-0"
               onClick={() => setShowNotifications(true)}
             />
           </div>
 
-          <h4 className="text-[18px] font-medium ml-6 mt-10">
+          <h4 className="text-[17px] font-medium px-5 mt-8">
             Catch Up on Today's Quick Stats
           </h4>
 
-          {/* Three circles in a row */}
-          <div className="w-[339px] bg-[#FFF0E5E0] mt-6 rounded-[10px] ml-6 py-6 px-4">
-            <div className="flex justify-between items-start">
-              {/* 100% Circle */}
-              <div className="flex flex-col items-center relative">
-                <svg
-                  height={radius * 2}
-                  width={radius * 2}
-                  className="transform -rotate-90"
-                >
-                  <circle
-                    stroke="#FF7B17"
-                    fill="transparent"
-                    strokeWidth={strokeWidth}
-                    r={normalizedRadius}
-                    cx={radius}
-                    cy={radius}
-                  />
-                  <circle
-                    stroke="#22C55E"
-                    fill="transparent"
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={`${circumference} ${circumference}`}
-                    style={{
-                      strokeDashoffset: strokeDashoffset,
-                      transition: "stroke-dashoffset 0.035s linear",
-                    }}
-                    strokeLinecap="round"
-                    r={normalizedRadius}
-                    cx={radius}
-                    cy={radius}
-                  />
-                </svg>
-                <div className="absolute top-[48px] left-[48px] -translate-x-1/2 -translate-y-1/2 text-[15px] font-semibold text-black">
-                  {percentage}%
+          {/* Three circles */}
+          <div className="bg-[#FFF0E5E0] mt-4 rounded-[10px] mx-5 py-5 px-2">
+            <div className="flex justify-around items-start">
+              {[
+                {
+                  pct: percentage,
+                  offset: strokeDashoffset,
+                  label: "Attendance Today",
+                },
+                {
+                  pct: percentage89,
+                  offset: strokeDashoffset89,
+                  label: "Submitted Assignment",
+                },
+                {
+                  pct: percentage22,
+                  offset: strokeDashoffset22,
+                  label: "Parents Engagement",
+                },
+              ].map(({ pct, offset, label }, idx) => (
+                <div key={idx} className="flex flex-col items-center">
+                  <div
+                    className="relative"
+                    style={{ width: radius * 2, height: radius * 2 }}
+                  >
+                    <svg
+                      height={radius * 2}
+                      width={radius * 2}
+                      className="transform -rotate-90"
+                    >
+                      <circle
+                        stroke="#FF7B17"
+                        fill="transparent"
+                        strokeWidth={strokeWidth}
+                        r={normalizedRadius}
+                        cx={radius}
+                        cy={radius}
+                      />
+                      <circle
+                        stroke="#22C55E"
+                        fill="transparent"
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={`${circumference} ${circumference}`}
+                        style={{
+                          strokeDashoffset: offset,
+                          transition: "stroke-dashoffset 0.035s linear",
+                        }}
+                        strokeLinecap="round"
+                        r={normalizedRadius}
+                        cx={radius}
+                        cy={radius}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center text-[13px] font-semibold text-black">
+                      {pct}%
+                    </div>
+                  </div>
+                  <p className="mt-2 font-semibold text-black text-[11px] w-[72px] text-center leading-tight">
+                    {label}
+                  </p>
                 </div>
-                <p className="mt-2 font-semibold text-black text-[12px] w-[73px] text-center">
-                  Attendance Today
-                </p>
-              </div>
-
-              {/* 89% Circle */}
-              <div className="flex flex-col items-center relative">
-                <svg
-                  height={radius * 2}
-                  width={radius * 2}
-                  className="transform -rotate-90"
-                >
-                  <circle
-                    stroke="#FF7B17"
-                    fill="transparent"
-                    strokeWidth={strokeWidth}
-                    r={normalizedRadius}
-                    cx={radius}
-                    cy={radius}
-                  />
-                  <circle
-                    stroke="#22C55E"
-                    fill="transparent"
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={`${circumference} ${circumference}`}
-                    style={{
-                      strokeDashoffset: strokeDashoffset89,
-                      transition: "stroke-dashoffset 0.035s linear",
-                    }}
-                    strokeLinecap="round"
-                    r={normalizedRadius}
-                    cx={radius}
-                    cy={radius}
-                  />
-                </svg>
-                <div className="absolute top-[48px] left-[48px] -translate-x-1/2 -translate-y-1/2 text-[15px] font-semibold text-black">
-                  {percentage89}%
-                </div>
-                <p className="mt-2 font-semibold text-black text-[12px] w-[73px] text-center">
-                  Submitted Assignment
-                </p>
-              </div>
-
-              {/* 22% Circle */}
-              <div className="flex flex-col items-center relative">
-                <svg
-                  height={radius * 2}
-                  width={radius * 2}
-                  className="transform -rotate-90"
-                >
-                  <circle
-                    stroke="#FF7B17"
-                    fill="transparent"
-                    strokeWidth={strokeWidth}
-                    r={normalizedRadius}
-                    cx={radius}
-                    cy={radius}
-                  />
-                  <circle
-                    stroke="#22C55E"
-                    fill="transparent"
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={`${circumference} ${circumference}`}
-                    style={{
-                      strokeDashoffset: strokeDashoffset22,
-                      transition: "stroke-dashoffset 0.035s linear",
-                    }}
-                    strokeLinecap="round"
-                    r={normalizedRadius}
-                    cx={radius}
-                    cy={radius}
-                  />
-                </svg>
-                <div className="absolute top-[48px] left-[48px] -translate-x-1/2 -translate-y-1/2 text-[15px] font-semibold text-black">
-                  {percentage22}%
-                </div>
-                <p className="mt-2 font-semibold text-black text-[12px] w-[73px] text-center">
-                  Parents Engagement
-                </p>
-              </div>
+              ))}
             </div>
           </div>
 
-          <h5 className="text-[18px] font-medium ml-6 mt-6">
+          <h5 className="text-[17px] font-medium px-5 mt-6">
             Get on Today's Task
           </h5>
 
-          <div className="grid grid-cols-2 gap-4 px-6 mt-5 w-[339px]">
+          {/* Task grid — 2 cols, full width */}
+          <div className="grid grid-cols-2 gap-3 px-5 mt-4">
             <button
               onClick={() => setScreen("post-homework")}
-              className="border border-[#3B82F6] rounded-[8.54px] p-3 text-left w-[159px] h-[95px]"
+              className="border border-[#3B82F6] rounded-[8px] p-3 text-left h-[90px]"
             >
-              <img src={hm} alt="" className="w-[39px]" />
+              <img src={hm} alt="" className="w-9" />
               <p className="font-bold text-[13px] mt-2">Post Homework</p>
             </button>
 
             <button
               onClick={() => setScreen("mark-attendance")}
-              className="border border-[#F97316] rounded-[8.54px] p-3 text-left  w-[159px] h-[95px] ml-6.5"
+              className="border border-[#F97316] rounded-[8px] p-3 text-left h-[90px]"
             >
-              <img src={att} alt="" className="w-[39px]" />
+              <img src={att} alt="" className="w-9" />
               <p className="font-bold text-[13px] mt-2">Mark Attendance</p>
             </button>
 
             <button
               onClick={() => setScreen("add-grade")}
-              className="border border-[#0F766E] rounded-[8.54px] p-3 text-left  w-[159px] h-[95px]"
+              className="border border-[#0F766E] rounded-[8px] p-3 text-left h-[90px]"
             >
-              <img src={gd} alt="" className="w-[39px]" />
+              <img src={gd} alt="" className="w-9" />
               <p className="font-bold text-[13px] mt-2">Add Grade</p>
             </button>
 
             <button
               onClick={() => setScreen("add-students")}
-              className="border border-[#3B82F6] rounded-[8.54px] p-3 text-left  w-[159px] h-[95px] ml-6.5"
+              className="border border-[#3B82F6] rounded-[8px] p-3 text-left h-[90px]"
             >
-              <img src={st} alt="" className="w-[39px]" />
+              <img src={st} alt="" className="w-9" />
               <p className="font-bold text-[13px] mt-2">Add Students</p>
             </button>
           </div>
 
-          <div className="p-6 ml-1">
-            <p className="font-medium text-[18px] text-black">
-              Recent Messages
-            </p>
-          </div>
+          {/* Recent Messages */}
+          <p className="font-medium text-[17px] text-black px-5 mt-6 mb-3">
+            Recent Messages
+          </p>
 
-          <div className="px-6 pb-6 flex flex-col gap-3">
+          <div className="px-5 pb-6 flex flex-col gap-3">
             {[
               {
                 name: "Sharon Smitty",
-                message: "Bryan's diary wasn't found in his diary...",
+                message: "Bryan's diary wasn't found in his bag...",
                 time: "11:10",
                 unread: 4,
                 img: parentImg1,
@@ -670,30 +566,27 @@ const HomePaget = () => {
             ].map((chat, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 bg-[#F8F8F8] border-[1px] border-[#0000001F] px-4 py-3 "
+                className="flex items-center gap-3 bg-[#F8F8F8] border border-[#0000001F] px-3 py-3 rounded-[6px]"
               >
-                {/* Avatar */}
                 <img
                   src={chat.img}
                   alt={chat.name}
-                  className="w-[52px] h-[52px] rounded-full object-cover flex-shrink-0"
+                  className="w-[48px] h-[48px] rounded-full object-cover flex-shrink-0"
                 />
-
-                {/* Name + Message */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center">
-                    <p className="font-semibold text-[15px] text-[#1a1a1a] truncate">
+                    <p className="font-semibold text-[14px] text-[#1a1a1a] truncate">
                       {chat.name}
                     </p>
-                    <p className="text-[12px] text-[#888] ml-2 flex-shrink-0">
+                    <p className="text-[11px] text-[#888] ml-2 flex-shrink-0">
                       {chat.time}
                     </p>
                   </div>
                   <div className="flex justify-between items-center mt-[2px]">
-                    <p className="text-[13px] text-[#666] truncate">
+                    <p className="text-[12px] text-[#666] truncate">
                       {chat.message}
                     </p>
-                    <span className="ml-2 flex-shrink-0 bg-[#22C55E] text-white text-[11px] font-bold w-[22px] h-[22px] rounded-full flex items-center justify-center">
+                    <span className="ml-2 flex-shrink-0 bg-[#22C55E] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
                       {chat.unread}
                     </span>
                   </div>
@@ -711,451 +604,422 @@ const HomePaget = () => {
 
       {/* ================= MARK ATTENDANCE SCREEN ================= */}
       {screen === "mark-attendance" && (
-        <div className="h-[1100px]">
+        <div className="pb-28">
           <div
-            className="flex items-center gap-4 p-6 cursor-pointer"
+            className="flex items-center gap-4 px-5 py-5 cursor-pointer"
             onClick={() => setScreen("home")}
           >
             <img src={back} alt="back" />
             <h2 className="text-[20px] font-medium">Attendance</h2>
           </div>
 
-          <div className="px-6 mt-1.5 ml-1">
-            <div className="flex justify-between w-[337px]">
-              <p className="font-semibold text-[16px] text-black">
+          {/* Class Attendance header */}
+          <div className="px-5">
+            <div className="flex justify-between items-center">
+              <p className="font-semibold text-[15px] text-black">
                 Class Attendance
               </p>
-              <p className="font-medium text-[14px] text-black">Today</p>
+              <p className="font-medium text-[13px] text-black">Today</p>
             </div>
           </div>
 
-          <div className="border border-[1px] w-[334px] h-[45px] rounded-[6px] border-[#E3E3E3] ml-7 mt-6">
-            <div className="flex items-center justify-between px-3 h-full">
-              <img
-                src={back3}
-                alt="previous day"
-                onClick={handlePrevDay}
-                className="cursor-pointer flex-shrink-0"
-              />
-              <p className="font-medium text-[16px] text-[#000000] whitespace-nowrap mx-4">
-                {formatDate(currentDate)}
-              </p>
-              <img
-                src={front}
-                alt="next day"
-                onClick={handleNextDay}
-                className="cursor-pointer flex-shrink-0"
-              />
-            </div>
+          {/* Date navigator */}
+          <div className="border border-[#E3E3E3] rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3">
+            <img
+              src={back3}
+              alt="previous day"
+              onClick={handlePrevDay}
+              className="cursor-pointer flex-shrink-0 w-5 h-5"
+            />
+            <p className="font-medium text-[13px] text-black text-center truncate mx-2">
+              {formatDate(currentDate)}
+            </p>
+            <img
+              src={front}
+              alt="next day"
+              onClick={handleNextDay}
+              className="cursor-pointer flex-shrink-0 w-5 h-5"
+            />
           </div>
 
-          <div className="w-[337px] h-[179px] rounded-[6px] border-[1px] border-[#E3E3E3] ml-7 mt-6 p-3">
-            <div className="flex flex-col">
-              <h2 className="font-medium text-[13px] text-[#000000]">
-                Today's Summary
-              </h2>
-              <div className="flex justify-around -ml-1">
-                {/* Present Box */}
-                <div className="w-[93px] h-[83px] bg-[#F0FDF4] mt-1.5">
-                  <div className="flex flex-col items-center justify-center mt-2">
-                    <div className="w-[25px] h-[25px] bg-green-100 rounded-full flex items-center justify-center ">
-                      <svg
-                        className="w-8 h-8 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-[#000000] font-medium text-[15px] flex mx-auto">
-                        {counts.present}
-                      </p>
-                      <p className="text-[13px] font-medium text-[#000000] -mt-1.5">
-                        Present
-                      </p>
-                    </div>
-                  </div>
+          {/* Today's Summary */}
+          <div className="border border-[#E3E3E3] rounded-[6px] mx-5 mt-4 p-3">
+            <h2 className="font-medium text-[13px] text-black mb-2">
+              Today's Summary
+            </h2>
+            <div className="flex justify-between gap-2">
+              {/* Present */}
+              <div className="flex-1 bg-[#F0FDF4] rounded-[4px] py-2 flex flex-col items-center">
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mb-1">
+                  <svg
+                    className="w-4 h-4 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                 </div>
-
-                {/* Absent Box */}
-                <div className="w-[93px] h-[83px] bg-[#FDF1F1] mt-1.5">
-                  <div className="flex flex-col items-center justify-center mt-2">
-                    <img src={pre} alt="" className="w-[25px] h-[25px]" />
-                    <div className="flex flex-col">
-                      <p className="text-[#000000] font-medium text-[15px] flex mx-auto">
-                        {counts.absent}
-                      </p>
-                      <p className="text-[13px] font-medium text-[#000000] -mt-1.5">
-                        Absent
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Late Box */}
-                <div className="w-[93px] h-[83px] bg-[#FEFCE9] mt-1.5">
-                  <div className="flex flex-col items-center justify-center mt-2">
-                    <img src={late} alt="" className="w-[25px] h-[25px]" />
-                    <div className="flex flex-col">
-                      <p className="text-[#000000] font-medium text-[15px] flex mx-auto">
-                        {counts.late}
-                      </p>
-                      <p className="text-[13px] font-medium text-[#000000] -mt-1.5">
-                        Late
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-[14px] font-semibold text-black">
+                  {counts.present}
+                </p>
+                <p className="text-[12px] font-medium text-black">Present</p>
               </div>
 
-              {/* Horizontal line */}
-              <div className="w-[332px] h-[1px] bg-[#D9D9D9] mt-4 -ml-3"></div>
+              {/* Absent */}
+              <div className="flex-1 bg-[#FDF1F1] rounded-[4px] py-2 flex flex-col items-center">
+                <img src={pre} alt="" className="w-6 h-6 mb-1" />
+                <p className="text-[14px] font-semibold text-black">
+                  {counts.absent}
+                </p>
+                <p className="text-[12px] font-medium text-black">Absent</p>
+              </div>
+
+              {/* Late */}
+              <div className="flex-1 bg-[#FEFCE9] rounded-[4px] py-2 flex flex-col items-center">
+                <img src={late} alt="" className="w-6 h-6 mb-1" />
+                <p className="text-[14px] font-semibold text-black">
+                  {counts.late}
+                </p>
+                <p className="text-[12px] font-medium text-black">Late</p>
+              </div>
             </div>
 
-            <div className="flex justify-between ml-2.5 mt-2 mr-2.5">
-              <p className="font-medium text-black text-[15px]">
+            <div className="w-full h-[1px] bg-[#D9D9D9] mt-3 mb-2" />
+
+            <div className="flex justify-between">
+              <p className="font-medium text-black text-[14px]">
                 Total Students
               </p>
-              <p className="font-semibold text-black text-[15px]">
+              <p className="font-semibold text-black text-[14px]">
                 {students.length}
               </p>
             </div>
           </div>
 
-          <p className="font-medium text-[18px] text-black ml-5 mt-3 p-3">
+          <p className="font-medium text-[17px] text-black px-5 mt-4 mb-2">
             Student List
           </p>
 
-          {studentss.map((student) => (
-            <div
-              key={student.id}
-              className="w-[334px] h-[68px] rounded-[6px] border-[1px] py-[9px] px-[10px] gap-[10px] border-[#E3E3E3] ml-8 mt-3"
-            >
-              <div className="flex items-center">
-                <img
-                  src={student.image}
-                  alt={student.name}
-                  className="w-[50px] h-[50px] rounded-full object-cover flex-shrink-0"
-                />
+          {/* Student rows */}
+          <div className="px-5 flex flex-col gap-3">
+            {studentss.map((student) => (
+              <div
+                key={student.id}
+                className="border border-[#E3E3E3] rounded-[6px] px-3 py-2 flex items-center justify-between"
+              >
+                {/* Left: avatar + info */}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <img
+                    src={student.image}
+                    alt={student.name}
+                    className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[14px] text-black truncate">
+                      {student.name}
+                    </p>
+                    <p className="font-medium text-[12px] text-[#9C9C9C]">
+                      ID: {student.id}
+                    </p>
+                  </div>
+                </div>
 
-                <div className="flex flex-col ml-2.5">
-                  <h6 className="font-semibold text-[15px] text-black">
-                    {student.name}
-                  </h6>
-                  <p className="font-semibold text-[14px] text-[#9C9C9C]">
-                    ID: {student.id}
-                  </p>
+                {/* Right: status icons */}
+                <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                  <img
+                    src={
+                      studentAttendance[student.id] === "present" ? presC : pres
+                    }
+                    onClick={() => handleStatusClick(student.id, "present")}
+                    className="cursor-pointer w-7 h-7"
+                    alt="present"
+                  />
+                  <img
+                    src={
+                      studentAttendance[student.id] === "absent" ? absC : abs
+                    }
+                    onClick={() => handleStatusClick(student.id, "absent")}
+                    className="cursor-pointer w-7 h-7"
+                    alt="absent"
+                  />
+                  <img
+                    src={
+                      studentAttendance[student.id] === "late" ? lateC : latee
+                    }
+                    onClick={() => handleStatusClick(student.id, "late")}
+                    className="cursor-pointer w-7 h-7"
+                    alt="late"
+                  />
                 </div>
               </div>
+            ))}
+          </div>
 
-              <div className="flex justify-end -mt-9 gap-[20px]">
-                <img
-                  src={
-                    studentAttendance[student.id] === "present" ? presC : pres
-                  }
-                  onClick={() => handleStatusClick(student.id, "present")}
-                  className="cursor-pointer"
-                />
-                <img
-                  src={studentAttendance[student.id] === "absent" ? absC : abs}
-                  onClick={() => handleStatusClick(student.id, "absent")}
-                  className="cursor-pointer"
-                />
-                <img
-                  src={studentAttendance[student.id] === "late" ? lateC : latee}
-                  onClick={() => handleStatusClick(student.id, "late")}
-                  className="cursor-pointer"
-                />
-              </div>
-            </div>
-          ))}
-
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E3E3E3] py-4 z-50">
-            <div className="flex justify-center -mt-2">
-              <button className="w-[335px] bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
-                Save
-              </button>
-            </div>
+          {/* Fixed Save Button */}
+          <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-50">
+            <button className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
+              Save
+            </button>
           </div>
         </div>
       )}
 
       {/* ================= ADD GRADE SCREEN ================= */}
       {screen === "add-grade" && (
-        <div className="relative h-screen bg-white">
-          <div className="h-[812px] overflow-y-auto pb-24">
+        <div className="relative min-h-screen bg-white">
+          <div className="pb-28 overflow-y-auto">
             <div
-              className="flex items-center gap-4 p-6 cursor-pointer"
+              className="flex items-center gap-4 px-5 py-5 cursor-pointer"
               onClick={() => setScreen("home")}
             >
               <img src={back} alt="back" />
               <h2 className="text-[20px] font-medium">Add Grade</h2>
             </div>
 
-            <div className="flex flex-col ml-7 mt-4">
-              <h4 className="font-medium text-[16px] text-[#303030]">
-                Student Name
-              </h4>
-
-              <input
-                type="text"
-                placeholder="E.g.......John Smith"
-                value={studentName}
-                onChange={(e) => setStudentName(e.target.value)}
-                className="w-[334px] h-[57px] rounded-[8px] border-[1px] py-[8px] px-[12px] placeholder:text-[14px] font-normal border-[#0000001F] mt-2 -ml-1.5"
-              />
-            </div>
-
-            <div className="p-6 -mt-1.5">
-              <label className="block text-[16px] font-medium text-[#303030] mb-2">
-                Subject
-              </label>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSubjectOpen(!isSubjectOpen);
-                    setIsGradeOpen(false);
-                    setIsAssessmentOpen(false);
-                  }}
-                  className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
-                >
-                  <span
-                    className={`${
-                      selectedSubject
-                        ? "text-[14px] text-[#303030] font-normal"
-                        : "text-[14px] text-gray-400"
-                    }`}
-                  >
-                    {selectedSubject || "Select subject"}
-                  </span>
-                  <img
-                    src={arr}
-                    alt="dropdown"
-                    className={`transition-transform duration-200 ${
-                      isSubjectOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {isSubjectOpen && (
-                  <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                    {subjects.map((subject) => (
-                      <div
-                        key={subject}
-                        onClick={() => handleSelect("subject", subject)}
-                        className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                      >
-                        {subject}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6 -mt-7.5">
-              <label className="block text-[16px] font-medium text-[#303030] mb-2">
-                Assessment
-              </label>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAssessmentOpen(!isAssessmentOpen);
-                    setIsGradeOpen(false);
-                    setIsSubjectOpen(false);
-                  }}
-                  className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
-                >
-                  <span
-                    className={`${
-                      selectedAssessment
-                        ? "text-[14px] text-[#303030] font-normal"
-                        : "text-[14px] text-gray-400"
-                    }`}
-                  >
-                    {selectedAssessment || "Select  an assessment"}
-                  </span>
-                  <img
-                    src={arr}
-                    alt="dropdown"
-                    className={`transition-transform duration-200 ${
-                      isAssessmentOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {isAssessmentOpen && (
-                  <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                    {assessments.map((assessment) => (
-                      <div
-                        key={assessment}
-                        onClick={() => handleSelect("assessment", assessment)}
-                        className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                      >
-                        {assessment}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6 -mt-7.5">
-              <label className="block text-[16px] font-medium text-[#303030] mb-2">
-                Grade
-              </label>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsGradeOpen(!isGradeOpen);
-                    setIsSubjectOpen(false);
-                    setIsAssessmentOpen(false);
-                  }}
-                  className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
-                >
-                  <span
-                    className={`${
-                      selectedGrade
-                        ? "text-[14px] text-[#303030] font-normal"
-                        : "text-[14px] text-gray-400"
-                    }`}
-                  >
-                    {selectedGrade || "Select grade"}
-                  </span>
-                  <img
-                    src={arr}
-                    alt="dropdown"
-                    className={`transition-transform duration-200 ${
-                      isGradeOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {isGradeOpen && (
-                  <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                    {grades.map((grade) => (
-                      <div
-                        key={grade}
-                        onClick={() => handleSelect("grade", grade)}
-                        className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                      >
-                        {grade}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col ml-7 -mt-1">
-              <h4 className="font-medium text-[16px] text-[#303030]">
-                Total Mark
-              </h4>
-
-              <input
-                type="text"
-                placeholder="Input Maximum Score"
-                value={totalMark}
-                onChange={(e) => setTotalMark(e.target.value)}
-                className="w-[334px] h-[57px] rounded-[8px] border-[1px] py-[8px] px-[12px] placeholder:text-[14px] font-normal border-[#0000001F] mt-2 -ml-1"
-              />
-            </div>
-
-            <div className="p-6 -mt-2 ml-2">
-              <h5 className="font-medium text-[16px] text-[#303030]">Date</h5>
-
-              <div className="relative">
+            <div className="px-5 flex flex-col gap-5">
+              {/* Student Name */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  Student Name
+                </label>
                 <input
                   type="text"
-                  readOnly
-                  value={
-                    selectedDate
-                      ? selectedDate.toLocaleDateString("en-GB")
-                      : "Select date"
-                  }
-                  placeholder="Select date"
-                  onClick={() => setIsOpen(true)}
-                  className="w-[334px] h-[57px] rounded-[8px] border-[1px] border-[#0000001F] mt-2 font-normal text-[#303030] pl-3 cursor-pointer -ml-2"
+                  placeholder="E.g. John Smith"
+                  value={studentName}
+                  onChange={(e) => setStudentName(e.target.value)}
+                  className={inputClass}
                 />
+              </div>
 
-                <img
-                  src={cal}
-                  alt="calendar"
-                  onClick={() => setIsOpen(true)}
-                  className="absolute left-[87%] bottom-[30%] cursor-pointer"
-                />
-
-                {isOpen && (
-                  <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
-                    <div className="bg-white rounded-xl p-4 shadow-lg">
-                      <DatePicker
-                        selected={selectedDate}
-                        onChange={(date) => {
-                          setSelectedDate(date);
-                          setIsOpen(false);
-                        }}
-                        inline
-                        showPopperArrow={false}
-                        minDate={new Date("2026-01-01")}
-                        maxDate={new Date("2026-12-31")}
-                        locale="en-GB"
-                      />
-                      <button
-                        onClick={() => setIsOpen(false)}
-                        className="mt-2 px-4 py-2 bg-[#3B82F6] text-white rounded-md w-full"
-                      >
-                        Close
-                      </button>
+              {/* Subject */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  Subject
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSubjectOpen(!isSubjectOpen);
+                      setIsGradeOpen(false);
+                      setIsAssessmentOpen(false);
+                    }}
+                    className={dropdownBtnClass}
+                  >
+                    <span
+                      className={
+                        selectedSubject ? "text-[#303030]" : "text-gray-400"
+                      }
+                    >
+                      {selectedSubject || "Select subject"}
+                    </span>
+                    <img
+                      src={arr}
+                      alt="dropdown"
+                      className={`transition-transform duration-200 ${isSubjectOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {isSubjectOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                      {subjects.map((subject) => (
+                        <div
+                          key={subject}
+                          onClick={() => handleSelect("subject", subject)}
+                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                        >
+                          {subject}
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+              </div>
+
+              {/* Assessment */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  Assessment
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAssessmentOpen(!isAssessmentOpen);
+                      setIsGradeOpen(false);
+                      setIsSubjectOpen(false);
+                    }}
+                    className={dropdownBtnClass}
+                  >
+                    <span
+                      className={
+                        selectedAssessment ? "text-[#303030]" : "text-gray-400"
+                      }
+                    >
+                      {selectedAssessment || "Select an assessment"}
+                    </span>
+                    <img
+                      src={arr}
+                      alt="dropdown"
+                      className={`transition-transform duration-200 ${isAssessmentOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {isAssessmentOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                      {assessments.map((assessment) => (
+                        <div
+                          key={assessment}
+                          onClick={() => handleSelect("assessment", assessment)}
+                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                        >
+                          {assessment}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Grade */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  Grade
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsGradeOpen(!isGradeOpen);
+                      setIsSubjectOpen(false);
+                      setIsAssessmentOpen(false);
+                    }}
+                    className={dropdownBtnClass}
+                  >
+                    <span
+                      className={
+                        selectedGrade ? "text-[#303030]" : "text-gray-400"
+                      }
+                    >
+                      {selectedGrade || "Select grade"}
+                    </span>
+                    <img
+                      src={arr}
+                      alt="dropdown"
+                      className={`transition-transform duration-200 ${isGradeOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {isGradeOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                      {grades.map((g) => (
+                        <div
+                          key={g}
+                          onClick={() => handleSelect("grade", g)}
+                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                        >
+                          {g}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Total Mark */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  Total Mark
+                </label>
+                <input
+                  type="text"
+                  placeholder="Input Maximum Score"
+                  value={totalMark}
+                  onChange={(e) => setTotalMark(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+
+              {/* Date */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  Date
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    readOnly
+                    value={
+                      selectedDate
+                        ? selectedDate.toLocaleDateString("en-GB")
+                        : ""
+                    }
+                    placeholder="Select date"
+                    onClick={() => setIsOpen(true)}
+                    className={`${inputClass} cursor-pointer pr-10`}
+                  />
+                  <img
+                    src={cal}
+                    alt="calendar"
+                    onClick={() => setIsOpen(true)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5"
+                  />
+                  {isOpen && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 px-4">
+                      <div className="bg-white rounded-xl p-4 shadow-lg w-full max-w-[320px]">
+                        <DatePicker
+                          selected={selectedDate}
+                          onChange={(date) => {
+                            setSelectedDate(date);
+                            setIsOpen(false);
+                          }}
+                          inline
+                          showPopperArrow={false}
+                          minDate={new Date("2026-01-01")}
+                          maxDate={new Date("2026-12-31")}
+                          locale="en-GB"
+                        />
+                        <button
+                          onClick={() => setIsOpen(false)}
+                          className="mt-2 px-4 py-2 bg-[#3B82F6] text-white rounded-md w-full"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Fixed Save Button */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E3E3E3] py-4 z-40">
-            <div className="flex justify-center -mt-2">
-              <button
-                onClick={handleSaveGrade}
-                disabled={!isFormValid}
-                className={`w-[335px] h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
-                  isFormValid
-                    ? "bg-[#FF7B17] cursor-pointer"
-                    : "bg-gray-300 cursor-not-allowed"
-                }`}
-              >
-                Save Grade
-              </button>
-            </div>
+          <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-40">
+            <button
+              onClick={handleSaveGrade}
+              disabled={!isFormValid}
+              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
+                isFormValid
+                  ? "bg-[#FF7B17] cursor-pointer"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+            >
+              Save Grade
+            </button>
           </div>
 
-          {/* Success Notification */}
+          {/* Success Modal */}
           {showSuccess && (
             <div className="fixed inset-0 flex items-end justify-center z-50">
-              {/* Backdrop */}
               <div
                 className="absolute inset-0 bg-black/30"
                 onClick={handleCloseSuccess}
-              ></div>
-
-              {/* Notification sliding from bottom */}
-              <div className="relative bg-white rounded-t-[20px] w-full max-w-[500px] p-6 shadow-2xl animate-slide-up">
+              />
+              <div className="relative bg-white rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up">
                 <div className="flex flex-col items-center">
-                  {/* Success Icon */}
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                     <svg
                       className="w-8 h-8 text-green-500"
@@ -1171,16 +1035,12 @@ const HomePaget = () => {
                       />
                     </svg>
                   </div>
-
-                  {/* Success Message */}
                   <h3 className="text-[20px] font-bold text-[#303030] mb-2">
                     Successful!
                   </h3>
                   <p className="text-[14px] text-gray-600 text-center mb-6">
                     You have successfully added a new grade
                   </p>
-
-                  {/* Okay Button */}
                   <button
                     onClick={handleCloseSuccess}
                     className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"
@@ -1208,65 +1068,62 @@ const HomePaget = () => {
         </div>
       )}
 
+      {/* ================= ADD STUDENTS SCREEN ================= */}
       {screen === "add-students" && (
-        <div className="relative h-screen bg-white">
-          <div className="h-[1120px] overflow-y-auto pb-24">
+        <div className="relative min-h-screen bg-white">
+          <div className="pb-28 overflow-y-auto">
             <div
-              className="flex items-center gap-4 p-6 cursor-pointer"
+              className="flex items-center gap-4 px-5 py-5 cursor-pointer"
               onClick={() => setScreen("home")}
             >
               <img src={back} alt="back" />
               <h2 className="text-[20px] font-medium">Add Student</h2>
             </div>
 
-            <div className="gap-y-[24px]">
-              <h4 className="font-semibold text-[18px] text-black leading-[22%] ml-7 mt-3">
+            <div className="px-5 flex flex-col gap-5">
+              <h4 className="font-semibold text-[17px] text-black">
                 Student Information
               </h4>
 
-              <div className="flex flex-col ml-7 mt-8">
-                <h4 className="font-medium text-[16px] text-[#303030]">
+              {/* Student Name */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
                   Student Name
-                </h4>
-
+                </label>
                 <input
                   type="text"
-                  placeholder="E.g.......John Smith"
+                  placeholder="E.g. John Smith"
                   value={studentNameAdd}
                   onChange={(e) => setStudentNameAdd(e.target.value)}
-                  className="w-[336px] h-[57px] rounded-[8px] border-[1px] py-[8px] px-[12px] placeholder:text-[14px] font-normal border-[#0000001F] mt-2 -ml-1.5"
+                  className={inputClass}
                 />
               </div>
 
-              <div className="p-6 -mt-2 ml-2">
-                <h5 className="font-medium text-[16px] text-[#303030] -ml-1.5">
+              {/* Date of Birth */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
                   Date Of Birth
-                </h5>
-
+                </label>
                 <div className="relative">
                   <input
                     type="text"
                     readOnly
                     value={
-                      studentDOB
-                        ? studentDOB.toLocaleDateString("en-GB")
-                        : "Select date"
+                      studentDOB ? studentDOB.toLocaleDateString("en-GB") : ""
                     }
                     placeholder="Select date"
                     onClick={() => setIsDOBOpen(true)}
-                    className="w-[334px] h-[57px] rounded-[8px] border-[1px] border-[#0000001F] mt-2 font-normal text-[#303030] pl-3 cursor-pointer -ml-2"
+                    className={`${inputClass} cursor-pointer pr-10`}
                   />
-
                   <img
                     src={cal}
                     alt="calendar"
                     onClick={() => setIsDOBOpen(true)}
-                    className="absolute left-[87%] bottom-[30%] cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5"
                   />
-
                   {isDOBOpen && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
-                      <div className="bg-white rounded-xl p-4 shadow-lg">
+                    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 px-4">
+                      <div className="bg-white rounded-xl p-4 shadow-lg w-full max-w-[320px]">
                         <DatePicker
                           selected={studentDOB}
                           onChange={(date) => {
@@ -1290,44 +1147,37 @@ const HomePaget = () => {
                 </div>
               </div>
 
-              <div className="p-6 -mt-8">
-                <label className="block text-[16px] font-medium text-[#303030] mb-2">
+              {/* Gender */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
                   Gender
                 </label>
-
                 <div className="relative">
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsGenderOpen(!isGenderOpen);
-                    }}
-                    className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
+                    onClick={() => setIsGenderOpen(!isGenderOpen)}
+                    className={dropdownBtnClass}
                   >
                     <span
-                      className={`${
-                        selectedGender
-                          ? "text-[14px] text-[#303030] font-normal"
-                          : "text-[14px] text-gray-400"
-                      }`}
+                      className={
+                        selectedGender ? "text-[#303030]" : "text-gray-400"
+                      }
                     >
                       {selectedGender || "Select a gender"}
                     </span>
                     <img
                       src={arr}
                       alt="dropdown"
-                      className={`transition-transform duration-200 ${
-                        isGenderOpen ? "rotate-180" : ""
-                      }`}
+                      className={`transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""}`}
                     />
                   </button>
-
                   {isGenderOpen && (
-                    <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
                       {genders.map((gender) => (
                         <div
                           key={gender}
                           onClick={() => handleSelectGender(gender)}
-                          className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
+                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
                         >
                           {gender}
                         </div>
@@ -1337,35 +1187,34 @@ const HomePaget = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col ml-7 -mt-2">
-                <h4 className="font-medium text-[16px] text-[#303030]">
+              {/* Student ID */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
                   Student ID
-                </h4>
-
+                </label>
                 <input
                   type="text"
-                  placeholder="E.G,..... Stu/020/25h"
+                  placeholder="E.g. Stu/020/25h"
                   value={studentID}
                   onChange={(e) => setStudentID(e.target.value)}
-                  className="w-[334px] h-[57px] rounded-[8px] border-[1px] py-[8px] px-[12px] placeholder:text-[14px] font-normal border-[#0000001F] mt-2 -ml-1"
+                  className={inputClass}
                 />
               </div>
 
-              <div className="ml-5.5 mt-4">
-                <h5 className="font-medium text-black text-[16px] ml-1">
+              {/* Upload Photo */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
                   Upload Photo
-                </h5>
-
-                <div className="flex border-[1px] border-[#0000001F] w-[334px] h-[57px] rounded-[8px] py-[8px] px-[12px] justify-between mt-2">
-                  <input
-                    type="text"
-                    placeholder="Choose File"
-                    value={selectedFile ? selectedFile.name : ""}
-                    readOnly
-                    className="placeholder:text-[#303030] font-normal text-[14px] flex-1 outline-none cursor-pointer"
-                    onClick={handleFileClick}
-                  />
-
+                </label>
+                <div
+                  className="flex items-center justify-between border border-[#0000001F] rounded-[8px] h-[52px] px-3 cursor-pointer"
+                  onClick={handleFileClick}
+                >
+                  <span
+                    className={`text-[14px] truncate flex-1 ${selectedFile ? "text-[#303030]" : "text-gray-400"}`}
+                  >
+                    {selectedFile ? selectedFile.name : "Choose File"}
+                  </span>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -1373,124 +1222,111 @@ const HomePaget = () => {
                     accept="image/*"
                     className="hidden"
                   />
-
                   <img
                     src={ch}
                     alt=""
-                    className="w-[18px] h-[18px] mt-3 cursor-pointer"
-                    onClick={handleFileClick}
+                    className="w-[18px] h-[18px] flex-shrink-0 ml-2"
                   />
                 </div>
               </div>
-            </div>
 
-            <div>
-              <h4 className="font-semibold text-[18px] text-black p-6">
+              <h4 className="font-semibold text-[17px] text-black pt-2">
                 Class & Academic Info
               </h4>
 
-              <div className="flex w-[336px] gap-3 ml-6">
-                <div>
-                  <h2 className="font-medium text-black text-[16px]">Class</h2>
+              {/* Class + Academic Session side by side */}
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    Class
+                  </label>
                   <input
                     type="text"
                     placeholder="e.g Grade 5"
                     value={studentClass}
                     onChange={(e) => setStudentClass(e.target.value)}
-                    className="border-[1px] rounded-[8px] w-[160px] placeholder:text-[14px] font-normal text-[#303030] 
-              border-[#0000001F] h-[57px] px-[12px] py-[8px] mt-1.5 -ml-0.5"
+                    className="w-full h-[52px] rounded-[8px] border border-[#0000001F] px-3 text-[14px] placeholder:text-gray-400 focus:outline-none focus:border-[#FF7B17]"
                   />
                 </div>
-
-                <div>
-                  <h2 className="font-medium text-black text-[16px]">
+                <div className="flex-1">
+                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
                     Academic Session
-                  </h2>
+                  </label>
                   <input
                     type="text"
                     placeholder="E.g 2024/2025"
                     value={academicSession}
                     onChange={(e) => setAcademicSession(e.target.value)}
-                    className="border-[1px] rounded-[8px] w-[160px] px-[12px] py-[8px] placeholder:text-[14px] font-normal text-[#303030] border-[#0000001F] h-[57px] mt-1.5"
+                    className="w-full h-[52px] rounded-[8px] border border-[#0000001F] px-3 text-[14px] placeholder:text-gray-400 focus:outline-none focus:border-[#FF7B17]"
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="p-6 -mt-2">
-              <label className="block text-[16px] font-medium text-[#303030] mb-2">
-                Term
-              </label>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsTermOpen(!isTermOpen);
-                  }}
-                  className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between -ml-0.5"
-                >
-                  <span
-                    className={`${
-                      selectedTerm
-                        ? "text-[14px] text-[#303030] font-normal"
-                        : "text-[14px] text-gray-400"
-                    }`}
+              {/* Term */}
+              <div>
+                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  Term
+                </label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsTermOpen(!isTermOpen)}
+                    className={dropdownBtnClass}
                   >
-                    {selectedTerm || "Select Term"}
-                  </span>
-                  <img
-                    src={arr}
-                    alt="dropdown"
-                    className={`transition-transform duration-200 ${
-                      isTermOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {isTermOpen && (
-                  <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                    {terms.map((term) => (
-                      <div
-                        key={term}
-                        onClick={() => handleSelectTerm(term)}
-                        className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                      >
-                        {term}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                    <span
+                      className={
+                        selectedTerm ? "text-[#303030]" : "text-gray-400"
+                      }
+                    >
+                      {selectedTerm || "Select Term"}
+                    </span>
+                    <img
+                      src={arr}
+                      alt="dropdown"
+                      className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {isTermOpen && (
+                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                      {terms.map((term) => (
+                        <div
+                          key={term}
+                          onClick={() => handleSelectTerm(term)}
+                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                        >
+                          {term}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Fixed Add Student Button */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E3E3E3] py-4 z-40">
-            <div className="flex justify-center -mt-2">
-              <button
-                onClick={handleSaveStudent}
-                disabled={!isStudentFormValid}
-                className={`w-[335px] h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
-                  isStudentFormValid
-                    ? "bg-[#FF7B17] cursor-pointer"
-                    : "bg-gray-300 cursor-not-allowed"
-                }`}
-              >
-                Add Student
-              </button>
-            </div>
+          <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-40">
+            <button
+              onClick={handleSaveStudent}
+              disabled={!isStudentFormValid}
+              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
+                isStudentFormValid
+                  ? "bg-[#FF7B17] cursor-pointer"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+            >
+              Add Student
+            </button>
           </div>
 
-          {/* Success Notification for Add Student */}
+          {/* Success Modal */}
           {showStudentSuccess && (
             <div className="fixed inset-0 flex items-end justify-center z-50">
               <div
                 className="absolute inset-0 bg-black/30"
                 onClick={handleCloseStudentSuccess}
-              ></div>
-
-              <div className="relative bg-white rounded-t-[20px] w-full max-w-[500px] p-6 shadow-2xl animate-slide-up">
+              />
+              <div className="relative bg-white rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up">
                 <div className="flex flex-col items-center">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
                     <svg
@@ -1507,14 +1343,12 @@ const HomePaget = () => {
                       />
                     </svg>
                   </div>
-
                   <h3 className="text-[20px] font-bold text-[#303030] mb-2">
                     Successful!
                   </h3>
                   <p className="text-[14px] text-gray-600 text-center mb-6">
                     You have successfully added a new student
                   </p>
-
                   <button
                     onClick={handleCloseStudentSuccess}
                     className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"

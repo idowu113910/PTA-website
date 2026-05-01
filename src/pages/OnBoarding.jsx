@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import boy from "../assets/BOY.jpg";
 import family from "../assets/FAMILY.png";
 import woman from "../assets/mama.jpg";
-import pag from "../assets/Pagination.svg";
 import { useNavigate } from "react-router-dom";
 
 const OnBoarding = () => {
@@ -32,16 +31,15 @@ const OnBoarding = () => {
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
-      setCurrentSlide(currentSlide + 1);
+      setCurrentSlide((prev) => prev + 1);
     } else {
-      // Navigate to /role on the last slide
       navigate("/role");
     }
   };
 
   const handleBack = () => {
     if (currentSlide > 0) {
-      setCurrentSlide(currentSlide - 1);
+      setCurrentSlide((prev) => prev - 1);
     }
   };
 
@@ -50,60 +48,63 @@ const OnBoarding = () => {
   };
 
   return (
-    <div className="h-[812px] w-screen overflow-x-hidden">
+    <div className="min-h-screen w-full overflow-x-hidden">
       <div
-        className="bg-cover h-full w-full bg-center bg-no-repeat transition-all duration-500"
+        className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
         style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
       >
-        <div>
-          <div className="flex flex-col justify-center items-center pt-130 gap-y-[28px] relative">
-            <div className="flex flex-col items-center text-center gap-y-[5px]">
-              <h2 className="font-bold text-[20px] text-[white]">
-                {slides[currentSlide].title}
-              </h2>
-              <p className="font-normal text-[16px] text-white px-8 text-center">
-                {slides[currentSlide].description}
-              </p>
-            </div>
-
-            {/* Pagination Dots */}
-            <div className="flex gap-2">
-              {slides.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentSlide ? "bg-[#FF7B17]" : "bg-[#EEEEEE]"
-                  }`}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={handleNext}
-              className="w-[335px] h-[50px] bg-[#FF7B17] text-white rounded-[10px] font-bold text-[18px]"
+        {/* TOP (Skip) */}
+        <div className="flex justify-end">
+          {currentSlide < slides.length - 1 && (
+            <p
+              onClick={handleSkip}
+              className="text-white text-sm border-b border-white cursor-pointer"
             >
-              {currentSlide === slides.length - 1 ? "Get Started" : "Next"}
-            </button>
+              Skip
+            </p>
+          )}
+        </div>
 
-            {/* Back Button - Only show after first slide */}
-            {currentSlide > 0 && (
-              <button
-                onClick={handleBack}
-                className="text-[#FFFDFD] font-bold text-[18px] cursor-pointer"
-              >
-                Back
-              </button>
-            )}
+        {/* CENTER CONTENT */}
+        <div className="flex flex-col items-center text-center gap-4 px-4">
+          <h2 className="font-bold text-lg text-white">
+            {slides[currentSlide].title}
+          </h2>
 
-            {currentSlide < 2 && (
-              <p
-                onClick={handleSkip}
-                className="text-[#FFFDFD] font-medium text-[16px] absolute top-[56px] right-[36px] pb-1 border-b border-[#FFFDFD] cursor-pointer"
-              >
-                Skip
-              </p>
-            )}
+          <p className="text-sm text-white max-w-sm">
+            {slides[currentSlide].description}
+          </p>
+
+          {/* Pagination */}
+          <div className="flex gap-2 mt-2">
+            {slides.map((_, index) => (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full ${
+                  index === currentSlide ? "bg-[#FF7B17]" : "bg-[#EEEEEE]"
+                }`}
+              />
+            ))}
           </div>
+        </div>
+
+        {/* BOTTOM BUTTONS */}
+        <div className="flex flex-col items-center gap-3">
+          <button
+            onClick={handleNext}
+            className="w-full max-w-md bg-[#FF7B17] text-white rounded-lg py-3 font-bold text-base"
+          >
+            {currentSlide === slides.length - 1 ? "Get Started" : "Next"}
+          </button>
+
+          {currentSlide > 0 && (
+            <button
+              onClick={handleBack}
+              className="text-white font-semibold text-base"
+            >
+              Back
+            </button>
+          )}
         </div>
       </div>
     </div>

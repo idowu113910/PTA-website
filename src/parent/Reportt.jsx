@@ -15,30 +15,17 @@ import dv from "../assets/divine parent.svg";
 
 const Reportt = () => {
   const [activeTab, setActiveTab] = useState("academic");
+  const [selectedTermYear, setSelectedTermYear] = useState(
+    "Term 3 2024/2025 Academic Year",
+  );
+  const [isTermDropdownOpen, setIsTermDropdownOpen] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState(null);
 
-  const terms = ["Term 1 ", "Term 2", "Term 3"];
   const termYears = [
     "Term 1 2024/2025 Academic Year",
     "Term 2 2024/2025 Academic Year",
     "Term 3 2024/2025 Academic Year",
   ];
-
-  // Term & Academic Year States
-  const [selectedTerm, setSelectedTerm] = useState("");
-  const [selectedTermYear, setSelectedTermYear] = useState(
-    "Term 3 2024/2025 Academic Year",
-  );
-  const [isTermDropdownOpen, setIsTermDropdownOpen] = useState(false);
-  const [isTermOpen, setIsTermOpen] = useState(false);
-  const [academicSession, setAcademicSession] = useState("");
-  const handleToggle = () => {
-    setIsOn(!isOn);
-  };
-
-  const handleSelectTerm = (term) => {
-    setSelectedTerm(term);
-    setIsTermOpen(false);
-  };
 
   const subjectData = [
     {
@@ -72,218 +59,259 @@ const Reportt = () => {
 
   const behaviorData = [
     { label: "Teamwork", score: "92%", img: tm },
-    { label: "Communication", score: "88%", img: cm }, // replace img with correct asset
-    { label: "Respect", score: "100%", img: rsp }, // replace img with correct asset
-    { label: "Responsibility", score: "95%", img: rsb }, // replace img with correct asset
+    { label: "Communication", score: "88%", img: cm },
+    { label: "Respect", score: "100%", img: rsp },
+    { label: "Responsibility", score: "95%", img: rsb },
   ];
 
   return (
-    <>
-      <div className="h-[1070px]">
-        <div>
-          <div className="p-6">
-            <h1 className="font-bold text-[20px] text-black">Report</h1>
+    <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+      <div className="px-5 pt-6">
+        {/* Page Title */}
+        <h1 className="font-bold text-[20px] text-black mb-5">Report</h1>
 
-            <div className="flex w-[336px] border-[1px] rounded-[9px] border-[#D9D9D9] py-[7px] px-[10px] gap-[14px] h-[66px] justify-around mt-6">
-              {/* Academic Tab */}
-              <div
-                onClick={() => setActiveTab("academic")}
-                className={`flex gap-[8px] my-auto px-[12px] py-[8px] w-[151px] h-[52px] -mt-0.5 rounded-[7px] cursor-pointer transition-all
-          ${activeTab === "academic" ? "bg-[#F3F4F6]" : ""}`}
-              >
-                <div className="mt-1 flex gap-[8px]">
-                  <img
-                    src={activeTab === "academic" ? aca2 : aca}
-                    alt=""
-                    className="w-[18px] h-[18px] mt-1 ml-1"
-                  />
-                  <p
-                    className={`font-medium text-[18px] ${activeTab === "academic" ? "text-[#F97316]" : "text-black"}`}
-                  >
-                    Academic
-                  </p>
-                </div>
-              </div>
+        {/* Tab Switcher */}
+        <div className="flex w-full border border-[#D9D9D9] rounded-[9px] py-[7px] px-[8px] gap-2 h-[62px] items-center">
+          {/* Academic Tab */}
+          <button
+            onClick={() => setActiveTab("academic")}
+            className={`flex-1 flex items-center justify-center gap-2 h-[46px] rounded-[7px] cursor-pointer transition-all ${
+              activeTab === "academic" ? "bg-[#F3F4F6]" : ""
+            }`}
+          >
+            <img
+              src={activeTab === "academic" ? aca2 : aca}
+              alt=""
+              className="w-[18px] h-[18px] flex-shrink-0"
+            />
+            <p
+              className={`font-medium text-[16px] ${activeTab === "academic" ? "text-[#F97316]" : "text-black"}`}
+            >
+              Academic
+            </p>
+          </button>
 
-              {/* Behavior Tab */}
-              <div
-                onClick={() => setActiveTab("behavior")}
-                className={`flex gap-[8px] my-auto px-[12px] py-[8px] w-[151px] h-[52px] -mt-0.5 rounded-[7px] cursor-pointer transition-all
-          ${activeTab === "behavior" ? "bg-[#F3F4F6]" : ""}`}
-              >
-                <img
-                  src={activeTab === "behavior" ? beh2 : beh}
-                  alt=""
-                  className="w-[18px] h-[18px] mt-2"
-                />
-                <p
-                  className={`font-medium text-[18px] mt-1 ${activeTab === "behavior" ? "text-[#F97316]" : "text-black"}`}
-                >
-                  Behavior
-                </p>
-              </div>
-            </div>
-
-            <div className="relative ml-1.5 -mt-1.5">
-              <div className="w-[336px] h-[42px] rounded-[9px] p-[10px] bg-[#F3F4F6] mt-8 -ml-1">
-                <div className="flex gap-[47px]">
-                  <p className="font-medium text-[14px] text-black">
-                    {selectedTermYear}
-                  </p>
-                  <img
-                    src={arr}
-                    alt=""
-                    className={`ml-9 cursor-pointer transition-transform duration-200 ${isTermDropdownOpen ? "rotate-180" : ""}`}
-                    onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
-                  />
-                </div>
-              </div>
-
-              {isTermDropdownOpen && (
-                <div className="absolute z-10 mt-2 w-[336px] bg-white border border-[#E5E7EB] rounded-[8px] shadow-md -ml-1">
-                  {termYears.map((term) => (
-                    <div
-                      key={term}
-                      onClick={() => {
-                        setSelectedTermYear(term);
-                        setIsTermDropdownOpen(false);
-                      }}
-                      className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                    >
-                      {term}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {activeTab === "academic" && (
-              <div>
-                <div className="flex w-[335px] justify-between mt-5">
-                  <p className="font-medium text-[18px] text-black">
-                    Attendance
-                  </p>
-                  <p className="font-normal text-[14px] text-[#FF7B17] mt-1">
-                    View More
-                  </p>
-                </div>
-
-                <div className="w-[335px] h-[362px] rounded-[9px] py-[14px] px-[9px] bg-[#F3F4F6] mt-5">
-                  <img
-                    src={circ}
-                    alt=""
-                    className="flex items-center justify-center mx-auto"
-                  />
-                  <div className="flex w-[317px] gap-[13px] mt-3">
-                    <div className="w-[97px] h-[75px] rounded-[9px] py-[14px] px-[13px] bg-[#F0FDF4] flex flex-col items-center text-center">
-                      <p className="font-normal text-[14px] text-[#10B981]">
-                        43
-                      </p>
-                      <p className="font-semibold text-[16px] text-[#10B981]">
-                        Present
-                      </p>
-                    </div>
-                    <div className="w-[97px] h-[75px] rounded-[9px] py-[14px] px-[13px] bg-[#FEF2F2] flex flex-col items-center text-center">
-                      <p className="font-normal text-[14px] text-[#DC2626]">
-                        0
-                      </p>
-                      <p className="font-semibold text-[16px] text-[#DC2626]">
-                        Absent
-                      </p>
-                    </div>
-                    <div className="w-[97px] h-[75px] rounded-[9px] py-[14px] px-[13px] bg-[#FEFCE8] flex flex-col items-center text-center">
-                      <p className="font-normal text-[14px] text-[#E7C905]">
-                        3
-                      </p>
-                      <p className="font-semibold text-[16px] text-[#E7C905]">
-                        Late
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex w-[335px] justify-between mt-5 mb-6">
-                  <p className="font-medium text-[18px] text-black">
-                    Grade Performance
-                  </p>
-                  <p className="font-normal text-[14px] text-[#FF7B17] mt-1">
-                    View More
-                  </p>
-                </div>
-
-                {subjectData.map((item, index) => (
-                  <div
-                    key={index}
-                    onClick={() => setSelectedSubject(item)}
-                    className="border-[1px] rounded-[9px] border-[#D9D9D9] py-[10px] px-[9px] w-[335px] h-[75px] mt-3 cursor-pointer"
-                  >
-                    <h2 className="font-medium text-[14px] text-black">
-                      {item.subject}
-                    </h2>
-                    <img src={gr} alt="" className="mt-2" />
-                    <p className="flex justify-end font-bold text-black text-[14px]">
-                      {item.grade}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeTab === "behavior" && (
-              <div>
-                {/* behavior content */}
-
-                <h2 className="font-medium text-[18px] text-black mt-4 ml-1">
-                  Social Skills Assessment
-                </h2>
-
-                {behaviorData.map((item, index) => (
-                  <div
-                    key={index}
-                    className="border-[1px] rounded-[9px] w-[335px] h-[75px] py-[10px] px-[9px] border-[#D9D9D9] mt-4"
-                  >
-                    <div>
-                      <p className="font-bold text-[14px] text-black">
-                        {item.label}
-                      </p>
-                      <img src={item.img} alt="" className="mt-0.5" />
-                    </div>
-                    <p className="text-[14px] font-bold text-black justify-end flex">
-                      {item.score}
-                    </p>
-                  </div>
-                ))}
-
-                <div>
-                  <h2 className="mt-6 text-[16.68px] font-medium">
-                    Behavioral Remarks
-                  </h2>
-
-                  <div className="flex">
-                    <img src={dv} alt="" className="w-[37.07px] h-[37.07px] mt-3.5" />
-
-                    <div className="flex flex-col ml-2 mt-3">
-                      <p className="text-[16.68px] font-bold text-black">
-                        Mr. Reynold.
-                      </p>
-                      <p className="text-[12.97px] font-normal text-black ">
-                        Divine is always attentive in class <br /> and is a
-                        bright kid{" "}
-                      </p>
-
-                      <p className="text-[12.97px] font-normal text-black">June 18th</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Behavior Tab */}
+          <button
+            onClick={() => setActiveTab("behavior")}
+            className={`flex-1 flex items-center justify-center gap-2 h-[46px] rounded-[7px] cursor-pointer transition-all ${
+              activeTab === "behavior" ? "bg-[#F3F4F6]" : ""
+            }`}
+          >
+            <img
+              src={activeTab === "behavior" ? beh2 : beh}
+              alt=""
+              className="w-[18px] h-[18px] flex-shrink-0"
+            />
+            <p
+              className={`font-medium text-[16px] ${activeTab === "behavior" ? "text-[#F97316]" : "text-black"}`}
+            >
+              Behavior
+            </p>
+          </button>
         </div>
+
+        {/* Term Dropdown */}
+        <div className="relative mt-5">
+          <div
+            className="w-full h-[42px] rounded-[9px] px-4 bg-[#F3F4F6] flex items-center justify-between cursor-pointer"
+            onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
+          >
+            <p className="font-medium text-[13px] text-black truncate flex-1 pr-2">
+              {selectedTermYear}
+            </p>
+            <img
+              src={arr}
+              alt=""
+              className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
+                isTermDropdownOpen ? "rotate-180" : ""
+              }`}
+            />
+          </div>
+
+          {isTermDropdownOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+              {termYears.map((term) => (
+                <div
+                  key={term}
+                  onClick={() => {
+                    setSelectedTermYear(term);
+                    setIsTermDropdownOpen(false);
+                  }}
+                  className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
+                >
+                  {term}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── ACADEMIC TAB ─────────────────────────────────────── */}
+        {activeTab === "academic" && (
+          <div className="mt-5">
+            {/* Attendance Header */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-medium text-[18px] text-black">Attendance</p>
+              <p className="font-normal text-[14px] text-[#FF7B17] cursor-pointer">
+                View More
+              </p>
+            </div>
+
+            {/* Attendance Card */}
+            <div className="w-full rounded-[9px] py-4 px-3 bg-[#F3F4F6]">
+              <img src={circ} alt="" className="mx-auto block max-w-full" />
+              {/* Stats Row — equal thirds */}
+              <div className="grid grid-cols-3 gap-3 mt-3">
+                <div className="rounded-[9px] py-3 px-2 bg-[#F0FDF4] flex flex-col items-center text-center">
+                  <p className="font-normal text-[14px] text-[#10B981]">43</p>
+                  <p className="font-semibold text-[14px] text-[#10B981]">
+                    Present
+                  </p>
+                </div>
+                <div className="rounded-[9px] py-3 px-2 bg-[#FEF2F2] flex flex-col items-center text-center">
+                  <p className="font-normal text-[14px] text-[#DC2626]">0</p>
+                  <p className="font-semibold text-[14px] text-[#DC2626]">
+                    Absent
+                  </p>
+                </div>
+                <div className="rounded-[9px] py-3 px-2 bg-[#FEFCE8] flex flex-col items-center text-center">
+                  <p className="font-normal text-[14px] text-[#E7C905]">3</p>
+                  <p className="font-semibold text-[14px] text-[#E7C905]">
+                    Late
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Grade Performance Header */}
+            <div className="flex items-center justify-between mt-6 mb-4">
+              <p className="font-medium text-[18px] text-black">
+                Grade Performance
+              </p>
+              <p className="font-normal text-[14px] text-[#FF7B17] cursor-pointer">
+                View More
+              </p>
+            </div>
+
+            {/* Subject Cards */}
+            <div className="flex flex-col gap-3">
+              {subjectData.map((item, index) => (
+                <div
+                  key={index}
+                  onClick={() => setSelectedSubject(item)}
+                  className="border border-[#D9D9D9] rounded-[9px] py-3 px-4 w-full cursor-pointer"
+                >
+                  <h2 className="font-medium text-[14px] text-black">
+                    {item.subject}
+                  </h2>
+                  <img src={gr} alt="" className="mt-2 w-full" />
+                  <p className="flex justify-end font-bold text-black text-[14px] mt-1">
+                    {item.grade}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── BEHAVIOR TAB ─────────────────────────────────────── */}
+        {activeTab === "behavior" && (
+          <div className="mt-5">
+            <h2 className="font-medium text-[18px] text-black mb-4">
+              Social Skills Assessment
+            </h2>
+
+            {/* Behavior Cards */}
+            <div className="flex flex-col gap-3">
+              {behaviorData.map((item, index) => (
+                <div
+                  key={index}
+                  className="border border-[#D9D9D9] rounded-[9px] w-full py-3 px-4"
+                >
+                  <p className="font-bold text-[14px] text-black mb-1">
+                    {item.label}
+                  </p>
+                  <img src={item.img} alt="" className="w-full mt-0.5" />
+                  <p className="text-[14px] font-bold text-black text-right mt-1">
+                    {item.score}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Behavioral Remarks */}
+            <div className="mt-6">
+              <h2 className="text-[16px] font-medium text-black mb-3">
+                Behavioral Remarks
+              </h2>
+              <div className="flex items-start gap-3">
+                <img
+                  src={dv}
+                  alt=""
+                  className="w-[37px] h-[37px] rounded-full flex-shrink-0 mt-1"
+                />
+                <div className="flex flex-col min-w-0">
+                  <p className="text-[16px] font-bold text-black">
+                    Mr. Reynold.
+                  </p>
+                  <p className="text-[13px] font-normal text-black mt-0.5 leading-5">
+                    Divine is always attentive in class and is a bright kid
+                  </p>
+                  <p className="text-[13px] font-normal text-black mt-1">
+                    June 18th
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ✅ Bottom Navigation nested directly in this page */}
+      {/* Subject Detail Modal */}
+      {selectedSubject && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-5">
+          <div className="bg-white w-full max-w-[370px] rounded-[16px] p-6 relative">
+            <button
+              onClick={() => setSelectedSubject(null)}
+              className="absolute top-4 right-4 w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 font-bold text-sm"
+            >
+              ✕
+            </button>
+            <h2 className="font-bold text-[20px] text-black mb-5 mt-4">
+              {selectedSubject.fullName}
+            </h2>
+            <div className="flex flex-col gap-4">
+              {[
+                { label: "Test", value: selectedSubject.test },
+                { label: "Final Exam", value: selectedSubject.finalExam },
+                { label: "Total", value: selectedSubject.total },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between">
+                  <p className="text-[16px] font-medium text-black">
+                    {label} =
+                  </p>
+                  <p className="font-black text-[16px] text-black">{value}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-right font-medium text-[18px] text-[#22C55E] mt-4">
+              {selectedSubject.grade} ({selectedSubject.percent})
+            </p>
+            <div className="border-t border-gray-200 mt-5 mb-4" />
+            <h3 className="font-bold text-[16px] text-black mb-2">
+              Grade System
+            </h3>
+            <p className="text-[13px] text-[#535151] leading-5">
+              (A+)= 90-100, (A)= 85-89, (B+)= 80-85, (B)= 70-79, (C+)= 60-69,
+              (C-)= 50-59, (D)= 1-49
+            </p>
+          </div>
+        </div>
+      )}
+
       <BottomNavigation />
-    </>
+    </div>
   );
 };
 

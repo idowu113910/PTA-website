@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import BottomNavigation from "../components/BottomNavigate";
 import srch from "../assets/search.svg";
 import shit from "../assets/edithh.svg";
@@ -10,13 +10,7 @@ import typ from "../assets/type pareny.svg";
 import send from "../assets/send parent.svg";
 
 const initialMessages = [
-  {
-    id: 1,
-    sender: "sent",
-    text: "Hello",
-    time: "10:55 AM",
-    delivered: true,
-  },
+  { id: 1, sender: "sent", text: "Hello", time: "10:55 AM", delivered: true },
   {
     id: 2,
     sender: "received",
@@ -32,22 +26,39 @@ const initialMessages = [
   {
     id: 4,
     sender: "sent",
-    text: "Good afternoon mrs Chukwu nonso, just heads up that we'll be having a math quiz nextweek",
+    text: "Good afternoon Mrs Chukwu nonso, just heads up that we'll be having a math quiz next week",
     time: "11:00 AM",
     delivered: true,
   },
 ];
 
+const conversations = [
+  {
+    id: 1,
+    name: "Edith Robinson",
+    img: shit,
+    preview: "Does your child need additional help in any subject?",
+    time: "11:00AM",
+    unread: true,
+  },
+];
+
 const Messagee = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("All");
   const [activeChat, setActiveChat] = useState(null);
   const [messages, setMessages] = useState(initialMessages);
   const [inputText, setInputText] = useState("");
+  const bottomRef = useRef(null);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, activeChat]);
 
   const handleSend = () => {
     if (!inputText.trim()) return;
-    const now = new Date();
-    const time = now.toLocaleTimeString([], {
+    const time = new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -68,149 +79,201 @@ const Messagee = () => {
     if (e.key === "Enter") handleSend();
   };
 
-  /* ── CHAT SCREEN ── */
+  const filters = ["All", "Unread", "Calls"];
+
+  const filteredConversations = conversations.filter((c) => {
+    const matchQ =
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.preview.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchF =
+      activeFilter === "All" ||
+      (activeFilter === "Unread" && c.unread) ||
+      (activeFilter === "Calls" && c.type === "call");
+    return matchQ && matchF;
+  });
+
+  /* ── CHAT SCREEN ──────────────────────────────────────────────── */
   if (activeChat) {
     return (
-      <div className="flex flex-col h-screen bg-white">
+      <div className="flex flex-col h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white">
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-[#E0DCDC]">
-          {/* Back arrow */}
+        <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-[#E0DCDC] flex-shrink-0">
           <button
             onClick={() => setActiveChat(null)}
-            className="text-[#1C1C1C] text-[20px] cursor-pointer "
+            className="cursor-pointer flex-shrink-0"
+            aria-label="Go back"
           >
-            <img src={arr} alt="" className="w-[35px] h-[35px] mt-1" />
+            <img src={arr} alt="" className="w-[32px] h-[32px]" />
           </button>
 
-          {/* Avatar */}
           <img
-            src={shit}
+            src={activeChat.img}
             alt=""
-            className="w-[30px] h-[30px] rounded-full object-cover"
+            className="w-[34px] h-[34px] rounded-full object-cover flex-shrink-0"
           />
 
-          {/* Name */}
-          <p className="flex-1 font-normal text-[20px] text-[#1C1C1C]">
+          <p className="flex-1 min-w-0 font-normal text-[18px] text-[#1C1C1C] truncate">
             {activeChat.name}
           </p>
 
-          {/* Call icon */}
-          <button className="bg-transparent border-none cursor-pointer text-[#1C1C1C] mx-1">
-            <img src={phone} alt="" className="w-[24px] h-[24px]" />
+          <button aria-label="Voice call" className="flex-shrink-0 p-1">
+            <img src={phone} alt="" className="w-[22px] h-[22px]" />
           </button>
-
-          {/* Video icon */}
-          <button className="bg-transparent border-none cursor-pointer text-[#1C1C1C]">
-            <img src={video} alt="" className="w-[24px] h-[24px]" />
+          <button aria-label="Video call" className="flex-shrink-0 p-1">
+            <img src={video} alt="" className="w-[22px] h-[22px]" />
           </button>
         </div>
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 bg-white">
           {/* Date divider */}
-          <p className="text-center mx-auto text-[12px] text-[#424242] bg-[#EFEFEF] font-medium rounded-[10px] py-[3px] px-[5px] w-[89px] h-[25px]">
+          <p className="text-center text-[12px] text-[#424242] bg-[#EFEFEF] font-medium rounded-[10px] py-[3px] px-3 mx-auto">
             June 15, 2025
           </p>
 
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex flex-col gap-[2px] ${
-                msg.sender === "sent" ? "items-end" : "items-start"
-              }`}
+              className={`flex flex-col gap-[2px] ${msg.sender === "sent" ? "items-end" : "items-start"}`}
             >
               {msg.sender === "sent" ? (
-                <div className="inline-block max-w-[80%] bg-[#F97316] text-white px-4 py-[10px] rounded-[18px] rounded-br-[4px] text-[16px] leading-relaxed relative">
-                  {msg.text}
+                <div className="inline-flex items-end gap-1 max-w-[80%] bg-[#F97316] text-white px-4 py-[10px] rounded-[18px] rounded-br-[4px] text-[15px] leading-relaxed">
+                  <span>{msg.text}</span>
                   {msg.delivered && (
-                    <span className="text-[11px] text-white opacity-80 ml-2 inline-block align-middle">
-                      <img
-                        src={delivered}
-                        alt=""
-                        className="w-[9.99px] h-[11px]"
-                      />
-                    </span>
+                    <img
+                      src={delivered}
+                      alt="delivered"
+                      className="w-[10px] h-[11px] flex-shrink-0 mb-0.5"
+                    />
                   )}
                 </div>
               ) : (
-                <div className="max-w-[75%] bg-[#F5F5F5] text-[#1C1C1C] font-normal px-4 py-[10px] rounded-[18px] rounded-bl-[4px] text-[16px] leading-relaxed">
+                <div className="max-w-[75%] bg-[#F5F5F5] text-[#1C1C1C] px-4 py-[10px] rounded-[18px] rounded-bl-[4px] text-[15px] leading-relaxed">
                   {msg.text}
                 </div>
               )}
+              <p className="text-[11px] text-[#9E9E9E] px-1">{msg.time}</p>
             </div>
           ))}
+          {/* Scroll anchor */}
+          <div ref={bottomRef} />
         </div>
 
         {/* Input Bar */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-white  border-[#f0f0f0]">
-          {/* Plus button */}
-          <button className="w-[35px] h-[35px] rounded-full border-[1.5px] border-[#ccc] flex items-center justify-center bg-transparent cursor-pointer text-[#999] text-[20px] font-light flex-shrink-0">
-            <img src={typ} alt="" />
+        <div className="flex items-center gap-2 px-4 py-3 bg-white border-t border-[#F0F0F0] flex-shrink-0">
+          <button
+            aria-label="Attach"
+            className="w-[35px] h-[35px] rounded-full border border-[#ccc] flex items-center justify-center flex-shrink-0"
+          >
+            <img src={typ} alt="" className="w-5 h-5" />
           </button>
 
-          {/* Input */}
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type message"
-            className="flex-1 w-[225px] h-[35px] rounded-[6px] border-[1px] px-[10px] py-0 pb-[4px] border-[#E0DCDC] outline-none placeholder:text-[12px] font-medium text-[#A3A2A2] leading-[35px]"
+            className="flex-1 min-w-0 h-[38px] rounded-[6px] border border-[#E0DCDC] px-3 outline-none text-[14px] font-medium text-[#1C1C1C] placeholder:text-[#A3A2A2] placeholder:text-[12px]"
           />
 
-          {/* Send button */}
           <button
             onClick={handleSend}
-            className="w-[35px] h-[35px] "
+            aria-label="Send"
+            className="w-[35px] h-[35px] flex-shrink-0 flex items-center justify-center"
           >
-            <img src={send} alt="" />
+            <img src={send} alt="" className="w-[35px] h-[35px]" />
           </button>
         </div>
       </div>
     );
   }
 
-  /* ── MESSAGE LIST SCREEN ── */
+  /* ── MESSAGE LIST SCREEN ──────────────────────────────────────── */
   return (
-    <>
-      <div className="p-6 h-[812px]">
-        <h1 className="font-bold text-[20px] text-black mt-1">Message</h1>
+    <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+      <div className="px-5 pt-6">
+        {/* Title */}
+        <h1 className="font-bold text-[20px] text-black mb-5">Message</h1>
 
-        <div className="w-[333px] h-[48px] border-[1px] border-[#D9D9D9] rounded-[7px] bg-[#FCFCFC] mt-6">
-          <div className="flex gap-[11px] p-2 mt-1">
-            <img src={srch} alt="" />
-            <input
-              type="text"
-              placeholder="Search Conversations"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="outline-none font-normal text-[14px] text-[#616161] bg-transparent"
-            />
-          </div>
+        {/* Search Bar */}
+        <div className="w-full h-[48px] border border-[#D9D9D9] rounded-[7px] bg-[#FCFCFC] flex items-center gap-3 px-3 mb-4">
+          <img src={srch} alt="" className="w-4 h-4 flex-shrink-0" />
+          <input
+            type="text"
+            placeholder="Search Conversations"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="outline-none font-normal text-[14px] text-[#616161] bg-transparent flex-1 min-w-0"
+          />
         </div>
 
-        <div
-          className="mt-8 flex w-[333px] cursor-pointer active:bg-gray-50 rounded-lg p-1"
-          onClick={() =>
-            setActiveChat({ name: "Edith Robinson", time: "11:00AM" })
-          }
-        >
-          <img src={shit} alt="" className="w-[58px] h-[58px]" />
-          <div className="flex flex-col ml-3 flex-1">
-            <div className="flex font-normal text-[#1E1D1D] justify-between">
-              <p className="font-normal text-[16px] text-[#1C1C1C]">
-                Edith Robinson
-              </p>
-              <p className="font-normal text-[#1E1D1D] text-[16px]">11:00AM</p>
-            </div>
-            <p className="font-medium text-[12px] text-[#000000]">
-              Does your child need additional help in any subject?
-            </p>
-          </div>
+        {/* Filter Tabs — full width, equal columns */}
+        <div className="flex gap-2 mb-6">
+          {filters.map((f) => (
+            <button
+              key={f}
+              onClick={() => setActiveFilter(f)}
+              className={`flex-1 h-[35px] rounded-[5px] text-[14px] font-normal ${
+                activeFilter === f
+                  ? "bg-[#FF7B17] text-white"
+                  : "bg-[#EFEFEF] text-black"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
+
+        {/* Conversation List */}
+        {filteredConversations.length === 0 ? (
+          <p className="text-center text-[14px] text-gray-400 mt-16">
+            No conversations found
+          </p>
+        ) : (
+          <div className="flex flex-col gap-1">
+            {filteredConversations.map((conv) => (
+              <div
+                key={conv.id}
+                className="flex items-center gap-3 cursor-pointer active:bg-gray-50 rounded-lg py-3 px-1"
+                onClick={() => setActiveChat(conv)}
+              >
+                {/* Avatar */}
+                <img
+                  src={conv.img}
+                  alt={conv.name}
+                  className="w-[52px] h-[52px] rounded-full object-cover flex-shrink-0"
+                />
+
+                {/* Body */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-normal text-[16px] text-[#1C1C1C] truncate">
+                      {conv.name}
+                    </p>
+                    <p
+                      className={`text-[12px] flex-shrink-0 ${conv.unread ? "text-[#FF7B17]" : "text-[#9E9E9E]"}`}
+                    >
+                      {conv.time}
+                    </p>
+                  </div>
+                  <p className="font-medium text-[12px] text-[#000000] mt-0.5 truncate">
+                    {conv.preview}
+                  </p>
+                </div>
+
+                {/* Unread dot */}
+                {conv.unread && (
+                  <div className="w-2 h-2 rounded-full bg-[#FF7B17] flex-shrink-0" />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
       <BottomNavigation />
-    </>
+    </div>
   );
 };
 

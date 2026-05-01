@@ -37,42 +37,34 @@ import off from "../assets/off.svg";
 import ana from "../assets/analytics.svg";
 import rr from "../assets/report review.svg";
 
-registerLocale("en-GB", enGB); // format DD/MM/YYYY
+registerLocale("en-GB", enGB);
 
 const Report = () => {
-  // Navigation & Screen States
   const [screen, setScreen] = useState("report");
   const mainScreens = ["report"];
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Date & Calendar States
   const [currentDate, setCurrentDate] = useState(new Date("2025-06-30"));
   const [selectedDate, setSelectedDate] = useState(null);
   const [studentDOB, setStudentDOB] = useState(null);
   const [isDOBOpen, setIsDOBOpen] = useState(false);
 
-  // Term & Academic Year States
   const [selectedTerm, setSelectedTerm] = useState("");
   const [selectedTermYear, setSelectedTermYear] = useState(
-    "Term 3 2024/2025 Academic Year"
+    "Term 3 2024/2025 Academic Year",
   );
   const [isTermDropdownOpen, setIsTermDropdownOpen] = useState(false);
   const [isTermOpen, setIsTermOpen] = useState(false);
   const [academicSession, setAcademicSession] = useState("");
-  const handleToggle = () => {
-    setIsOn(!isOn);
-  };
 
   const termYears = [
     "Term 1 2024/2025 Academic Year",
     "Term 2 2024/2025 Academic Year",
     "Term 3 2024/2025 Academic Year",
   ];
+  const terms = ["Term 1", "Term 2", "Term 3"];
 
-  const terms = ["Term 1 ", "Term 2", "Term 3"];
-
-  // Student Data Arrays
   const [students, setStudents] = useState([
     { id: "06201", name: "Divine Ekubor", image: dv },
     { id: "06202", name: "Emma Wilson", image: em },
@@ -83,17 +75,6 @@ const Report = () => {
     { id: "06207", name: "Sean King", image: se },
   ]);
 
-  const mystudent = [
-    { id: "06201", name: "Divine Ekubor", image: dv, marginLeft: "-ml-5.5" },
-    { id: "06202", name: "Emma Wilson", image: em, marginLeft: "-ml-6" },
-    { id: "06203", name: "Shayla Jason", image: sh, marginLeft: "-ml-7.5" },
-    { id: "06204", name: "Bryan Williams", image: br, marginLeft: "-ml-5" },
-    { id: "06205", name: "Amaya Isah", image: am, marginLeft: "-ml-10.5" },
-    { id: "06206", name: "Tamara Wilson", image: ta, marginLeft: "-ml-5.5" },
-    { id: "06207", name: "Sean Kong", image: se, marginLeft: "-ml-11.5" },
-  ];
-
-  // Attendance States
   const [studentAttendance, setStudentAttendance] = useState({
     "06201": null,
     "06202": null,
@@ -103,7 +84,6 @@ const Report = () => {
   });
   const [counts, setCounts] = useState({ present: 0, absent: 0, late: 0 });
 
-  // Grade/Assessment Form States
   const [studentName, setStudentName] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedAssessment, setSelectedAssessment] = useState("");
@@ -111,7 +91,6 @@ const Report = () => {
   const [totalMark, setTotalMark] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Add Student Form States
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [studentNameAdd, setStudentNameAdd] = useState("");
   const [studentID, setStudentID] = useState("");
@@ -121,221 +100,21 @@ const Report = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showStudentSuccess, setShowStudentSuccess] = useState(false);
   const [isOn, setIsOn] = useState(false);
-  const [comments, setComments] = useState(" ");
-  const [activeSkill, setActiveSkill] = useState(null);
+  const [comments, setComments] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const fileInputRef = useRef(null);
-
-  const genders = ["Male", "Female", "Other"];
-
-  // Handler functions
-  const handleSelectGender = (gender) => {
-    setSelectedGender(gender);
-    setIsGenderOpen(false);
-  };
-
-  const handleSelectTerm = (term) => {
-    setSelectedTerm(term);
-    setIsTermOpen(false);
-  };
-
-  const handleFileClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
-  };
-
-  // Form validation
-  const isStudentFormValid =
-    studentNameAdd.trim() !== "" &&
-    studentDOB !== null &&
-    selectedGender !== "" &&
-    studentID.trim() !== "" &&
-    studentClass.trim() !== "" &&
-    academicSession.trim() !== "" &&
-    selectedTerm !== "";
-
-  // Generate avatar helper functions
-  const generateInitials = (name) => {
-    const parts = name.trim().split(" ");
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
-  const generateAvatar = (name) => {
-    const colors = [
-      "%234A90E2",
-      "%23E91E63",
-      "%239C27B0",
-      "%23FF9800",
-      "%234CAF50",
-      "%23F44336",
-    ];
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    const initials = generateInitials(name);
-
-    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Ccircle cx='25' cy='25' r='25' fill='${randomColor}'/%3E%3Ctext x='25' y='32' font-size='20' fill='white' text-anchor='middle' font-family='Arial'%3E${initials}%3C/text%3E%3C/svg%3E`;
-  };
-
-  // Dropdown States
   const [isOpen, setIsOpen] = useState(false);
 
-  const isBehaviourFormValid =
-    studentNameAdd.trim() && selectedGender && selectedTerm;
+  const fileInputRef = useRef(null);
+  const genders = ["Male", "Female", "Other"];
 
-  // Form Validation - Grade Form
-  const isFormValid =
-    studentName.trim() !== "" &&
-    selectedSubject !== "" &&
-    selectedAssessment !== "" &&
-    selectedGrade !== "" &&
-    totalMark.trim() !== "" &&
-    selectedDate !== null;
-
-  // Handler Functions
-  const handleSelect = (type, value) => {
-    if (type === "grade") {
-      setSelectedGrade(value);
-      setIsGradeOpen(false);
-    } else if (type === "subject") {
-      setSelectedSubject(value);
-      setIsSubjectOpen(false);
-    } else if (type === "assessment") {
-      setSelectedAssessment(value);
-      setIsAssessmentOpen(false);
-    }
-  };
-
-  const handleStatusClick = (studentId, status) => {
-    const previousStatus = studentAttendance[studentId];
-
-    setStudentAttendance((prev) => ({
-      ...prev,
-      [studentId]: status,
-    }));
-
-    setCounts((prev) => {
-      const newCounts = { ...prev };
-
-      if (previousStatus) {
-        newCounts[previousStatus] = Math.max(0, newCounts[previousStatus] - 1);
-      }
-
-      newCounts[status] = newCounts[status] + 1;
-
-      return newCounts;
-    });
-  };
-
-  const handleSaveGrade = () => {
-    if (isFormValid) {
-      setShowSuccess(true);
-    }
-  };
-
-  const handleCloseSuccess = () => {
-    setShowSuccess(false);
-    setStudentName("");
-    setSelectedSubject("");
-    setSelectedAssessment("");
-    setSelectedGrade("");
-    setTotalMark("");
-    setSelectedDate(null);
-  };
-
-  const handleRemoveStudent = (id) => {
-    setStudents((prevStudents) =>
-      prevStudents.filter((student) => student.id !== id)
-    );
-  };
-
-  const handleSaveStudent = () => {
-    const newStudent = {
-      id: studentID,
-      name: studentNameAdd,
-      image: selectedFile
-        ? URL.createObjectURL(selectedFile)
-        : generateAvatar(studentNameAdd),
-    };
-
-    setStudents([...students, newStudent]);
-
-    // Reset form
-    setStudentNameAdd("");
-    setStudentDOB(null);
-    setSelectedGender("");
-    setStudentID("");
-    setSelectedFile(null);
-    setStudentClass("");
-    setAcademicSession("");
-    setSelectedTerm("");
-
-    // Show success
-    setShowStudentSuccess(true);
-  };
-
-  const handleCloseStudentSuccess = () => {
-    setShowStudentSuccess(false);
-    setShowAddStudent(false);
-  };
-
-  const handleNextDay = () => {
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(nextDay.getDate() + 1);
-    setCurrentDate(nextDay);
-  };
-
-  const handlePrevDay = () => {
-    const prevDay = new Date(currentDate);
-    prevDay.setDate(prevDay.getDate() - 1);
-    setCurrentDate(prevDay);
-  };
-
-  const formatDate = (date) => {
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    };
-    return date.toLocaleDateString("en-US", options);
-  };
-
-  const [progress, setProgress] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-
-  // Add this state at the top of your component
   const [progressBars, setProgressBars] = useState({
     teamwork: 0,
     communication: 0,
     respect: 0,
     responsibility: 0,
   });
-
   const [activeDrag, setActiveDrag] = useState(null);
 
-  // Update the handler functions to work with specific progress bars
-
-  // Add this at the top level of your component (outside the return)
-  React.useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      setActiveDrag(null);
-    };
-
-    if (activeDrag) {
-      window.addEventListener("mouseup", handleGlobalMouseUp);
-      return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
-    }
-  }, [activeDrag]);
-
-  // Skills array
   const skills = [
     { id: "teamwork", label: "Team Work" },
     { id: "communication", label: "Communication" },
@@ -343,61 +122,6 @@ const Report = () => {
     { id: "responsibility", label: "Responsibility" },
   ];
 
-  // Handler functions
-  const handleMouseDown = (skillId) => {
-    setActiveDrag(skillId);
-  };
-
-  const handleMouseUp = () => {
-    setActiveDrag(null);
-  };
-
-  const handleMouseMove = (e, skillId) => {
-    if (activeDrag === skillId) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const width = rect.width;
-      const percentage = Math.min(Math.max((x / width) * 100, 0), 100);
-      setProgressBars((prev) => ({
-        ...prev,
-        [skillId]: Math.round(percentage),
-      }));
-    }
-  };
-
-  const handleClick = (e, skillId) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const width = rect.width;
-    const percentage = Math.min(Math.max((x / width) * 100, 0), 100);
-    setProgressBars((prev) => ({
-      ...prev,
-      [skillId]: Math.round(percentage),
-    }));
-  };
-
-  const handleSaveBehaviour = () => {
-    if (!isFormValid) return;
-
-    const behaviourData = {
-      studentName: studentNameAdd,
-      gender: selectedGender,
-      term: selectedTerm,
-      socialSkills: progressBars,
-      comments: comments,
-      notifyParents: isOn,
-    };
-
-    console.log("Behaviour Data:", behaviourData);
-
-    // Add your save logic here (e.g., API call, state update, etc.)
-    // Example: saveBehaviourToDatabase(behaviourData);
-
-    // Optionally reset form or navigate back
-    // setScreen("report");
-  };
-
-  // Add this to your state declarations at the top of your component
   const reportTypes = [
     "Progress Report",
     "Term Report Card",
@@ -408,45 +132,183 @@ const Report = () => {
     "Skills-Based Report",
     "Subject-Specific Report",
   ];
-
   const [selectedReportType, setSelectedReportType] = useState("");
   const [isReportTypeOpen, setIsReportTypeOpen] = useState(false);
 
-  // Add this handler function
-  const handleSelectReportType = (reportType) => {
-    setSelectedReportType(reportType);
+  React.useEffect(() => {
+    const handleGlobalMouseUp = () => setActiveDrag(null);
+    if (activeDrag) {
+      window.addEventListener("mouseup", handleGlobalMouseUp);
+      return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
+    }
+  }, [activeDrag]);
+
+  const handleToggle = () => setIsOn(!isOn);
+
+  const handleSelectGender = (gender) => {
+    setSelectedGender(gender);
+    setIsGenderOpen(false);
+  };
+  const handleSelectTerm = (term) => {
+    setSelectedTerm(term);
+    setIsTermOpen(false);
+  };
+  const handleSelectReportType = (rt) => {
+    setSelectedReportType(rt);
     setIsReportTypeOpen(false);
   };
+  const handleFileClick = () => fileInputRef.current?.click();
+  const handleFileChange = (e) => {
+    if (e.target.files?.[0]) setSelectedFile(e.target.files[0]);
+  };
 
-  // Filter logic
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().startsWith(searchQuery.toLowerCase())
+  const handleMouseDown = (skillId) => setActiveDrag(skillId);
+  const handleMouseUp = () => setActiveDrag(null);
+  const handleMouseMove = (e, skillId) => {
+    if (activeDrag !== skillId) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = Math.min(
+      Math.max(((e.clientX - rect.left) / rect.width) * 100, 0),
+      100,
+    );
+    setProgressBars((prev) => ({ ...prev, [skillId]: Math.round(pct) }));
+  };
+  const handleSliderClick = (e, skillId) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = Math.min(
+      Math.max(((e.clientX - rect.left) / rect.width) * 100, 0),
+      100,
+    );
+    setProgressBars((prev) => ({ ...prev, [skillId]: Math.round(pct) }));
+  };
+
+  const handleStatusClick = (studentId, status) => {
+    const prev = studentAttendance[studentId];
+    setStudentAttendance((p) => ({ ...p, [studentId]: status }));
+    setCounts((p) => {
+      const n = { ...p };
+      if (prev) n[prev] = Math.max(0, n[prev] - 1);
+      n[status] = n[status] + 1;
+      return n;
+    });
+  };
+
+  const handleRemoveStudent = (id) =>
+    setStudents((prev) => prev.filter((s) => s.id !== id));
+
+  const generateInitials = (name) => {
+    const parts = name.trim().split(" ");
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase();
+  };
+  const generateAvatar = (name) => {
+    const colors = [
+      "%234A90E2",
+      "%23E91E63",
+      "%239C27B0",
+      "%23FF9800",
+      "%234CAF50",
+      "%23F44336",
+    ];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const initials = generateInitials(name);
+    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Ccircle cx='25' cy='25' r='25' fill='${color}'/%3E%3Ctext x='25' y='32' font-size='20' fill='white' text-anchor='middle' font-family='Arial'%3E${initials}%3C/text%3E%3C/svg%3E`;
+  };
+
+  const handleSaveStudent = () => {
+    const newStudent = {
+      id: studentID,
+      name: studentNameAdd,
+      image: selectedFile
+        ? URL.createObjectURL(selectedFile)
+        : generateAvatar(studentNameAdd),
+    };
+    setStudents([...students, newStudent]);
+    setStudentNameAdd("");
+    setStudentDOB(null);
+    setSelectedGender("");
+    setStudentID("");
+    setSelectedFile(null);
+    setStudentClass("");
+    setAcademicSession("");
+    setSelectedTerm("");
+    setShowStudentSuccess(true);
+  };
+
+  const handleCloseStudentSuccess = () => {
+    setShowStudentSuccess(false);
+    setShowAddStudent(false);
+  };
+
+  const handleNextDay = () => {
+    const d = new Date(currentDate);
+    d.setDate(d.getDate() + 1);
+    setCurrentDate(d);
+  };
+  const handlePrevDay = () => {
+    const d = new Date(currentDate);
+    d.setDate(d.getDate() - 1);
+    setCurrentDate(d);
+  };
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
+  const isStudentFormValid =
+    studentNameAdd.trim() !== "" &&
+    studentDOB !== null &&
+    selectedGender !== "" &&
+    studentID.trim() !== "" &&
+    studentClass.trim() !== "" &&
+    academicSession.trim() !== "" &&
+    selectedTerm !== "";
+
+  const isBehaviourFormValid =
+    studentNameAdd.trim() !== "" &&
+    selectedGender !== "" &&
+    selectedTerm !== "";
+
+  const filteredStudents = students.filter((s) =>
+    s.name.toLowerCase().startsWith(searchQuery.toLowerCase()),
   );
+
+  // Shared classes
+  const inputClass =
+    "w-full h-[52px] rounded-[8px] border border-[#0000001F] py-2 px-3 text-[14px] placeholder:text-gray-400 focus:outline-none focus:border-[#FF7B17]";
+  const dropdownBtnClass =
+    "w-full h-[52px] px-3 border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between text-[14px]";
+  const fixedBtnWrapper =
+    "fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-50";
+
   return (
-    <>
+    <div className="w-full max-w-[430px] mx-auto min-h-screen bg-white">
+      {/* ================= REPORT HOME ================= */}
       {screen === "report" && (
-        <div className="p-6 h-[812px]">
+        <div className="pb-24 px-5 pt-6">
           <h1 className="font-bold text-[20px] text-black">Report</h1>
 
-          <div className="relative">
-            <div className="w-[336px] h-[42px] rounded-[9px] p-[10px] bg-[#F3F4F6] mt-8 -ml-1">
-              <div className="flex gap-[47px]">
-                <p className="font-medium text-[14px] text-black">
-                  {selectedTermYear}
-                </p>
-                <img
-                  src={arr}
-                  alt=""
-                  className={`ml-9 cursor-pointer transition-transform duration-200 ${
-                    isTermDropdownOpen ? "rotate-180" : ""
-                  }`}
-                  onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
-                />
-              </div>
-            </div>
-
+          {/* Term year dropdown */}
+          <div className="relative mt-6">
+            <button
+              onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
+              className="w-full h-[42px] rounded-[9px] px-3 bg-[#F3F4F6] flex items-center justify-between"
+            >
+              <p className="font-medium text-[13px] text-black truncate flex-1 text-left">
+                {selectedTermYear}
+              </p>
+              <img
+                src={arr}
+                alt=""
+                className={`ml-2 flex-shrink-0 transition-transform duration-200 ${isTermDropdownOpen ? "rotate-180" : ""}`}
+              />
+            </button>
             {isTermDropdownOpen && (
-              <div className="absolute z-10 mt-2 w-[336px] bg-white border border-[#E5E7EB] rounded-[8px] shadow-md -ml-1">
+              <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
                 {termYears.map((term) => (
                   <div
                     key={term}
@@ -454,7 +316,7 @@ const Report = () => {
                       setSelectedTermYear(term);
                       setIsTermDropdownOpen(false);
                     }}
-                    className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
+                    className="px-4 py-3 text-[13px] cursor-pointer hover:bg-[#EFF6FF]"
                   >
                     {term}
                   </div>
@@ -463,308 +325,266 @@ const Report = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-[18px] px-6 mt-7 -ml-6.5 w-[336px]">
+          {/* Task grid */}
+          <div className="grid grid-cols-2 gap-3 mt-6">
             <button
               onClick={() => setScreen("my-students")}
-              className="border border-[#0F766E] rounded-[8.54px] p-3 text-left w-[159px] h-[95px]"
+              className="border border-[#0F766E] rounded-[8px] p-3 text-left h-[90px]"
             >
-              <img src={st} alt="" className="w-[39px]" />
+              <img src={st} alt="" className="w-9" />
               <p className="font-bold text-[13px] mt-2">My Students</p>
             </button>
 
             <button
               onClick={() => setScreen("mark-attendance")}
-              className="border border-[#F97316] rounded-[8.54px] p-3 text-left w-[159px] h-[95px] ml-5.5"
+              className="border border-[#F97316] rounded-[8px] p-3 text-left h-[90px]"
             >
-              <img src={ma} alt="" className="w-[39px]" />
+              <img src={ma} alt="" className="w-9" />
               <p className="font-bold text-[13px] mt-2">Mark Attendance</p>
             </button>
 
             <button
               onClick={() => setScreen("behaviour")}
-              className="border border-[#0F766E] rounded-[8.54px] p-3 text-left w-[159px] h-[95px]"
+              className="border border-[#0F766E] rounded-[8px] p-3 text-left h-[90px]"
             >
-              <img src={brr} alt="" className="w-[39px]" />
+              <img src={brr} alt="" className="w-9" />
               <p className="font-bold text-[13px] mt-2">Behaviour</p>
             </button>
 
             <button
               onClick={() => setScreen("generate-report")}
-              className="border border-[#3B82F6] rounded-[8.54px] p-3 text-left w-[159px] h-[95px] ml-5.5"
+              className="border border-[#3B82F6] rounded-[8px] p-3 text-left h-[90px]"
             >
-              <img src={gr} alt="" className="w-[39px]" />
+              <img src={gr} alt="" className="w-9" />
               <p className="font-bold text-[13px] mt-2">Generate Report</p>
             </button>
           </div>
         </div>
       )}
 
+      {/* ================= MARK ATTENDANCE ================= */}
       {screen === "mark-attendance" && (
-        <div className="h-[1200px]">
+        <div className="pb-28">
           <div
-            className="flex items-center gap-4 p-6 cursor-pointer"
+            className="flex items-center gap-4 px-5 py-5 cursor-pointer"
             onClick={() => setScreen("report")}
           >
             <img src={back} alt="back" />
             <h2 className="text-[20px] font-medium">Attendance</h2>
           </div>
 
-          <div className="px-6 mt-1.5 ml-1">
-            <div className="flex justify-between w-[337px]">
-              <p className="font-semibold text-[16px] text-black">
+          <div className="px-5">
+            <div className="flex justify-between items-center">
+              <p className="font-semibold text-[15px] text-black">
                 Class Attendance
               </p>
-              <p className="font-medium text-[14px] text-black">Today</p>
+              <p className="font-medium text-[13px] text-black">Today</p>
             </div>
           </div>
 
-          <div className="border border-[1px] w-[334px] h-[45px] rounded-[6px] border-[#E3E3E3] ml-7 mt-6">
-            <div className="flex items-center justify-between px-3 h-full">
-              <img
-                src={back3}
-                alt="previous day"
-                onClick={handlePrevDay}
-                className="cursor-pointer flex-shrink-0"
-              />
-              <p className="font-medium text-[16px] text-[#000000] whitespace-nowrap mx-4">
-                {formatDate(currentDate)}
-              </p>
-              <img
-                src={front}
-                alt="next day"
-                onClick={handleNextDay}
-                className="cursor-pointer flex-shrink-0"
-              />
-            </div>
+          {/* Date navigator */}
+          <div className="border border-[#E3E3E3] rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3">
+            <img
+              src={back3}
+              alt="prev"
+              onClick={handlePrevDay}
+              className="cursor-pointer w-5 h-5 flex-shrink-0"
+            />
+            <p className="font-medium text-[13px] text-black truncate mx-2">
+              {formatDate(currentDate)}
+            </p>
+            <img
+              src={front}
+              alt="next"
+              onClick={handleNextDay}
+              className="cursor-pointer w-5 h-5 flex-shrink-0"
+            />
           </div>
 
-          <div className="w-[337px] h-[179px] rounded-[6px] border-[1px] border-[#E3E3E3] ml-7 mt-6 p-3">
-            <div className="flex flex-col">
-              <h2 className="font-medium text-[13px] text-[#000000]">
-                Today's Summary
-              </h2>
-              <div className="flex justify-around -ml-1">
-                {/* Present Box */}
-                <div className="w-[93px] h-[83px] bg-[#F0FDF4] mt-1.5">
-                  <div className="flex flex-col items-center justify-center mt-2">
-                    <div className="w-[25px] h-[25px] bg-green-100 rounded-full flex items-center justify-center ">
-                      <svg
-                        className="w-8 h-8 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-[#000000] font-medium text-[15px] flex mx-auto">
-                        {counts.present}
-                      </p>
-                      <p className="text-[13px] font-medium text-[#000000] -mt-1.5">
-                        Present
-                      </p>
-                    </div>
-                  </div>
+          {/* Summary card */}
+          <div className="border border-[#E3E3E3] rounded-[6px] mx-5 mt-4 p-3">
+            <h2 className="font-medium text-[13px] text-black mb-2">
+              Today's Summary
+            </h2>
+            <div className="flex justify-between gap-2">
+              <div className="flex-1 bg-[#F0FDF4] rounded py-2 flex flex-col items-center">
+                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mb-1">
+                  <svg
+                    className="w-4 h-4 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                 </div>
-
-                {/* Absent Box */}
-                <div className="w-[93px] h-[83px] bg-[#FDF1F1] mt-1.5">
-                  <div className="flex flex-col items-center justify-center mt-2">
-                    <img src={pre} alt="" className="w-[25px] h-[25px]" />
-                    <div className="flex flex-col">
-                      <p className="text-[#000000] font-medium text-[15px] flex mx-auto">
-                        {counts.absent}
-                      </p>
-                      <p className="text-[13px] font-medium text-[#000000] -mt-1.5">
-                        Absent
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Late Box */}
-                <div className="w-[93px] h-[83px] bg-[#FEFCE9] mt-1.5">
-                  <div className="flex flex-col items-center justify-center mt-2">
-                    <img src={late} alt="" className="w-[25px] h-[25px]" />
-                    <div className="flex flex-col">
-                      <p className="text-[#000000] font-medium text-[15px] flex mx-auto">
-                        {counts.late}
-                      </p>
-                      <p className="text-[13px] font-medium text-[#000000] -mt-1.5">
-                        Late
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-[14px] font-semibold">{counts.present}</p>
+                <p className="text-[12px] font-medium">Present</p>
               </div>
-
-              {/* Horizontal line */}
-              <div className="w-[332px] h-[1px] bg-[#D9D9D9] mt-4 -ml-3"></div>
+              <div className="flex-1 bg-[#FDF1F1] rounded py-2 flex flex-col items-center">
+                <img src={pre} alt="" className="w-6 h-6 mb-1" />
+                <p className="text-[14px] font-semibold">{counts.absent}</p>
+                <p className="text-[12px] font-medium">Absent</p>
+              </div>
+              <div className="flex-1 bg-[#FEFCE9] rounded py-2 flex flex-col items-center">
+                <img src={late} alt="" className="w-6 h-6 mb-1" />
+                <p className="text-[14px] font-semibold">{counts.late}</p>
+                <p className="text-[12px] font-medium">Late</p>
+              </div>
             </div>
-
-            <div className="flex justify-between ml-2.5 mt-2 mr-2.5">
-              <p className="font-medium text-black text-[15px]">
+            <div className="w-full h-[1px] bg-[#D9D9D9] mt-3 mb-2" />
+            <div className="flex justify-between">
+              <p className="font-medium text-black text-[14px]">
                 Total Students
               </p>
-              <p className="font-semibold text-black text-[15px]">
+              <p className="font-semibold text-black text-[14px]">
                 {students.length}
               </p>
             </div>
           </div>
 
-          <p className="font-medium text-[18px] text-black ml-5 mt-3 p-3">
+          <p className="font-medium text-[17px] text-black px-5 mt-4 mb-2">
             Student List
           </p>
 
-          <div>
-            {/* Student list */}
-            <div>
-              {students.map((student) => (
-                <div
-                  key={student.id}
-                  className="w-[334px] h-[68px] rounded-[6px] border-[1px] py-[9px] px-[10px] gap-[10px] border-[#E3E3E3] ml-8 mt-3"
-                >
-                  <div className="flex">
-                    <img
-                      src={student.image}
-                      alt={student.name}
-                      className="w-[50px] h-[50px] rounded-full object-cover flex-shrink-0"
-                    />
-
-                    <div className="flex flex-col ml-2.5">
-                      <h6 className="font-semibold text-[15px] text-black">
-                        {student.name}
-                      </h6>
-                      <p className="font-semibold text-[14px] text-[#9C9C9C]">
-                        ID: {student.id}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end -mt-9 gap-[20px]">
-                    <img
-                      src={
-                        studentAttendance[student.id] === "present"
-                          ? presC
-                          : pres
-                      }
-                      alt="present"
-                      onClick={() => handleStatusClick(student.id, "present")}
-                      className="cursor-pointer transition-all"
-                    />
-                    <img
-                      src={
-                        studentAttendance[student.id] === "absent" ? absC : abs
-                      }
-                      alt="absent"
-                      onClick={() => handleStatusClick(student.id, "absent")}
-                      className="cursor-pointer transition-all"
-                    />
-                    <img
-                      src={
-                        studentAttendance[student.id] === "late" ? lateC : latee
-                      }
-                      alt="late"
-                      onClick={() => handleStatusClick(student.id, "late")}
-                      className="cursor-pointer transition-all"
-                    />
+          <div className="px-5 flex flex-col gap-3">
+            {students.map((student) => (
+              <div
+                key={student.id}
+                className="border border-[#E3E3E3] rounded-[6px] px-3 py-2 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <img
+                    src={student.image}
+                    alt={student.name}
+                    className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[14px] text-black truncate">
+                      {student.name}
+                    </p>
+                    <p className="font-medium text-[12px] text-[#9C9C9C]">
+                      ID: {student.id}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                  <img
+                    src={
+                      studentAttendance[student.id] === "present" ? presC : pres
+                    }
+                    alt="present"
+                    onClick={() => handleStatusClick(student.id, "present")}
+                    className="cursor-pointer w-7 h-7"
+                  />
+                  <img
+                    src={
+                      studentAttendance[student.id] === "absent" ? absC : abs
+                    }
+                    alt="absent"
+                    onClick={() => handleStatusClick(student.id, "absent")}
+                    className="cursor-pointer w-7 h-7"
+                  />
+                  <img
+                    src={
+                      studentAttendance[student.id] === "late" ? lateC : latee
+                    }
+                    alt="late"
+                    onClick={() => handleStatusClick(student.id, "late")}
+                    className="cursor-pointer w-7 h-7"
+                  />
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E3E3E3] py-4 z-50">
-            <div className="flex justify-center -mt-2">
-              <button className="w-[335px] bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
-                Save
-              </button>
-            </div>
+          <div className={fixedBtnWrapper}>
+            <button className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
+              Save
+            </button>
           </div>
         </div>
       )}
 
+      {/* ================= MY STUDENTS ================= */}
       {screen === "my-students" && (
-        <div className="h-[850px]">
+        <div className="pb-24">
           {!showAddStudent ? (
-            // Current Student List Screen
             <>
+              {/* Header */}
               <div
-                className="flex items-center gap-4 p-6 cursor-pointer"
+                className="flex items-center gap-4 px-5 py-5 cursor-pointer"
                 onClick={() => setScreen("report")}
               >
                 <img src={back} alt="back" />
-                <h2 className="text-[20px] font-medium">My Students</h2>
-
+                <h2 className="text-[20px] font-medium flex-1">My Students</h2>
                 <div
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the back navigation
+                    e.stopPropagation();
                     setShowAddStudent(true);
                   }}
-                  className="flex ml-32 cursor-pointer"
+                  className="cursor-pointer"
                 >
-                  <img src={add} alt="" className="" />
+                  <img src={add} alt="add student" />
                 </div>
               </div>
 
-              <div className="w-[333px] h-[48px] border-[1px] border-[#D9D9D9] rounded-[7px] bg-[#FCFCFC] ml-7.5 mt-4">
-                <div className="flex gap-[11px] p-2 mt-1">
-                  <img src={srch} alt="" />
-                  <input
-                    type="text"
-                    placeholder="Search Students"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="outline-none font-normal text-[14px] text-[#616161] bg-transparent"
-                  />
-                </div>
+              {/* Search */}
+              <div className="mx-5 mt-2 border border-[#D9D9D9] rounded-[7px] bg-[#FCFCFC] h-[48px] flex items-center gap-3 px-3">
+                <img src={srch} alt="" className="w-5 h-5 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search Students"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="outline-none text-[14px] text-[#616161] bg-transparent flex-1"
+                />
               </div>
 
-              {filteredStudents.map((student) => (
-                <div
-                  key={student.id}
-                  className="w-[334px] h-[68px] border-[1px] rounded-[6px] border-[#E3E3E3] py-[9px] px-[10px] gap-[10px] ml-7.5 mt-6"
-                >
-                  <div className="flex justify-between items-center">
+              {/* Student list */}
+              <div className="px-5 mt-4 flex flex-col gap-3">
+                {filteredStudents.map((student) => (
+                  <div
+                    key={student.id}
+                    className="border border-[#E3E3E3] rounded-[6px] px-3 py-2 flex items-center gap-2"
+                  >
                     <img
                       src={student.image}
                       alt={student.name}
-                      className="w-[50px] h-[50px] rounded-full object-cover flex-shrink-0"
+                      className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
                     />
-
-                    <div className="flex flex-col text-[15px] font-semibold text-[#000000] flex-1 ml-2.5">
-                      <h5>{student.name}</h5>
-                      <p className="font-semibold text-[14px] text-[#9C9C9C]">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-[14px] text-black truncate">
+                        {student.name}
+                      </p>
+                      <p className="font-medium text-[12px] text-[#9C9C9C]">
                         ID: {student.id}
                       </p>
                     </div>
-
-                    <div className="flex justify-end w-[124px] h-[32px] gap-[4px] flex-shrink-0">
-                      <button className="w-[54px] h-[32px] rounded-[5px] py-[5px] px-[10px] text-white font-normal text-[14px] bg-[#FF7B17]">
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button className="h-[32px] px-3 rounded-[5px] text-white font-normal text-[13px] bg-[#FF7B17]">
                         View
                       </button>
-
                       <button
                         onClick={() => handleRemoveStudent(student.id)}
-                        className="text-[14px] font-normal text-[#FF0000] ml-1.5"
+                        className="text-[13px] font-normal text-[#FF0000]"
                       >
                         Remove
                       </button>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </>
           ) : (
-            // Add Student Screen
-            <div>
-              <div className="flex items-center gap-4 p-6">
+            /* Add Student form */
+            <div className="pb-28">
+              <div className="flex items-center gap-4 px-5 py-5">
                 <img
                   src={back}
                   alt="back"
@@ -774,707 +594,621 @@ const Report = () => {
                 <h2 className="text-[20px] font-medium">Add Student</h2>
               </div>
 
-              <div className=" mt-6">
-                <div className="">
-                  <div className="h-[1120px]  pb-24">
-                    <div className="gap-y-[24px]">
-                      <h4 className="font-semibold text-[18px] text-black leading-[22%] ml-7 -mt-2">
-                        Student Information
-                      </h4>
+              <div className="px-5 flex flex-col gap-5">
+                <h4 className="font-semibold text-[17px] text-black">
+                  Student Information
+                </h4>
 
-                      <div className="flex flex-col ml-7 mt-8">
-                        <h4 className="font-medium text-[16px] text-[#303030]">
-                          Student Name
-                        </h4>
+                <div>
+                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    Student Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="E.g. John Smith"
+                    value={studentNameAdd}
+                    onChange={(e) => setStudentNameAdd(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
 
-                        <input
-                          type="text"
-                          placeholder="E.g.......John Smith"
-                          value={studentNameAdd}
-                          onChange={(e) => setStudentNameAdd(e.target.value)}
-                          className="w-[336px] h-[57px] rounded-[8px] border-[1px] py-[8px] px-[12px] placeholder:text-[14px] font-normal border-[#0000001F] mt-2 -ml-1.5"
-                        />
-                      </div>
-
-                      <div className="p-6 -mt-2 ml-2">
-                        <h5 className="font-medium text-[16px] text-[#303030] -ml-1.5">
-                          Date Of Birth
-                        </h5>
-
-                        <div className="relative">
-                          <input
-                            type="text"
-                            readOnly
-                            value={
-                              studentDOB
-                                ? studentDOB.toLocaleDateString("en-GB")
-                                : "Select date"
-                            }
-                            placeholder="Select date"
-                            onClick={() => setIsDOBOpen(true)}
-                            className="w-[334px] h-[57px] rounded-[8px] border-[1px] border-[#0000001F] mt-2 font-normal text-[#303030] pl-3 cursor-pointer -ml-2"
-                          />
-
-                          <img
-                            src={cal}
-                            alt="calendar"
-                            onClick={() => setIsDOBOpen(true)}
-                            className="absolute left-[87%] bottom-[30%] cursor-pointer"
-                          />
-
-                          {isDOBOpen && (
-                            <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
-                              <div className="bg-white rounded-xl p-4 shadow-lg">
-                                <DatePicker
-                                  selected={studentDOB}
-                                  onChange={(date) => {
-                                    setStudentDOB(date);
-                                    setIsDOBOpen(false);
-                                  }}
-                                  inline
-                                  showPopperArrow={false}
-                                  maxDate={new Date()}
-                                  locale="en-GB"
-                                />
-                                <button
-                                  onClick={() => setIsDOBOpen(false)}
-                                  className="mt-2 px-4 py-2 bg-[#3B82F6] text-white rounded-md w-full"
-                                >
-                                  Close
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="p-6 -mt-8">
-                        <label className="block text-[16px] font-medium text-[#303030] mb-2">
-                          Gender
-                        </label>
-
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setIsGenderOpen(!isGenderOpen);
+                {/* DOB */}
+                <div>
+                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    Date Of Birth
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      readOnly
+                      value={
+                        studentDOB ? studentDOB.toLocaleDateString("en-GB") : ""
+                      }
+                      placeholder="Select date"
+                      onClick={() => setIsDOBOpen(true)}
+                      className={`${inputClass} cursor-pointer pr-10`}
+                    />
+                    <img
+                      src={cal}
+                      alt="calendar"
+                      onClick={() => setIsDOBOpen(true)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer"
+                    />
+                    {isDOBOpen && (
+                      <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 px-4">
+                        <div className="bg-white rounded-xl p-4 shadow-lg w-full max-w-[320px]">
+                          <DatePicker
+                            selected={studentDOB}
+                            onChange={(d) => {
+                              setStudentDOB(d);
+                              setIsDOBOpen(false);
                             }}
-                            className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
+                            inline
+                            showPopperArrow={false}
+                            maxDate={new Date()}
+                            locale="en-GB"
+                          />
+                          <button
+                            onClick={() => setIsDOBOpen(false)}
+                            className="mt-2 px-4 py-2 bg-[#3B82F6] text-white rounded-md w-full"
                           >
-                            <span
-                              className={`${
-                                selectedGender
-                                  ? "text-[14px] text-[#303030] font-normal"
-                                  : "text-[14px] text-gray-400"
-                              }`}
-                            >
-                              {selectedGender || "Select a gender"}
-                            </span>
-                            <img
-                              src={arr}
-                              alt="dropdown"
-                              className={`transition-transform duration-200 ${
-                                isGenderOpen ? "rotate-180" : ""
-                              }`}
-                            />
+                            Close
                           </button>
-
-                          {isGenderOpen && (
-                            <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                              {genders.map((gender) => (
-                                <div
-                                  key={gender}
-                                  onClick={() => handleSelectGender(gender)}
-                                  className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                                >
-                                  {gender}
-                                </div>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
-
-                      <div className="flex flex-col ml-7 -mt-2">
-                        <h4 className="font-medium text-[16px] text-[#303030]">
-                          Student ID
-                        </h4>
-
-                        <input
-                          type="text"
-                          placeholder="E.G,..... Stu/020/25h"
-                          value={studentID}
-                          onChange={(e) => setStudentID(e.target.value)}
-                          className="w-[334px] h-[57px] rounded-[8px] border-[1px] py-[8px] px-[12px] placeholder:text-[14px] font-normal border-[#0000001F] mt-2 -ml-1"
-                        />
-                      </div>
-
-                      <div className="ml-5.5 mt-4">
-                        <h5 className="font-medium text-black text-[16px] ml-1">
-                          Upload Photo
-                        </h5>
-
-                        <div className="flex border-[1px] border-[#0000001F] w-[334px] h-[57px] rounded-[8px] py-[8px] px-[12px] justify-between mt-2">
-                          <input
-                            type="text"
-                            placeholder="Choose File"
-                            value={selectedFile ? selectedFile.name : ""}
-                            readOnly
-                            className="placeholder:text-[#303030] font-normal text-[14px] flex-1 outline-none cursor-pointer"
-                            onClick={handleFileClick}
-                          />
-
-                          <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            accept="image/*"
-                            className="hidden"
-                          />
-
-                          <img
-                            src={ch}
-                            alt=""
-                            className="w-[18px] h-[18px] mt-3 cursor-pointer"
-                            onClick={handleFileClick}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold text-[18px] text-black p-6">
-                        Class & Academic Info
-                      </h4>
-
-                      <div className="flex w-[336px] gap-3 ml-6">
-                        <div>
-                          <h2 className="font-medium text-black text-[16px]">
-                            Class
-                          </h2>
-                          <input
-                            type="text"
-                            placeholder="e.g Grade 5"
-                            value={studentClass}
-                            onChange={(e) => setStudentClass(e.target.value)}
-                            className="border-[1px] rounded-[8px] w-[160px] placeholder:text-[14px] font-normal text-[#303030] 
-                           border-[#0000001F] h-[57px] px-[12px] py-[8px] mt-1.5 -ml-0.5"
-                          />
-                        </div>
-
-                        <div>
-                          <h2 className="font-medium text-black text-[16px]">
-                            Academic Session
-                          </h2>
-                          <input
-                            type="text"
-                            placeholder="E.g 2024/2025"
-                            value={academicSession}
-                            onChange={(e) => setAcademicSession(e.target.value)}
-                            className="border-[1px] rounded-[8px] w-[160px] px-[12px] py-[8px] placeholder:text-[14px] font-normal text-[#303030] border-[#0000001F] h-[57px] mt-1.5"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-6 -mt-2">
-                      <label className="block text-[16px] font-medium text-[#303030] mb-2">
-                        Term
-                      </label>
-
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsTermOpen(!isTermOpen);
-                          }}
-                          className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between -ml-0.5"
-                        >
-                          <span
-                            className={`${
-                              selectedTerm
-                                ? "text-[14px] text-[#303030] font-normal"
-                                : "text-[14px] text-gray-400"
-                            }`}
-                          >
-                            {selectedTerm || "Select Term"}
-                          </span>
-                          <img
-                            src={arr}
-                            alt="dropdown"
-                            className={`transition-transform duration-200 ${
-                              isTermOpen ? "rotate-180" : ""
-                            }`}
-                          />
-                        </button>
-
-                        {isTermOpen && (
-                          <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                            {terms.map((term) => (
-                              <div
-                                key={term}
-                                onClick={() => handleSelectTerm(term)}
-                                className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                              >
-                                {term}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </div>
+                </div>
 
-                  {/* Fixed Add Student Button */}
-                  <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E3E3E3] py-4 z-40">
-                    <div className="flex justify-center -mt-2">
-                      <button
-                        onClick={handleSaveStudent}
-                        disabled={!isStudentFormValid}
-                        className={`w-[335px] h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
-                          isStudentFormValid
-                            ? "bg-[#FF7B17] cursor-pointer"
-                            : "bg-gray-300 cursor-not-allowed"
-                        }`}
+                {/* Gender */}
+                <div>
+                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    Gender
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsGenderOpen(!isGenderOpen)}
+                      className={dropdownBtnClass}
+                    >
+                      <span
+                        className={
+                          selectedGender ? "text-[#303030]" : "text-gray-400"
+                        }
                       >
-                        Add Student
+                        {selectedGender || "Select a gender"}
+                      </span>
+                      <img
+                        src={arr}
+                        alt=""
+                        className={`transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                    {isGenderOpen && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                        {genders.map((g) => (
+                          <div
+                            key={g}
+                            onClick={() => handleSelectGender(g)}
+                            className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          >
+                            {g}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Student ID */}
+                <div>
+                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    Student ID
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="E.g. Stu/020/25h"
+                    value={studentID}
+                    onChange={(e) => setStudentID(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+
+                {/* Upload Photo */}
+                <div>
+                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    Upload Photo
+                  </label>
+                  <div
+                    className="flex items-center justify-between border border-[#0000001F] rounded-[8px] h-[52px] px-3 cursor-pointer"
+                    onClick={handleFileClick}
+                  >
+                    <span
+                      className={`text-[14px] truncate flex-1 ${selectedFile ? "text-[#303030]" : "text-gray-400"}`}
+                    >
+                      {selectedFile ? selectedFile.name : "Choose File"}
+                    </span>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <img
+                      src={ch}
+                      alt=""
+                      className="w-[18px] h-[18px] flex-shrink-0 ml-2"
+                    />
+                  </div>
+                </div>
+
+                <h4 className="font-semibold text-[17px] text-black pt-1">
+                  Class & Academic Info
+                </h4>
+
+                {/* Class + Session */}
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                      Class
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g Grade 5"
+                      value={studentClass}
+                      onChange={(e) => setStudentClass(e.target.value)}
+                      className="w-full h-[52px] rounded-[8px] border border-[#0000001F] px-3 text-[14px] placeholder:text-gray-400 focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                      Academic Session
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="E.g 2024/2025"
+                      value={academicSession}
+                      onChange={(e) => setAcademicSession(e.target.value)}
+                      className="w-full h-[52px] rounded-[8px] border border-[#0000001F] px-3 text-[14px] placeholder:text-gray-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Term */}
+                <div>
+                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    Term
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsTermOpen(!isTermOpen)}
+                      className={dropdownBtnClass}
+                    >
+                      <span
+                        className={
+                          selectedTerm ? "text-[#303030]" : "text-gray-400"
+                        }
+                      >
+                        {selectedTerm || "Select Term"}
+                      </span>
+                      <img
+                        src={arr}
+                        alt=""
+                        className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
+                    {isTermOpen && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                        {terms.map((t) => (
+                          <div
+                            key={t}
+                            onClick={() => handleSelectTerm(t)}
+                            className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          >
+                            {t}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className={fixedBtnWrapper}>
+                <button
+                  onClick={handleSaveStudent}
+                  disabled={!isStudentFormValid}
+                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${isStudentFormValid ? "bg-[#FF7B17] cursor-pointer" : "bg-gray-300 cursor-not-allowed"}`}
+                >
+                  Add Student
+                </button>
+              </div>
+
+              {showStudentSuccess && (
+                <div className="fixed inset-0 flex items-end justify-center z-50">
+                  <div
+                    className="absolute inset-0 bg-black/30"
+                    onClick={handleCloseStudentSuccess}
+                  />
+                  <div className="relative bg-white rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up">
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                        <svg
+                          className="w-8 h-8 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-[20px] font-bold text-[#303030] mb-2">
+                        Successful!
+                      </h3>
+                      <p className="text-[14px] text-gray-600 text-center mb-6">
+                        You have successfully added a new student
+                      </p>
+                      <button
+                        onClick={handleCloseStudentSuccess}
+                        className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"
+                      >
+                        Okay
                       </button>
                     </div>
                   </div>
-
-                  {/* Success Notification for Add Student */}
-                  {showStudentSuccess && (
-                    <div className="fixed inset-0 flex items-end justify-center z-50">
-                      <div
-                        className="absolute inset-0 bg-black/30"
-                        onClick={handleCloseStudentSuccess}
-                      ></div>
-
-                      <div className="relative bg-white rounded-t-[20px] w-full max-w-[500px] p-6 shadow-2xl animate-slide-up">
-                        <div className="flex flex-col items-center">
-                          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                            <svg
-                              className="w-8 h-8 text-green-500"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          </div>
-
-                          <h3 className="text-[20px] font-bold text-[#303030] mb-2">
-                            Successful!
-                          </h3>
-                          <p className="text-[14px] text-gray-600 text-center mb-6">
-                            You have successfully added a new student
-                          </p>
-
-                          <button
-                            onClick={handleCloseStudentSuccess}
-                            className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"
-                          >
-                            Okay
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <style jsx>{`
-                    @keyframes slide-up {
-                      from {
-                        transform: translateY(100%);
-                      }
-                      to {
-                        transform: translateY(0);
-                      }
-                    }
-                    .animate-slide-up {
-                      animation: slide-up 0.3s ease-out;
-                    }
-                  `}</style>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
       )}
 
+      {/* ================= BEHAVIOUR ================= */}
       {screen === "behaviour" && (
-        <div className="h-[980px]" onMouseUp={handleMouseUp}>
-          <div>
-            <div className="flex items-center gap-4 p-6">
-              <img
-                src={back}
-                alt="back"
-                onClick={() => setScreen("report")}
-                className="cursor-pointer"
+        <div className="pb-28" onMouseUp={handleMouseUp}>
+          <div
+            className="flex items-center gap-4 px-5 py-5 cursor-pointer"
+            onClick={() => setScreen("report")}
+          >
+            <img src={back} alt="back" />
+            <h2 className="text-[20px] font-medium">Add Behaviour</h2>
+          </div>
+
+          <div className="px-5 flex flex-col gap-5">
+            {/* Student Name */}
+            <div>
+              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                Student Name
+              </label>
+              <input
+                type="text"
+                placeholder="E.g. John Smith"
+                value={studentNameAdd}
+                onChange={(e) => setStudentNameAdd(e.target.value)}
+                className={inputClass}
               />
-              <h2 className="text-[20px] font-medium">Add Behaviour</h2>
             </div>
-          </div>
 
-          <div className="flex flex-col ml-7 mt-2">
-            <h4 className="font-medium text-[16px] text-[#303030]">
-              Student Name
-            </h4>
-
-            <input
-              type="text"
-              placeholder="E.g.......John Smith"
-              value={studentNameAdd}
-              onChange={(e) => setStudentNameAdd(e.target.value)}
-              className="w-[336px] h-[57px] rounded-[8px] border-[1px] py-[8px] px-[12px] placeholder:text-[14px] font-normal border-[#0000001F] mt-2 -ml-1.5"
-            />
-          </div>
-
-          <div className="p-6 -mt-1">
-            <label className="block text-[16px] font-medium text-[#303030] mb-2">
-              Gender
-            </label>
-
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsGenderOpen(!isGenderOpen);
-                }}
-                className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
-              >
-                <span
-                  className={`${
-                    selectedGender
-                      ? "text-[14px] text-[#303030] font-normal"
-                      : "text-[14px] text-gray-400"
-                  }`}
+            {/* Gender */}
+            <div>
+              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                Gender
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsGenderOpen(!isGenderOpen)}
+                  className={dropdownBtnClass}
                 >
-                  {selectedGender || "Select a gender"}
-                </span>
-                <img
-                  src={arr}
-                  alt="dropdown"
-                  className={`transition-transform duration-200 ${
-                    isGenderOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {isGenderOpen && (
-                <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                  {genders.map((gender) => (
-                    <div
-                      key={gender}
-                      onClick={() => handleSelectGender(gender)}
-                      className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                    >
-                      {gender}
-                    </div>
-                  ))}
-                </div>
-              )}
+                  <span
+                    className={
+                      selectedGender ? "text-[#303030]" : "text-gray-400"
+                    }
+                  >
+                    {selectedGender || "Select a gender"}
+                  </span>
+                  <img
+                    src={arr}
+                    alt=""
+                    className={`transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {isGenderOpen && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    {genders.map((g) => (
+                      <div
+                        key={g}
+                        onClick={() => handleSelectGender(g)}
+                        className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                      >
+                        {g}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="p-6 -mt-7">
-            <label className="block text-[16px] font-medium text-[#303030] mb-2">
-              Academic Term
-            </label>
-
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsTermOpen(!isTermOpen);
-                }}
-                className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between -ml-0.5"
-              >
-                <span
-                  className={`${
-                    selectedTerm
-                      ? "text-[14px] text-[#303030] font-normal"
-                      : "text-[14px] text-gray-400"
-                  }`}
+            {/* Academic Term */}
+            <div>
+              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                Academic Term
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsTermOpen(!isTermOpen)}
+                  className={dropdownBtnClass}
                 >
-                  {selectedTerm || "Select an Academic Term"}
-                </span>
-                <img
-                  src={arr}
-                  alt="dropdown"
-                  className={`transition-transform duration-200 ${
-                    isTermOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {isTermOpen && (
-                <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                  {terms.map((term) => (
-                    <div
-                      key={term}
-                      onClick={() => handleSelectTerm(term)}
-                      className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                    >
-                      {term}
-                    </div>
-                  ))}
-                </div>
-              )}
+                  <span
+                    className={
+                      selectedTerm ? "text-[#303030]" : "text-gray-400"
+                    }
+                  >
+                    {selectedTerm || "Select an Academic Term"}
+                  </span>
+                  <img
+                    src={arr}
+                    alt=""
+                    className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {isTermOpen && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    {terms.map((t) => (
+                      <div
+                        key={t}
+                        onClick={() => handleSelectTerm(t)}
+                        className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                      >
+                        {t}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className=" ml-6 -mt-1.5">
-            <h1 className="font-medium text-[16px] text-black">
-              Social Skills Assessment
-            </h1>
-
-            {skills.map((skill, index) => (
-              <div key={skill.id}>
-                <div className={index === 0 ? "mt-5" : "mt-7"}>
-                  <p className="font-normal text-[14px] text-black">
-                    {skill.label}
-                  </p>
-
-                  <div className="w-[336px] h-[6px] rounded-[15px] mt-2">
+            {/* Social Skills */}
+            <div>
+              <h2 className="font-medium text-[15px] text-black mb-3">
+                Social Skills Assessment
+              </h2>
+              <div className="flex flex-col gap-5">
+                {skills.map((skill) => (
+                  <div key={skill.id}>
+                    <div className="flex justify-between mb-1">
+                      <p className="font-normal text-[14px] text-black">
+                        {skill.label}
+                      </p>
+                      <span className="text-[13px] font-semibold">
+                        {progressBars[skill.id]}%
+                      </span>
+                    </div>
                     <div
                       className="w-full h-2 bg-gray-200 rounded-full cursor-pointer relative"
                       onMouseDown={() => handleMouseDown(skill.id)}
                       onMouseMove={(e) => handleMouseMove(e, skill.id)}
-                      onClick={(e) => handleClick(e, skill.id)}
+                      onClick={(e) => handleSliderClick(e, skill.id)}
                     >
                       <div
-                        className="h-full bg-[#22C55E] rounded-full transition-all"
+                        className="h-full bg-[#22C55E] rounded-full"
                         style={{ width: `${progressBars[skill.id]}%` }}
                       />
-
-                      {/* Draggable handle */}
                       <div
-                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-[#22C55E] border-2 border-[#22C55E] rounded-full shadow-lg"
+                        className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-[#22C55E] border-2 border-white rounded-full shadow-lg"
                         style={{
                           left: `calc(${progressBars[skill.id]}% - 8px)`,
                         }}
                       />
                     </div>
-
-                    <div className="flex justify-end mt-2">
-                      <span className="text-sm font-semibold">
-                        {progressBars[skill.id]}%
-                      </span>
-                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
 
-            <div className="mt-8 -ml-1">
-              <h2 className="font-normal text-black text-[16px]">
+            {/* Comments */}
+            <div>
+              <label className="block text-[15px] font-medium text-[#303030] mb-2">
                 Add Comments
-              </h2>
+              </label>
               <input
                 type="text"
                 placeholder="Enter Comments...."
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
-                className="w-[336px] h-[57px] border-[1px] border-[#E5E7EB] rounded-[6px] px-[12px] mt-3"
+                className={inputClass}
+              />
+            </div>
+
+            {/* Notify Parents */}
+            <div className="flex justify-between items-center pb-2">
+              <h6 className="font-medium text-[15px] text-black">
+                Notify Parents
+              </h6>
+              <img
+                src={isOn ? off : on}
+                alt="toggle"
+                onClick={handleToggle}
+                className="w-10 h-10 cursor-pointer"
               />
             </div>
           </div>
 
-          <div className="w-[336px] flex justify-between ml-6 mb-80 mt-4">
-            <h6 className="font-medium text-[16px] text-black mt-2">
-              Notify Parents
-            </h6>
-            <img
-              src={isOn ? off : on}
-              alt="switch"
-              onClick={handleToggle}
-              className="w-12 h-12 cursor-pointer transition-all duration-300"
-            />
-          </div>
-
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E3E3E3] py-4 z-50">
-            <div className="flex justify-center -mt-2">
-              <button
-                onClick={handleSaveBehaviour}
-                disabled={!isBehaviourFormValid}
-                className={`w-[335px] h-[50px] rounded-[10px] font-bold text-[18px] text-white ${
-                  isBehaviourFormValid
-                    ? "bg-[#FF7B17] cursor-pointer"
-                    : "bg-gray-300 cursor-not-allowed"
-                }`}
-              >
-                Save
-              </button>
-            </div>
+          <div className={fixedBtnWrapper}>
+            <button
+              onClick={() => {}}
+              disabled={!isBehaviourFormValid}
+              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white ${isBehaviourFormValid ? "bg-[#FF7B17] cursor-pointer" : "bg-gray-300 cursor-not-allowed"}`}
+            >
+              Save
+            </button>
           </div>
         </div>
       )}
 
+      {/* ================= GENERATE REPORT ================= */}
       {screen === "generate-report" && (
-        <div className="h-[790px]">
-          <div className="flex items-center gap-4 p-6">
-            <img
-              src={back}
-              alt="back"
-              onClick={() => setScreen("report")}
-              className="cursor-pointer"
-            />
+        <div className="pb-28">
+          <div
+            className="flex items-center gap-4 px-5 py-5 cursor-pointer"
+            onClick={() => setScreen("report")}
+          >
+            <img src={back} alt="back" />
             <h2 className="text-[20px] font-medium">Generate Report</h2>
           </div>
-          <div className="flex flex-col ml-7 mt-2">
-            <h4 className="font-medium text-[16px] text-[#303030]">
-              Student Name
-            </h4>
 
-            <input
-              type="text"
-              placeholder="E.g.......John Smith"
-              value={studentNameAdd}
-              onChange={(e) => setStudentNameAdd(e.target.value)}
-              className="w-[336px] h-[57px] rounded-[8px] border-[1px] py-[8px] px-[12px] placeholder:text-[14px] font-normal border-[#0000001F] mt-2 -ml-1.5"
-            />
-          </div>
-          <div className="p-6 -mt-1">
-            <label className="block text-[16px] font-medium text-[#303030] mb-2">
-              Academic Term
-            </label>
-
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsTermOpen(!isTermOpen);
-                  setIsReportTypeOpen(false);
-                }}
-                className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between -ml-0.5"
-              >
-                <span
-                  className={`${
-                    selectedTerm
-                      ? "text-[14px] text-[#303030] font-normal"
-                      : "text-[14px] text-gray-400"
-                  }`}
-                >
-                  {selectedTerm || "Select an Academic Term"}
-                </span>
-                <img
-                  src={arr}
-                  alt="dropdown"
-                  className={`transition-transform duration-200 ${
-                    isTermOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {isTermOpen && (
-                <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-                  {terms.map((term) => (
-                    <div
-                      key={term}
-                      onClick={() => handleSelectTerm(term)}
-                      className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                    >
-                      {term}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="ml-7">
-              <label className="block text-[16px] font-medium text-[#303030] mb-2">
-                Report Type
+          <div className="px-5 flex flex-col gap-5">
+            {/* Student Name */}
+            <div>
+              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                Student Name
               </label>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsReportTypeOpen(!isReportTypeOpen);
-                  setIsTermOpen(false);
-                }}
-                className="w-[334px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between -ml-0.5"
-              >
-                <span
-                  className={`${
-                    selectedReportType
-                      ? "text-[14px] text-[#303030] font-normal"
-                      : "text-[14px] text-gray-400"
-                  }`}
-                >
-                  {selectedReportType || "Select a report type"}
-                </span>
-                <img
-                  src={arr}
-                  alt="dropdown"
-                  className={`transition-transform duration-200 ${
-                    isReportTypeOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {isReportTypeOpen && (
-                <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md max-h-[300px] overflow-y-auto">
-                  {reportTypes.map((reportType) => (
-                    <div
-                      key={reportType}
-                      onClick={() => handleSelectReportType(reportType)}
-                      className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                    >
-                      {reportType}
-                    </div>
-                  ))}
-                </div>
-              )}
+              <input
+                type="text"
+                placeholder="E.g. John Smith"
+                value={studentNameAdd}
+                onChange={(e) => setStudentNameAdd(e.target.value)}
+                className={inputClass}
+              />
             </div>
-          </div>
 
-          <div className="border border-dashed border-[#000000] rounded-[8px] w-[334px] h-[185px] flex flex-col items-center justify-center ml-7 mt-12">
-            <img src={ana} alt="" />
-
-            <div className="flex">
-              <div>
-                <div className="flex items-center justify-center">
-                  <img src={rr} alt="" className="w-[27px] h-[27px]" />
-                  <p className="font-semibold text-[16px] text-black mt-0.5">
-                    View Report Review
-                  </p>
-                </div>
-
-                <p className="text-[12px] font-normal text-[#9E9E9E] flex items-center text-center px-6 w-[284px] mt-2.5">
-                  Preview the generated attendance summary report for Shayla
-                  Jason.
-                </p>
+            {/* Academic Term */}
+            <div>
+              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                Academic Term
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsTermOpen(!isTermOpen);
+                    setIsReportTypeOpen(false);
+                  }}
+                  className={dropdownBtnClass}
+                >
+                  <span
+                    className={
+                      selectedTerm ? "text-[#303030]" : "text-gray-400"
+                    }
+                  >
+                    {selectedTerm || "Select an Academic Term"}
+                  </span>
+                  <img
+                    src={arr}
+                    alt=""
+                    className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {isTermOpen && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    {terms.map((t) => (
+                      <div
+                        key={t}
+                        onClick={() => handleSelectTerm(t)}
+                        className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                      >
+                        {t}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Report Type */}
+            <div>
+              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                Report Type
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsReportTypeOpen(!isReportTypeOpen);
+                    setIsTermOpen(false);
+                  }}
+                  className={dropdownBtnClass}
+                >
+                  <span
+                    className={
+                      selectedReportType ? "text-[#303030]" : "text-gray-400"
+                    }
+                  >
+                    {selectedReportType || "Select a report type"}
+                  </span>
+                  <img
+                    src={arr}
+                    alt=""
+                    className={`transition-transform duration-200 ${isReportTypeOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {isReportTypeOpen && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md max-h-[220px] overflow-y-auto">
+                    {reportTypes.map((rt) => (
+                      <div
+                        key={rt}
+                        onClick={() => handleSelectReportType(rt)}
+                        className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                      >
+                        {rt}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Preview card */}
+            <div className="border border-dashed border-black rounded-[8px] h-[160px] flex flex-col items-center justify-center mt-2">
+              <img src={ana} alt="" className="mb-2" />
+              <div className="flex items-center gap-1 mb-1">
+                <img src={rr} alt="" className="w-6 h-6" />
+                <p className="font-semibold text-[15px] text-black">
+                  View Report Review
+                </p>
+              </div>
+              <p className="text-[12px] text-[#9E9E9E] text-center px-6 leading-tight">
+                Preview the generated attendance summary report for Shayla
+                Jason.
+              </p>
+            </div>
           </div>
 
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E3E3E3] py-4 z-50">
-            <div className="flex justify-center -mt-2">
-              <button
-                onClick={handleSaveBehaviour}
-                disabled={!isBehaviourFormValid}
-                className={`w-[335px] h-[50px] rounded-[10px] font-bold text-[18px] text-white ${
-                  isBehaviourFormValid
-                    ? "bg-[#FF7B17] cursor-pointer"
-                    : "bg-gray-300 cursor-not-allowed"
-                }`}
-              >
-                Save
-              </button>
-            </div>
+          <div className={fixedBtnWrapper}>
+            <button
+              disabled={!isBehaviourFormValid}
+              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white ${isBehaviourFormValid ? "bg-[#FF7B17] cursor-pointer" : "bg-gray-300 cursor-not-allowed"}`}
+            >
+              Save
+            </button>
           </div>
         </div>
       )}
 
       {mainScreens.includes(screen) && <BottomNavigation />}
-    </>
+
+      <style jsx>{`
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
+    </div>
   );
 };
 
