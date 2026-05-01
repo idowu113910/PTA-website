@@ -8,39 +8,24 @@ import { registerLocale } from "react-datepicker";
 import enGB from "date-fns/locale/en-GB";
 import on from "../assets/switch.svg";
 import off from "../assets/off.svg";
-import HomePaget from "../teacher/HomePaget";
 import { useNavigate } from "react-router-dom";
 
-registerLocale("en-GB", enGB); // format DD/MM/YYYY
+registerLocale("en-GB", enGB);
 
 const PostHomeWork = ({ onBack }) => {
   const [isGradeOpen, setIsGradeOpen] = useState(false);
   const [isSubjectOpen, setIsSubjectOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [showPostHomework, setShowPostHomework] = useState(false);
 
   const [selectedGrade, setSelectedGrade] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [isOn, setIsOn] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(null);
-  const dateRef = useRef(null);
 
   const navigate = useNavigate();
 
-  const handleBack = () => {
-    // Always go to home page without reloading
-    navigate("/home", { replace: true });
-  };
-
-  const handleCalendarClick = () => {
-    // Open the hidden date input
-    dateRef.current.showPicker?.(); // Modern browsers
-  };
-
-  const handleToggle = () => {
-    setIsOn(!isOn);
-  };
+  const handleToggle = () => setIsOn(!isOn);
 
   const grades = [
     "Grade 1",
@@ -60,206 +45,201 @@ const PostHomeWork = ({ onBack }) => {
     "Agricultural Science",
   ];
 
-  // Generic handler
   const handleSelect = (type, value) => {
     if (type === "grade") {
       setSelectedGrade(value);
       setIsGradeOpen(false);
-    } else if (type === "subject") {
+    } else {
       setSelectedSubject(value);
       setIsSubjectOpen(false);
     }
   };
 
   return (
-    <div className="h-[780px]">
+    <div className="max-w-[430px] mx-auto w-full min-h-screen pb-28">
+      {/* Header */}
       <div
-        className="flex items-center gap-4 p-6 cursor-pointer"
+        className="flex items-center gap-3 px-4 py-4 cursor-pointer"
         onClick={onBack}
       >
-        <img src={back} alt="back" />
-        <h2 className="text-[20px] font-medium">Post HomeWork</h2>
+        <img src={back} alt="back" className="w-5 h-5" />
+        <h2 className="text-[18px] sm:text-[20px] font-medium">
+          Post Homework
+        </h2>
       </div>
 
-      {/* Grade Dropdown */}
-      <div className="p-6">
-        <label className="block text-[16px] font-medium text-[#303030] mb-2">
-          Select Class
-        </label>
+      {/* Form */}
+      <div className="px-4 flex flex-col gap-5">
+        {/* Grade */}
+        <div>
+          <label className="text-[14px] sm:text-[16px] font-medium mb-1 block">
+            Select Class
+          </label>
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => {
-              setIsGradeOpen(!isGradeOpen);
-              setIsSubjectOpen(false); // Close other dropdown
-            }}
-            className="w-[336px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
-          >
-            <span
-              className={`${
-                selectedGrade
-                  ? "text-[14px] text-[#303030] font-normal"
-                  : "text-[14px] text-gray-400"
-              }`}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setIsGradeOpen(!isGradeOpen);
+                setIsSubjectOpen(false);
+              }}
+              className="w-full h-[52px] sm:h-[57px] px-3 border rounded-lg flex items-center justify-between"
             >
-              {selectedGrade || "Select grade"}
-            </span>
-            <img
-              src={arr}
-              alt="dropdown"
-              className={`transition-transform duration-200 ${
-                isGradeOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
+              <span
+                className={`text-[14px] ${selectedGrade ? "text-black" : "text-gray-400"}`}
+              >
+                {selectedGrade || "Select grade"}
+              </span>
 
-          {isGradeOpen && (
-            <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-              {grades.map((grade) => (
-                <div
-                  key={grade}
-                  onClick={() => handleSelect("grade", grade)}
-                  className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                >
-                  {grade}
-                </div>
-              ))}
-            </div>
-          )}
+              <img
+                src={arr}
+                className={`w-4 h-4 transition-transform ${isGradeOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {isGradeOpen && (
+              <div className="absolute z-20 mt-2 w-full bg-white border rounded-lg shadow-md">
+                {grades.map((grade) => (
+                  <div
+                    key={grade}
+                    onClick={() => handleSelect("grade", grade)}
+                    className="px-4 py-3 text-[14px] cursor-pointer hover:bg-blue-50"
+                  >
+                    {grade}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      {/* Subject Dropdown */}
-      <div className="p-6 -mt-8">
-        <label className="block text-[16px] font-medium text-[#303030] mb-2">
-          Subject
-        </label>
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSubjectOpen(!isSubjectOpen);
-              setIsGradeOpen(false); // Close other dropdown
-            }}
-            className="w-[336px] h-[57px] px-[12px] border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
-          >
-            <span
-              className={`${
-                selectedSubject
-                  ? "text-[14px] text-[#303030] font-normal"
-                  : "text-[14px] text-gray-400"
-              }`}
+        {/* Subject */}
+        <div>
+          <label className="text-[14px] sm:text-[16px] font-medium mb-1 block">
+            Subject
+          </label>
+
+          <div className="relative">
+            <button
+              onClick={() => {
+                setIsSubjectOpen(!isSubjectOpen);
+                setIsGradeOpen(false);
+              }}
+              className="w-full h-[52px] sm:h-[57px] px-3 border rounded-lg flex items-center justify-between"
             >
-              {selectedSubject || "Select subject"}
-            </span>
-            <img
-              src={arr}
-              alt="dropdown"
-              className={`transition-transform duration-200 ${
-                isSubjectOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
+              <span
+                className={`text-[14px] ${selectedSubject ? "text-black" : "text-gray-400"}`}
+              >
+                {selectedSubject || "Select subject"}
+              </span>
 
-          {isSubjectOpen && (
-            <div className="absolute z-10 mt-2 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
-              {subjects.map((subject) => (
-                <div
-                  key={subject}
-                  onClick={() => handleSelect("subject", subject)}
-                  className="px-4 py-3 text-[14px] font-normal cursor-pointer hover:bg-[#EFF6FF]"
-                >
-                  {subject}
-                </div>
-              ))}
-            </div>
-          )}
+              <img
+                src={arr}
+                className={`w-4 h-4 transition-transform ${isSubjectOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {isSubjectOpen && (
+              <div className="absolute z-20 mt-2 w-full bg-white border rounded-lg shadow-md">
+                {subjects.map((subject) => (
+                  <div
+                    key={subject}
+                    onClick={() => handleSelect("subject", subject)}
+                    className="px-4 py-3 text-[14px] cursor-pointer hover:bg-blue-50"
+                  >
+                    {subject}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="p-6 -mt-8 ml-1">
-        <h5 className="font-medium text-[16px] text-[#303030]">
-          Homework Title
-        </h5>
 
-        <input
-          type="text"
-          placeholder="E.g..., Practice Counting Numbers"
-          className="w-[336px] h-[57px] rounded-[8px] border-[1px] border-[#0000001F] mt-2 font-normal text-[#303030] pl-3 -ml-0.5"
-        />
-      </div>
-      <div className="p-6 -mt-8 ml-2">
-        <h5 className="font-medium text-[16px] text-[#303030]">Instructions</h5>
-
-        <input
-          type="text"
-          placeholder="E.g., Count the apples in the pic..."
-          className="w-[336px] h-[57px] rounded-[8px] border-[1px] border-[#0000001F] mt-2 font-normal text-[#303030] pl-3 -ml-1"
-        />
-      </div>
-
-      <div className="p-6 -mt-8 ml-2">
-        <h5 className="font-medium text-[16px] text-[#303030]">Due Date</h5>
-
-        <div className="relative">
-          {/* Visible input */}
+        {/* Title */}
+        <div>
+          <label className="text-[14px] sm:text-[16px] font-medium mb-1 block">
+            Homework Title
+          </label>
           <input
             type="text"
-            readOnly
-            value={
-              selectedDate
-                ? selectedDate.toLocaleDateString("en-GB")
-                : "Select date"
-            }
-            placeholder="Select date"
-            onClick={() => setIsOpen(true)}
-            className="w-[336px] h-[57px] rounded-[8px] border-[1px] border-[#0000001F] mt-2 font-normal text-[#303030] pl-3 cursor-pointer -ml-1"
+            placeholder="E.g..., Practice Counting Numbers"
+            className="w-full h-[52px] sm:h-[57px] border rounded-lg px-3 text-[14px]"
           />
-
-          {/* Calendar icon */}
-          <img
-            src={cal}
-            alt="calendar"
-            onClick={() => setIsOpen(true)}
-            className="absolute left-[90%] bottom-[30%] cursor-pointer"
-          />
-
-          {/* React DatePicker */}
-          {isOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
-              <div className="bg-white rounded-xl p-4 shadow-lg">
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => {
-                    setSelectedDate(date);
-                    setIsOpen(false);
-                  }}
-                  inline
-                  showPopperArrow={false}
-                  minDate={new Date("2026-01-01")}
-                  maxDate={new Date("2026-12-31")}
-                  locale="en-GB"
-                />
-                {/* Optional close button */}
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="mt-2 px-4 py-2 bg-[#3B82F6] text-white rounded-md w-full"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
-      <div className="w-[336px] flex justify-between ml-7 mb-80">
-        <h6 className="font-medium text-[16px] text-black">Notify Parents</h6>
-        <img
-          src={isOn ? off : on}
-          alt="switch"
-          onClick={handleToggle}
-          className="w-12 h-12 cursor-pointer transition-all duration-300"
-        />
+
+        {/* Instructions */}
+        <div>
+          <label className="text-[14px] sm:text-[16px] font-medium mb-1 block">
+            Instructions
+          </label>
+          <input
+            type="text"
+            placeholder="E.g., Count the apples..."
+            className="w-full h-[52px] sm:h-[57px] border rounded-lg px-3 text-[14px]"
+          />
+        </div>
+
+        {/* Date */}
+        <div>
+          <label className="text-[14px] sm:text-[16px] font-medium mb-1 block">
+            Due Date
+          </label>
+
+          <div className="relative">
+            <input
+              readOnly
+              value={
+                selectedDate
+                  ? selectedDate.toLocaleDateString("en-GB")
+                  : "Select date"
+              }
+              onClick={() => setIsOpen(true)}
+              className="w-full h-[52px] sm:h-[57px] border rounded-lg px-3 text-[14px] cursor-pointer"
+            />
+
+            <img
+              src={cal}
+              onClick={() => setIsOpen(true)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer"
+            />
+
+            {isOpen && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
+                <div className="bg-white rounded-xl p-4">
+                  <DatePicker
+                    selected={selectedDate}
+                    onChange={(date) => {
+                      setSelectedDate(date);
+                      setIsOpen(false);
+                    }}
+                    inline
+                    minDate={new Date("2026-01-01")}
+                    maxDate={new Date("2026-12-31")}
+                    locale="en-GB"
+                  />
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="mt-2 w-full bg-blue-500 text-white py-2 rounded-md"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Toggle */}
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-[14px] sm:text-[16px] font-medium">
+            Notify Parents
+          </p>
+
+          <img
+            src={isOn ? off : on}
+            onClick={handleToggle}
+            className="w-10 h-10 sm:w-12 sm:h-12 cursor-pointer"
+          />
+        </div>
       </div>
     </div>
   );
