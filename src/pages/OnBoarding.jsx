@@ -66,7 +66,7 @@ const OnBoarding = () => {
         </div>
 
         {/* CENTER CONTENT (MOVED DOWN) */}
-        <div className="flex flex-col items-center text-center gap-4 px-5 mt-[64vh] sm:mt-[28vh]">
+        <div className="flex flex-col items-center text-center gap-4 px-14 mt-[64vh] sm:mt-[28vh]">
           <h2 className="font-bold text-lg text-white">
             {slides[currentSlide].title}
           </h2>

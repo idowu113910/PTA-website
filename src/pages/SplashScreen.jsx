@@ -10,16 +10,14 @@ const SplashScreen = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // start animation immediately on page load
     setAnimate(true);
-    // reveal center AFTER animation finishes
     const timer = setTimeout(() => {
       setShowCenter(true);
-    }, 1000); // match animation duration
+    }, 1000);
 
     const navigationTimer = setTimeout(() => {
       navigate("/onboarding");
-    }, 3000); // 3 seconds total time on splash screen
+    }, 3000);
 
     return () => {
       clearTimeout(timer);
@@ -28,36 +26,36 @@ const SplashScreen = () => {
   }, []);
 
   return (
-    <div className="relative w-screen h-screen  bg-white">
-      <div className="relative w-full h-full">
-        {/* Center image (hidden initially) */}
+    <div className="relative w-screen h-screen bg-white overflow-hidden">
+      <div className="relative w-full h-full overflow-hidden">
+        {/* Center logo */}
         <img
           src={cn}
           alt="Connect Ed Logo"
           className={`absolute top-[45%] left-[45%] -translate-x-1/2 -translate-y-1/2 z-10
-          transition-opacity duration-500 delay-400
-          ${showCenter ? "opacity-100" : "opacity-0"}
-        `}
+            transition-opacity duration-500 delay-400
+            ${showCenter ? "opacity-100" : "opacity-0"}
+          `}
         />
 
-        {/* Yellow circle — starts center, moves to TOP RIGHT */}
+        {/* Yellow circle — moves straight UP */}
         <img
           src={yellow}
           alt=""
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-          transition-all duration-1000 ease-out
-          ${animate ? "!translate-x-[10%] !-translate-y-[135%]" : ""}
-        `}
+    transition-all duration-1000 ease-out
+    ${animate ? "!translate-x-[10%] !-translate-y-[175%]" : ""}
+  `}
         />
 
-        {/* Blue circle — starts center, moves to BOTTOM LEFT */}
+        {/* Blue circle — moves further DOWN and off screen edge */}
         <img
           src={blue}
           alt=""
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-          transition-all duration-1000 ease-out
-          ${animate ? "!-translate-x-[100%] !translate-y-[30%]" : ""}
-        `}
+    transition-all duration-1000 ease-out
+    ${animate ? "!-translate-x-[130%] !translate-y-[60%]" : ""}
+  `}
         />
       </div>
     </div>
