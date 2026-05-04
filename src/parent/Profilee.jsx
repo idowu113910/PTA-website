@@ -44,7 +44,6 @@ const Grade = () => {
   const [isClosing, setIsClosing] = useState(false);
 
   // ── Profile image ────────────────────────────────────────────────
-  const [profileImage, setProfileImage] = useState(ed);
 
   // ── Edit-profile temp state — initialised from context ──────────
   const [tempFullName, setTempFullName] = useState("");
@@ -84,6 +83,7 @@ const Grade = () => {
   const [phoneNum, setPhoneNum] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [phoneToast, setPhoneToast] = useState("");
+  const { profileImage, updateProfileImage } = useUser();
 
   // Lock body scroll when sheet is open
   useEffect(() => {
@@ -93,11 +93,15 @@ const Grade = () => {
     };
   }, [showScreen]);
 
-  // ── Handlers ─────────────────────────────────────────────────────
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    setProfileImage(URL.createObjectURL(file));
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateProfileImage(reader.result); // base64 string — survives logout
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleClose = () => {
@@ -601,7 +605,7 @@ const Grade = () => {
         {/* Avatar + name row */}
         <div className="flex items-center gap-4 mb-6">
           <img
-            src={ed}
+            src={profileImage || ed}
             alt=""
             className="w-[55px] h-[55px] rounded-full object-cover flex-shrink-0"
           />

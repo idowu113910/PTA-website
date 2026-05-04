@@ -27,6 +27,8 @@ const HomePage = () => {
 
   const { fullName, grade, room, teacherName } = useUser();
 
+  const { profileImage } = useUser();
+
   const termYears = [
     "Term 1 2024/2025 Academic Year",
     "Term 2 2024/2025 Academic Year",
@@ -219,7 +221,11 @@ const HomePage = () => {
           {/* Student Card */}
           <div className="w-full rounded-[9px] py-4 px-4 bg-[#FF7B17]">
             <div className="flex justify-between items-start">
-              <img src={div} alt="" className="w-10 h-10" />
+              <img
+                src={profileImage || div}
+                alt="profile"
+                className="w-10 h-10 object-cover rounded-full"
+              />
               <img src={grad} alt="" className="w-10 h-10" />
             </div>
             <p className="text-white font-black text-[24px] mt-2">

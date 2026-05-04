@@ -21,6 +21,9 @@ export function UserProvider({ children }) {
   const [teacherName, setTeacherName] = useState(
     localStorage.getItem("teacherName") || "",
   );
+  const [profileImage, setProfileImage] = useState(
+    localStorage.getItem("profileImage") || "",
+  );
 
   function updateFullName(name) {
     setFullName(name);
@@ -62,6 +65,11 @@ export function UserProvider({ children }) {
     localStorage.setItem("teacherName", val);
   }
 
+  function updateProfileImage(imageUrl) {
+    setProfileImage(imageUrl);
+    localStorage.setItem("profileImage", imageUrl);
+  }
+
   function saveOnboardingData({
     fullName,
     workEmail,
@@ -95,6 +103,8 @@ export function UserProvider({ children }) {
         updateRoom,
         teacherName,
         updateTeacherName,
+        profileImage,
+        updateProfileImage,
         saveOnboardingData,
       }}
     >
