@@ -88,6 +88,8 @@ const HomePaget = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
 
+  const { profileImage } = useUser();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -408,7 +410,11 @@ const HomePaget = () => {
           {/* Header */}
           <div className="flex justify-between items-center px-5 pt-6">
             <div className="flex gap-3 items-center">
-              <img src={edith} alt="" className="w-10 h-10 flex-shrink-0" />
+              <img
+                src={profileImage || edith}
+                alt="profile"
+                className="w-10 h-10 flex-shrink-0 rounded-full object-cover"
+              />
               <div>
                 <p className="text-[13px]">Welcome,</p>
                 <p className="text-[15px] font-semibold leading-tight">

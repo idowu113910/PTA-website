@@ -15,34 +15,34 @@ import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
 
 const Grade = () => {
-  // ── useUser MUST be first ────────────────────────────────────────
-  const { fullName, updateFullName, email, updateEmail } = useUser();
+  const {
+    fullName,
+    updateFullName,
+    email,
+    updateEmail,
+    profileImage,
+    updateProfileImage,
+  } = useUser();
 
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const codeRef = useRef(null);
 
-  // ── Screen toggles ───────────────────────────────────────────────
   const [showTeacherProfile, setShowTeacherProfile] = useState(false);
   const [showAppPreference, setShowAppPreference] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [hideBackdrop, setHideBackdrop] = useState(false);
 
-  // ── Profile image ────────────────────────────────────────────────
-  const [profileImage, setProfileImage] = useState(ed);
-
-  // ── Edit-profile temp values — synced from context via useEffect ─
   const [tempFullName, setTempFullName] = useState("");
   const [tempEmail, setTempEmail] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
-  const [hideBackdrop, setHideBackdrop] = useState(false);
 
   useEffect(() => {
     setTempFullName(fullName || "");
     setTempEmail(email || "");
   }, [fullName, email]);
 
-  // ── Inline field editors ─────────────────────────────────────────
   const [genderValue, setGenderValue] = useState("Female");
   const [tempGender, setTempGender] = useState("Female");
   const [isEditingGender, setIsEditingGender] = useState(false);
@@ -55,12 +55,10 @@ const Grade = () => {
   const [tempAge, setTempAge] = useState("12");
   const [isEditingAge, setIsEditingAge] = useState(false);
 
-  // ── App preference toggles ───────────────────────────────────────
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   const [SwitchOn, setSwitchOn] = useState(false);
   const [SwitchAuto, setSwitchAuto] = useState(false);
 
-  // ── Mobile number ────────────────────────────────────────────────
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [savedCode, setSavedCode] = useState("+234");
   const [savedNumber, setSavedNumber] = useState("703 543 2234");
@@ -69,16 +67,20 @@ const Grade = () => {
   const [phoneError, setPhoneError] = useState("");
   const [phoneToast, setPhoneToast] = useState("");
 
-  // ── Handlers ─────────────────────────────────────────────────────
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    setProfileImage(URL.createObjectURL(file));
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        updateProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleClose = () => {
-    setHideBackdrop(true); // backdrop gone instantly
-    setIsClosing(true); // sheet starts sliding down
+    setHideBackdrop(true);
+    setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
       setHideBackdrop(false);
@@ -86,7 +88,6 @@ const Grade = () => {
     }, 1400);
   };
 
-  // Phone editing
   function openEdit() {
     setAreaCode(savedCode);
     setPhoneNum(savedNumber);
@@ -99,13 +100,11 @@ const Grade = () => {
     setIsEditingPhone(false);
     setPhoneError("");
   }
-
   function handleAreaCodeChange(e) {
     let val = e.target.value;
     if (!val.startsWith("+")) val = "+" + val.replace(/\+/g, "");
     setAreaCode(val);
   }
-
   function validate() {
     if (!areaCode.startsWith("+") || areaCode.length < 2) {
       setPhoneError("Area code must start with + (e.g. +234)");
@@ -118,7 +117,6 @@ const Grade = () => {
     setPhoneError("");
     return true;
   }
-
   function handlePhoneSave() {
     if (!validate()) return;
     setSavedCode(areaCode.trim());
@@ -127,13 +125,11 @@ const Grade = () => {
     setPhoneToast("Number saved successfully");
     setTimeout(() => setPhoneToast(""), 3000);
   }
-
   function handleKeyDown(e) {
     if (e.key === "Enter") handlePhoneSave();
     if (e.key === "Escape") closeEdit();
   }
 
-  // ── Reusable sub-components ───────────────────────────────────────
   const MenuRow = ({ icon, label, onClick }) => (
     <div
       onClick={onClick}
@@ -175,9 +171,7 @@ const Grade = () => {
     </div>
   );
 
-  // ────────────────────────────────────────────────────────────────
-  // App Preference Screen
-  // ────────────────────────────────────────────────────────────────
+  // ── App Preference Screen ────────────────────────────────────────
   if (showAppPreference) {
     return (
       <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
@@ -208,17 +202,15 @@ const Grade = () => {
             </div>
           ))}
         </div>
+        <BottomNavigation />
       </div>
     );
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // Edit Profile Screen
-  // ────────────────────────────────────────────────────────────────
+  // ── Edit Profile Screen ──────────────────────────────────────────
   if (showTeacherProfile) {
     return (
       <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-32">
-        {/* Header */}
         <div className="flex items-center gap-4 px-5 pt-6 pb-2">
           <button onClick={() => setShowTeacherProfile(false)}>
             <img src={back} alt="back" className="w-6 h-6" />
@@ -236,7 +228,7 @@ const Grade = () => {
             className="hidden"
           />
           <img
-            src={profileImage}
+            src={profileImage || ed}
             alt="profile"
             className="w-[75px] h-[75px] object-cover rounded-full"
           />
@@ -252,7 +244,6 @@ const Grade = () => {
           {fullName}
         </p>
 
-        {/* Fields */}
         <div className="px-5 mt-4 flex flex-col gap-4">
           {/* Full Name */}
           <div>
@@ -446,7 +437,7 @@ const Grade = () => {
           </div>
         </div>
 
-        {/* Save Changes — pinned bottom */}
+        {/* Save Changes */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-5 pb-6 pt-4 z-10">
           <button
             disabled={!hasChanges}
@@ -463,22 +454,21 @@ const Grade = () => {
             Save Changes
           </button>
         </div>
+
+    
       </div>
     );
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // Main Profile Screen
-  // ────────────────────────────────────────────────────────────────
+  // ── Main Profile Screen ──────────────────────────────────────────
   return (
     <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
       <div className="px-5 pt-6">
         <h1 className="font-bold text-[20px] text-black mb-6">Profile</h1>
 
-        {/* Avatar + name */}
         <div className="flex items-center gap-4 mb-6">
           <img
-            src={ed}
+            src={profileImage || ed}
             alt=""
             className="w-[55px] h-[55px] rounded-full object-cover flex-shrink-0"
           />
@@ -490,7 +480,6 @@ const Grade = () => {
           </div>
         </div>
 
-        {/* Menu rows */}
         <MenuRow
           icon={tpi}
           label="Teacher Profile Information"
@@ -504,7 +493,6 @@ const Grade = () => {
         <MenuRow icon={hs} label="Help and Support" onClick={() => {}} />
         <MenuRow icon={iaf} label="Invite a Friend" onClick={() => {}} />
 
-        {/* Logout */}
         <div
           onClick={() => setShowLogoutModal(true)}
           className="flex items-center gap-4 mt-5 py-2 cursor-pointer"
@@ -515,60 +503,61 @@ const Grade = () => {
       </div>
 
       {/* Logout Modal */}
-      {/* Logout Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 flex items-end justify-center z-20">
-          {/* Backdrop — hidden instantly on close */}
           {!hideBackdrop && (
             <div
               className="absolute inset-0 bg-black/40"
               onClick={handleClose}
             />
           )}
-
-          {/* Sheet */}
           <div
-            className={`relative bg-white w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-8 shadow-2xl overflow-y-auto max-h-[90vh] ${
+            className={`relative bg-white w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-8 shadow-2xl overflow-y-auto max-h-[90vh] mb-[65px] ${
               isClosing ? "animate-slide-down" : "animate-slide-up"
             }`}
           >
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
             <h2 className="text-[20px] font-bold text-[#E8341A] text-center mb-4 border-b border-[#EEEEEE] pb-4">
               Logout
             </h2>
             <p className="text-[16px] font-medium text-[#616161] text-center mb-6">
               Are you sure you want to logout?
             </p>
-            <button
-              onClick={() => {
-                setShowLogoutModal(false);
-                navigate("/role");
-              }}
-              className="w-full h-[50px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold mb-3"
-            >
-              Yes, Logout
-            </button>
-            <button
-              onClick={handleClose}
-              className="w-full h-[50px] border border-[#FFDDDD] rounded-[10px] text-[#E8341A] text-[18px] font-medium bg-[#FFF8F8]"
-            >
-              Cancel
-            </button>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  navigate("/role");
+                }}
+                className="w-full h-[52px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold active:opacity-80"
+              >
+                Yes, Logout
+              </button>
+              <button
+                onClick={handleClose}
+                className="w-full h-[52px] border border-[#FFDDDD] rounded-[10px] text-[#E8341A] text-[18px] font-medium bg-[#FFF8F8] active:opacity-80"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       <style>{`
-  @keyframes slide-up {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
-  @keyframes slide-down {
-    from { transform: translateY(0); }
-    to   { transform: translateY(100%); }
-  }
-  .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
-  .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
-`}</style>
+        @keyframes slide-up {
+          from { transform: translateY(100%); }
+          to   { transform: translateY(0); }
+        }
+        @keyframes slide-down {
+          from { transform: translateY(0); }
+          to   { transform: translateY(100%); }
+        }
+        .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
+        .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
+      `}</style>
+
+      <BottomNavigation />
     </div>
   );
 };
