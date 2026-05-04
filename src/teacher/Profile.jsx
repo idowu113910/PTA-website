@@ -35,6 +35,7 @@ const Grade = () => {
   const [tempFullName, setTempFullName] = useState("");
   const [tempEmail, setTempEmail] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
+  const [hideBackdrop, setHideBackdrop] = useState(false);
 
   useEffect(() => {
     setTempFullName(fullName || "");
@@ -75,13 +76,14 @@ const Grade = () => {
     setProfileImage(URL.createObjectURL(file));
   };
 
-  // Logout sheet — pure React state, no DOM manipulation
   const handleClose = () => {
-    setIsClosing(true);
+    setHideBackdrop(true); // backdrop gone instantly
+    setIsClosing(true); // sheet starts sliding down
     setTimeout(() => {
       setIsClosing(false);
+      setHideBackdrop(false);
       setShowLogoutModal(false);
-    }, 380);
+    }, 1400);
   };
 
   // Phone editing
@@ -513,18 +515,27 @@ const Grade = () => {
       </div>
 
       {/* Logout Modal */}
+      {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 flex items-end justify-center z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
+        <div className="fixed inset-0 flex items-end justify-center z-20">
+          {/* Backdrop — hidden instantly on close */}
+          {!hideBackdrop && (
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={handleClose}
+            />
+          )}
+
+          {/* Sheet */}
           <div
-            className={`relative bg-white w-full max-w-[430px] rounded-t-[20px] px-6 pt-8 pb-10 shadow-2xl ${
+            className={`relative bg-white w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-8 shadow-2xl overflow-y-auto max-h-[90vh] ${
               isClosing ? "animate-slide-down" : "animate-slide-up"
             }`}
           >
-            <h2 className="text-[20px] font-bold text-[#E8341A] text-center mb-5 border-b border-[#EEEEEE] pb-5">
+            <h2 className="text-[20px] font-bold text-[#E8341A] text-center mb-4 border-b border-[#EEEEEE] pb-4">
               Logout
             </h2>
-            <p className="text-[16px] font-medium text-[#616161] text-center mb-8">
+            <p className="text-[16px] font-medium text-[#616161] text-center mb-6">
               Are you sure you want to logout?
             </p>
             <button
@@ -532,7 +543,7 @@ const Grade = () => {
                 setShowLogoutModal(false);
                 navigate("/role");
               }}
-              className="w-full h-[50px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold mb-4"
+              className="w-full h-[50px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold mb-3"
             >
               Yes, Logout
             </button>
@@ -547,19 +558,17 @@ const Grade = () => {
       )}
 
       <style>{`
-        @keyframes slide-up {
-          from { transform: translateY(100%); }
-          to   { transform: translateY(0); }
-        }
-        @keyframes slide-down {
-          from { transform: translateY(0); }
-          to   { transform: translateY(100%); }
-        }
-        .animate-slide-up   { animation: slide-up   0.4s cubic-bezier(0.32,0.72,0,1); }
-        .animate-slide-down { animation: slide-down 0.35s cubic-bezier(0.32,0.72,0,1) forwards; }
-      `}</style>
-
-      <BottomNavigation />
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  @keyframes slide-down {
+    from { transform: translateY(0); }
+    to   { transform: translateY(100%); }
+  }
+  .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
+  .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
+`}</style>
     </div>
   );
 };

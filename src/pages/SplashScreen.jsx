@@ -13,7 +13,7 @@ const SplashScreen = () => {
     setAnimate(true);
     const timer = setTimeout(() => {
       setShowCenter(true);
-    }, 1000);
+    }, 5000);
 
     const navigationTimer = setTimeout(() => {
       navigate("/onboarding");

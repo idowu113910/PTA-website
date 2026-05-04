@@ -304,10 +304,9 @@ const Calendarr = () => {
       {/* ── Add Reminder Bottom Sheet ───────────────────────────── */}
       <div
         className={`fixed left-0 bottom-0 w-full max-w-[430px] bg-white rounded-t-[24px] shadow-xl z-30
-          transition-transform duration-300 ease-in-out
-          ${showScreen ? "translate-y-0" : "translate-y-full"}`}
+    transition-transform duration-300 ease-in-out flex flex-col`}
         style={{
-          height: "92vh",
+          height: "min(730px, 90vh)",
           left: "50%",
           transform: showScreen
             ? "translateX(-50%) translateY(0)"
@@ -315,20 +314,17 @@ const Calendarr = () => {
         }}
       >
         {/* Sheet Header */}
-        <div className="flex items-center justify-between px-5 pt-6 pb-3 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 pt-8 pb-3 flex-shrink-0">
           <h1 className="text-2xl font-bold">Add Reminder</h1>
           <button onClick={() => setShowScreen(false)} aria-label="Close">
             <img src={cnc} alt="close" className="w-8 h-8" />
           </button>
         </div>
 
-        {/* Sheet Scrollable Body */}
-        <div
-          className="overflow-y-auto px-5 pb-8"
-          style={{ height: "calc(92vh - 72px)" }}
-        >
+        {/* Sheet Body */}
+        <div className="flex-1 overflow-hidden px-5">
           {/* Task Title */}
-          <div className="mt-2">
+          <div className="mt-4">
             <h1 className="font-medium text-[16px] text-black mb-2">
               Task Title
             </h1>
@@ -418,7 +414,7 @@ const Calendarr = () => {
           </div>
 
           {/* Repeat */}
-          <div className="mt-4 mb-6">
+          <div className="mt-4 mb-90">
             <h1 className="font-medium text-[16px] text-black mb-2">Repeat</h1>
             <div className="relative w-full">
               <input
@@ -435,15 +431,10 @@ const Calendarr = () => {
               />
             </div>
           </div>
-
-          {/* Save Button */}
-          <button
-            className="w-full h-[50px] rounded-[10px] bg-[#FF7B17] text-white font-bold text-[18px] mb-4"
-            onClick={() => setShowScreen(false)}
-          >
-            Save Reminder
-          </button>
         </div>
+
+        {/* Bottom spacer */}
+        <div className="h-[40px] flex-shrink-0" />
       </div>
     </div>
   );

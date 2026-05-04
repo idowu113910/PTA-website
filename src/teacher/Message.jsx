@@ -173,9 +173,9 @@ const Assignment = ({ setScreen }) => {
       {/* FAB */}
       <button
         aria-label="New conversation"
-        className="absolute bottom-[72px] right-5 w-[52px] h-[52px] rounded-full bg-[#FF7B17] flex items-center justify-center shadow-md"
+        className="absolute bottom-[72px] right-5"
       >
-        <img src={pl} alt="new" className="w-5 h-5" />
+        <img src={pl} alt="new" className="w-[51px] h-[51px]" />
       </button>
 
       <BottomNavigation />

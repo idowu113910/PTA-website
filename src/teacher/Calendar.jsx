@@ -15,8 +15,9 @@ import day from "../assets/day.svg";
 import pl from "../assets/plus sign.svg";
 import cal from "../assets/calendar3.svg";
 import arr from "../assets/arr down.svg";
-import cnc from "../assets/cancel back btn.svg";
+import cnc from "../assets/cnc.svg";
 import cl from "../assets/clock.svg";
+import cncc from "../assets/event cnc.svg"
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
@@ -68,6 +69,7 @@ const Notifications = () => {
   const [isEventTypeOpen, setIsEventTypeOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showScreen, setShowScreen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const today = new Date();
   const [current, setCurrent] = useState({
@@ -86,6 +88,25 @@ const Notifications = () => {
       document.body.style.overflow = "";
     };
   }, [showScreen]);
+
+  useEffect(() => {
+    if (showScreen) {
+      // Small delay lets the element mount before animating
+      const t = setTimeout(() => setIsVisible(true), 10);
+      return () => clearTimeout(t);
+    } else {
+      setIsVisible(false);
+    }
+  }, [showScreen]);
+
+  const handleClose = () => {
+    setIsVisible(false); // slide out
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setShowScreen(false);
+    }, 300); // match duration
+  };
 
   const formatTime = (t) =>
     `${t.hour}:${String(t.min).padStart(2, "0")}${t.period}`;
@@ -111,14 +132,6 @@ const Notifications = () => {
   const handleSelectGender = (gender) => {
     setSelectedGender(gender);
     setIsGenderOpen(false);
-  };
-
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      setShowScreen(false);
-    }, 300);
   };
 
   const isEventFormValid =
@@ -428,6 +441,7 @@ const Notifications = () => {
       <BottomNavigation />
 
       {/* ── ADD NEW EVENT PANEL ─────────────────────────────────── */}
+
       {showScreen && (
         <>
           {/* Backdrop */}
@@ -438,8 +452,8 @@ const Notifications = () => {
 
           {/* Sheet */}
           <div
-            className={`fixed inset-x-0 bottom-0 top-[4%] bg-white rounded-t-[20px] z-50 flex flex-col transition-transform duration-300 ${
-              isClosing ? "translate-y-full" : "translate-y-0"
+            className={`fixed inset-x-0 bottom-0 top-[4%] bg-white rounded-t-[20px] z-50 flex flex-col transition-transform duration-300 ease-out ${
+              isVisible && !isClosing ? "translate-y-0" : "translate-y-full"
             }`}
           >
             {/* Scrollable body */}
@@ -448,7 +462,7 @@ const Notifications = () => {
               <div className="flex items-center justify-between px-5 pt-6 pb-2">
                 <h1 className="text-2xl font-bold">Add New Event</h1>
                 <button onClick={handleClose} className="p-1">
-                  <img src={cnc} alt="close" className="w-8 h-8" />
+                  <img src={cncc} alt="close" className="w-8 h-8" />
                 </button>
               </div>
 
@@ -651,9 +665,9 @@ const Notifications = () => {
                     <img src={kids} alt="" className="w-full object-cover" />
                     <button
                       onClick={() => setShowEventCard(false)}
-                      className="absolute top-2 right-2 bg-white rounded-full w-7 h-7 flex items-center justify-center shadow"
+                      className="absolute top-2 right-2"
                     >
-                      <img src={cnc} alt="close" className="w-5 h-5" />
+                      <img src={cnc} alt="close" className="w-[35px] h-[35px]" />
                     </button>
                   </div>
                   <div className="p-4 space-y-3">

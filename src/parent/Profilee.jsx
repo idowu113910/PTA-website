@@ -61,6 +61,7 @@ const Grade = () => {
   const [genderValue, setGenderValue] = useState("Female");
   const [tempGender, setTempGender] = useState("Female");
   const [isEditingGender, setIsEditingGender] = useState(false);
+  const [hideBackdrop, setHideBackdrop] = useState(false);
 
   const [classValue, setClassValue] = useState("Grade 6, Room 201");
   const [tempClass, setTempClass] = useState("Grade 6, Room 201");
@@ -100,11 +101,13 @@ const Grade = () => {
   };
 
   const handleClose = () => {
-    setIsClosing(true);
+    setHideBackdrop(true); // backdrop gone instantly
+    setIsClosing(true); // sheet starts sliding down
     setTimeout(() => {
       setIsClosing(false);
+      setHideBackdrop(false);
       setShowLogoutModal(false);
-    }, 350);
+    }, 1400);
   };
 
   function openEdit() {
@@ -640,51 +643,64 @@ const Grade = () => {
 
       {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 flex items-end justify-center z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
+        <div className="fixed inset-0 flex items-end justify-center z-20">
+          {/* Backdrop — hidden instantly on close */}
+          {!hideBackdrop && (
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={handleClose}
+            />
+          )}
+
+          {/* Sheet — pushed above bottom nav */}
           <div
-            className={`relative bg-white w-full max-w-[430px] rounded-t-[20px] px-6 pt-8 pb-10 shadow-2xl ${
+            className={`relative bg-white w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-6 shadow-2xl overflow-y-auto max-h-[85vh] mb-[65px] ${
               isClosing ? "animate-slide-down" : "animate-slide-up"
             }`}
           >
-            <h2 className="text-[20px] font-bold text-[#E8341A] text-center mb-5 border-b border-[#EEEEEE] pb-5">
+            {/* Drag handle */}
+            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
+
+            <h2 className="text-[20px] font-bold text-[#E8341A] text-center mb-4 border-b border-[#EEEEEE] pb-4">
               Logout
             </h2>
-            <p className="text-[16px] font-medium text-[#616161] text-center mb-8">
+            <p className="text-[16px] font-medium text-[#616161] text-center mb-6">
               Are you sure you want to logout?
             </p>
-            <button
-              onClick={() => {
-                setShowLogoutModal(false);
-                navigate("/role");
-              }}
-              className="w-full h-[50px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold mb-4"
-            >
-              Yes, Logout
-            </button>
-            <button
-              onClick={handleClose}
-              className="w-full h-[50px] border border-[#FFDDDD] rounded-[10px] text-[#E8341A] text-[18px] font-medium bg-[#FFF8F8]"
-            >
-              Cancel
-            </button>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setShowLogoutModal(false);
+                  navigate("/role");
+                }}
+                className="w-full h-[52px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold active:opacity-80"
+              >
+                Yes, Logout
+              </button>
+              <button
+                onClick={handleClose}
+                className="w-full h-[52px] border border-[#FFDDDD] rounded-[10px] text-[#E8341A] text-[18px] font-medium bg-[#FFF8F8] active:opacity-80"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       <style>{`
-        @keyframes slide-up {
-          from { transform: translateY(100%); }
-          to   { transform: translateY(0);    }
-        }
-        @keyframes slide-down {
-          from { transform: translateY(0);    }
-          to   { transform: translateY(100%); }
-        }
-        .animate-slide-up   { animation: slide-up   0.4s cubic-bezier(0.32,0.72,0,1);          }
-        .animate-slide-down { animation: slide-down 0.35s cubic-bezier(0.32,0.72,0,1) forwards; }
-      `}</style>
-
+  @keyframes slide-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  @keyframes slide-down {
+    from { transform: translateY(0); }
+    to   { transform: translateY(100%); }
+  }
+  .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
+  .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
+`}</style>
       <BottomNavigate />
     </div>
   );

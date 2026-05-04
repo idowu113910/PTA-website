@@ -12,6 +12,7 @@ import cm from "../assets/cm parent.svg";
 import rsp from "../assets/rsp parent.svg";
 import rsb from "../assets/rsb parent.svg";
 import dv from "../assets/divine parent.svg";
+import cnc from "../assets/Grade cnc.svg"
 
 const Reportt = () => {
   const [activeTab, setActiveTab] = useState("academic");
@@ -276,7 +277,7 @@ const Reportt = () => {
               onClick={() => setSelectedSubject(null)}
               className="absolute top-4 right-4 w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-500 font-bold text-sm"
             >
-              ✕
+              <img src={cnc} alt="" />
             </button>
             <h2 className="font-bold text-[20px] text-black mb-5 mt-4">
               {selectedSubject.fullName}
