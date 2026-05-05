@@ -17,7 +17,7 @@ import cal from "../assets/calendar3.svg";
 import arr from "../assets/arr down.svg";
 import cnc from "../assets/cnc.svg";
 import cl from "../assets/clock.svg";
-import cncc from "../assets/event cnc.svg"
+import cncc from "../assets/event cnc.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
@@ -70,6 +70,7 @@ const Notifications = () => {
   const [showMore, setShowMore] = useState(false);
   const [showScreen, setShowScreen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [hideBackdrop, setHideBackdrop] = useState(false);
 
   const today = new Date();
   const [current, setCurrent] = useState({
@@ -100,12 +101,14 @@ const Notifications = () => {
   }, [showScreen]);
 
   const handleClose = () => {
-    setIsVisible(false); // slide out
+    setHideBackdrop(true); // screen visible instantly
+    setIsVisible(false);
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
+      setHideBackdrop(false);
       setShowScreen(false);
-    }, 300); // match duration
+    }, 300);
   };
 
   const formatTime = (t) =>
@@ -444,11 +447,13 @@ const Notifications = () => {
 
       {showScreen && (
         <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/40 z-40"
-            onClick={handleClose}
-          />
+          {/* Backdrop — hidden instantly on close */}
+          {!hideBackdrop && (
+            <div
+              className="fixed inset-0 bg-black/40 z-40"
+              onClick={handleClose}
+            />
+          )}
 
           {/* Sheet */}
           <div
@@ -667,7 +672,11 @@ const Notifications = () => {
                       onClick={() => setShowEventCard(false)}
                       className="absolute top-2 right-2"
                     >
-                      <img src={cnc} alt="close" className="w-[35px] h-[35px]" />
+                      <img
+                        src={cnc}
+                        alt="close"
+                        className="w-[35px] h-[35px]"
+                      />
                     </button>
                   </div>
                   <div className="p-4 space-y-3">
