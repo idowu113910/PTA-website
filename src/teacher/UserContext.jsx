@@ -21,8 +21,13 @@ export function UserProvider({ children }) {
   const [teacherName, setTeacherName] = useState(
     localStorage.getItem("teacherName") || "",
   );
+
+  // Load profile image per user using their email as key
+  const currentEmail = localStorage.getItem("userEmail") || "";
   const [profileImage, setProfileImage] = useState(
-    localStorage.getItem("profileImage") || "",
+    currentEmail
+      ? localStorage.getItem(`profileImage_${currentEmail}`) || ""
+      : "",
   );
 
   function updateFullName(name) {
@@ -66,8 +71,12 @@ export function UserProvider({ children }) {
   }
 
   function updateProfileImage(imageUrl) {
+    const userEmail = localStorage.getItem("userEmail") || "";
     setProfileImage(imageUrl);
-    localStorage.setItem("profileImage", imageUrl);
+    if (userEmail) {
+      // Save per user so different users don't share the same image
+      localStorage.setItem(`profileImage_${userEmail}`, imageUrl);
+    }
   }
 
   function saveOnboardingData({
@@ -82,6 +91,9 @@ export function UserProvider({ children }) {
     updateSchoolName(schoolName);
     updatePhoneNumber(phoneNumber);
     updateStudentCount(studentCount);
+    // Load this new user's profile image if they have one saved
+    const savedImage = localStorage.getItem(`profileImage_${workEmail}`) || "";
+    setProfileImage(savedImage);
   }
 
   return (
