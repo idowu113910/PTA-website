@@ -79,20 +79,15 @@ const Notifications = () => {
   });
   const [selected, setSelected] = useState(null);
 
+  // Only lock scroll when opening — unlock after animation in handleClose
   useEffect(() => {
     if (showScreen) {
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [showScreen]);
 
   useEffect(() => {
     if (showScreen) {
-      // Small delay lets the element mount before animating
       const t = setTimeout(() => setIsVisible(true), 10);
       return () => clearTimeout(t);
     } else {
@@ -101,13 +96,14 @@ const Notifications = () => {
   }, [showScreen]);
 
   const handleClose = () => {
-    setHideBackdrop(true); // screen visible instantly
+    setHideBackdrop(true);
     setIsVisible(false);
     setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
       setHideBackdrop(false);
       setShowScreen(false);
+      document.body.style.overflow = ""; // restore AFTER animation completes
     }, 300);
   };
 
@@ -174,7 +170,6 @@ const Notifications = () => {
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
-  // ── Reusable Event Card ──────────────────────────────────────────
   const EventCard = ({ icon, title, date, time, location, rightImg }) => (
     <div className="flex w-full rounded-[10px] py-4 px-3 bg-[#F1F0F0] mt-4 items-center gap-3">
       <img src={icon} alt="" className="w-8 h-8 flex-shrink-0" />
@@ -195,7 +190,6 @@ const Notifications = () => {
     </div>
   );
 
-  // ── Time Picker Dropdown ─────────────────────────────────────────
   const TimePicker = ({ label, time, setTime, pickerKey }) => (
     <div className="relative flex-1">
       <h2 className="font-medium text-[16px] text-[#303030]">{label}</h2>
@@ -268,7 +262,6 @@ const Notifications = () => {
     </div>
   );
 
-  // ── Show More / Upcoming Events ──────────────────────────────────
   if (showMore) {
     return (
       <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-6">
@@ -325,7 +318,6 @@ const Notifications = () => {
     );
   }
 
-  // ── Main Calendar View ───────────────────────────────────────────
   return (
     <div className="relative min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white">
       <h2 className="font-bold text-[20px] px-5 pt-5 pb-2">Calendar</h2>
@@ -443,8 +435,7 @@ const Notifications = () => {
 
       <BottomNavigation />
 
-      {/* ── ADD NEW EVENT PANEL ─────────────────────────────────── */}
-
+      {/* ADD NEW EVENT PANEL */}
       {showScreen && (
         <>
           {/* Backdrop — hidden instantly on close */}
@@ -647,7 +638,7 @@ const Notifications = () => {
               </div>
             </div>
 
-            {/* Save Button — pinned to bottom of sheet */}
+            {/* Save Button */}
             <div className="bg-white border-t border-[#E3E3E3] py-4 px-5">
               <button
                 onClick={() => setShowEventCard(true)}
