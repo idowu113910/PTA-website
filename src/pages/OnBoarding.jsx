@@ -48,9 +48,9 @@ const OnBoarding = () => {
   };
 
   return (
-    <div className="h-dvh w-screen overflow-hidden">
+    <div className="h-dvh w-full overflow-hidden">
       <div
-        className="relative w-screen h-dvh bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4"
+        className="relative w-full h-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4"
         style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
       >
         {/* TOP (Skip) */}
