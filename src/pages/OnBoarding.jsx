@@ -40,7 +40,7 @@ const OnBoarding = () => {
       image: family,
       title: "Monitor child's Growth",
       description:
-        "Easily track assignments, attendance, and grades to support your child’s success.",
+        "Easily track assignments, attendance, and grades to support your child's success.",
     },
     {
       image: woman,
@@ -79,7 +79,7 @@ const OnBoarding = () => {
       }}
     >
       <div
-        className="relative w-full h-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4 pt-6 pb-8"
+        className="safe-top safe-bottom relative w-full h-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4 pt-6 pb-8"
         style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
       >
         {/* TOP (Skip) */}
