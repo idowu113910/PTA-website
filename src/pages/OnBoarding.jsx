@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import boy from "../assets/BOY.jpg";
 import family from "../assets/FAMILY.png";
 import woman from "../assets/mama.jpg";
@@ -7,6 +7,27 @@ import { useNavigate } from "react-router-dom";
 const OnBoarding = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
+
+  // Fix for Safari (iOS/macOS) viewport height quirks.
+  // Safari resizes its chrome (address bar/toolbar) on scroll, which makes
+  // 100vh unreliable. We compute the real visible height in JS and store it
+  // as a CSS custom property, then use that as the primary source of truth,
+  // with 100dvh as a fallback for browsers that support it natively.
+  useEffect(() => {
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
+    };
+
+    setVH();
+    window.addEventListener("resize", setVH);
+    window.addEventListener("orientationchange", setVH);
+
+    return () => {
+      window.removeEventListener("resize", setVH);
+      window.removeEventListener("orientationchange", setVH);
+    };
+  }, []);
 
   const slides = [
     {
@@ -48,15 +69,19 @@ const OnBoarding = () => {
   };
 
   return (
-    <div className="relative w-full h-screen h-[100dvh] h-safari-fix overflow-hidden">
-      {/* Dedicated Background Layer */}
+    <div
+      className="w-full overflow-hidden select-none"
+      style={{
+        // Fallback chain: JS-computed height (most reliable on Safari) ->
+        // 100dvh (modern browsers) -> 100vh (last resort)
+        height: "calc(var(--vh, 1vh) * 100)",
+        minHeight: "100dvh",
+      }}
+    >
       <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-500 z-0"
+        className="relative w-full h-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4 pt-6 pb-8"
         style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
-      />
-
-      {/* Foreground Content Layer */}
-      <div className="relative z-10 w-full h-full flex flex-col justify-between px-4 pt-6 pb-8">
+      >
         {/* TOP (Skip) */}
         <div className="flex justify-end pt-2">
           {currentSlide < slides.length - 1 && (
@@ -96,7 +121,8 @@ const OnBoarding = () => {
         <div className="flex flex-col items-center gap-3 w-full shrink-0">
           <button
             onClick={handleNext}
-            className="w-full max-w-md bg-[#FF7B17] text-white rounded-lg py-3 font-bold text-base shadow-md active:scale-95 transition-transform cursor-pointer"
+            className="w-full max-w-md bg-[#FF7B17] text-white rounded-lg py-3 font-bold text-base shadow-md 
+            active:scale-95 transition-transform cursor-pointer"
           >
             {currentSlide === slides.length - 1 ? "Get Started" : "Next"}
           </button>
@@ -109,6 +135,7 @@ const OnBoarding = () => {
               Back
             </button>
           ) : (
+            /* Spacer to prevent layout shift when back button isn't visible */
             <div className="h-8" />
           )}
         </div>

@@ -1,28 +1,25 @@
 @import "tailwindcss";
 
-/* Ensure CSS custom properties / utilities handle iOS Safari fill-available */
-@supports (-webkit-touch-callout: none) {
-  .h-safari-fix {
-    height: -webkit-fill-available;
-  }
-  .min-h-safari-fix {
-    min-height: -webkit-fill-available;
-  }
-}
-
 html {
-  height: -webkit-fill-available;
+  height: 100%;
 }
 
 body,
 #root {
   width: 100%;
   height: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  min-height: -webkit-fill-available;
+  min-height: 100vh; /* broad fallback */
+  min-height: -webkit-fill-available; /* older iOS Safari fix */
+  min-height: 100dvh; /* modern, most accurate — wins last */
   margin: 0;
   padding: 0;
+}
+
+/* Only needed for older iOS Safari that doesn't support dvh */
+@supports (-webkit-touch-callout: none) {
+  html {
+    height: -webkit-fill-available;
+  }
 }
 
 /* Optional keyframes */
