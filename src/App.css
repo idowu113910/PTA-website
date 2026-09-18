@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Target Mobile Safari explicitly */
+@supports (-webkit-touch-callout: none) {
+  .min-h-safari {
+    min-height: -webkit-fill-available;
+  }
+}
+
 html,
 body,
 #root {
@@ -9,8 +16,14 @@ body,
   padding: 0;
 }
 
+html {
+  height: -webkit-fill-available;
+}
+
 body {
+  min-height: 100vh;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
 }
 
 @keyframes slideUp {

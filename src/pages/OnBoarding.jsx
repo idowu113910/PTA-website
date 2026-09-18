@@ -48,13 +48,13 @@ const OnBoarding = () => {
   };
 
   return (
-    <div className="h-dvh w-full overflow-hidden">
+    <div className="h-screen h-[100dvh] min-h-safari w-full overflow-hidden select-none">
       <div
-        className="relative w-full h-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4"
+        className="relative w-full h-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4 pt-6 pb-8"
         style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
       >
         {/* TOP (Skip) */}
-        <div className="flex justify-end">
+        <div className="flex justify-end pt-2">
           {currentSlide < slides.length - 1 && (
             <p
               onClick={handleSkip}
@@ -65,8 +65,8 @@ const OnBoarding = () => {
           )}
         </div>
 
-        {/* CENTER CONTENT (MOVED DOWN) */}
-        <div className="flex flex-col items-center text-center gap-4 px-14 mt-[64vh] sm:mt-[28vh]">
+        {/* CENTER CONTENT */}
+        <div className="flex flex-col items-center text-center gap-4 px-6 sm:px-14 mt-auto mb-6">
           <h2 className="font-bold text-lg text-white">
             {slides[currentSlide].title}
           </h2>
@@ -80,8 +80,8 @@ const OnBoarding = () => {
             {slides.map((_, index) => (
               <div
                 key={index}
-                className={`w-2 h-2 rounded-full ${
-                  index === currentSlide ? "bg-[#FF7B17]" : "bg-[#EEEEEE]"
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentSlide ? "bg-[#FF7B17] w-5" : "bg-[#EEEEEE]"
                 }`}
               />
             ))}
@@ -89,21 +89,24 @@ const OnBoarding = () => {
         </div>
 
         {/* BOTTOM BUTTONS */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-3 w-full shrink-0">
           <button
             onClick={handleNext}
-            className="w-full max-w-md bg-[#FF7B17] text-white rounded-lg py-3 font-bold text-base"
+            className="w-full max-w-md bg-[#FF7B17] text-white rounded-lg py-3 font-bold text-base shadow-md active:scale-95 transition-transform cursor-pointer"
           >
             {currentSlide === slides.length - 1 ? "Get Started" : "Next"}
           </button>
 
-          {currentSlide > 0 && (
+          {currentSlide > 0 ? (
             <button
               onClick={handleBack}
-              className="text-white font-semibold text-base"
+              className="text-white font-semibold text-base py-1 cursor-pointer"
             >
               Back
             </button>
+          ) : (
+            /* Spacer to prevent layout shift when back button isn't visible */
+            <div className="h-8" />
           )}
         </div>
       </div>
