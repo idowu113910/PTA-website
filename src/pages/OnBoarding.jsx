@@ -48,11 +48,15 @@ const OnBoarding = () => {
   };
 
   return (
-    <div className="h-screen h-[100dvh] min-h-safari w-full overflow-hidden select-none">
+    <div className="relative w-full h-screen h-[100dvh] h-safari-fix overflow-hidden">
+      {/* Dedicated Background Layer */}
       <div
-        className="relative w-full h-full bg-cover bg-center bg-no-repeat flex flex-col justify-between px-4 pt-6 pb-8"
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-500 z-0"
         style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
-      >
+      />
+
+      {/* Foreground Content Layer */}
+      <div className="relative z-10 w-full h-full flex flex-col justify-between px-4 pt-6 pb-8">
         {/* TOP (Skip) */}
         <div className="flex justify-end pt-2">
           {currentSlide < slides.length - 1 && (
@@ -105,7 +109,6 @@ const OnBoarding = () => {
               Back
             </button>
           ) : (
-            /* Spacer to prevent layout shift when back button isn't visible */
             <div className="h-8" />
           )}
         </div>
