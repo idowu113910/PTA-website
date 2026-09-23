@@ -49,10 +49,10 @@ const RoleSelect = () => {
 
       <div
         onClick={() => setSelectedRole("teacher")}
-        className={`border rounded-[10px] w-[335px] h-[144px] mt-14 bg-white mx-auto relative cursor-pointer ${
+        className={`border rounded-[10px] w-83.75 h-36 mt-14 bg-white mx-auto relative cursor-pointer ${
           selectedRole === "teacher"
             ? "border-[3px] border-[#FF7B17]"
-            : "border-[1px] border-[#D2DBD6]"
+            : "border border-[#D2DBD6]"
         }`}
       >
         <div className="flex justify-between">
@@ -65,7 +65,8 @@ const RoleSelect = () => {
 
       <div
         onClick={() => setSelectedRole("parent")}
-        className={`relative w-[335px] h-[144px] mt-8 mx-auto rounded-[10px] bg-white overflow-hidden cursor-pointer shadow-[0_2px_2px_0_#0000001A] ${
+        className={`relative w-83.75 h-36 mt-8 mx-auto rounded-[10px] bg-white overflow-hidden
+           cursor-pointer shadow-[0_2px_2px_0_#0000001A] ${
           selectedRole === "parent"
             ? "border-[3px] border-[#FF7B17]"
             : "border border-[#D2DBD6]"
@@ -77,7 +78,7 @@ const RoleSelect = () => {
         <img
           src={pare}
           alt=""
-          className="absolute bottom-0 right-0 w-[142px] h-[142px] object-contain"
+          className="absolute bottom-0 right-0 w-35.5 h-35.5 object-contain"
         />
       </div>
 
@@ -85,7 +86,7 @@ const RoleSelect = () => {
         <button
           onClick={handleNext}
           disabled={!selectedRole}
-          className={`w-[335px] h-[50px] rounded-[10px] text-[18px] font-bold ${
+          className={`w-83.75 h-12.5 rounded-[10px] text-[18px] font-bold ${
             selectedRole
               ? "bg-[#FF7B17] text-white cursor-pointer"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"

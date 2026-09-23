@@ -203,7 +203,7 @@ const HomePage = () => {
   // ── HOME ──────────────────────────────────────────────────────────
   if (screen === "home") {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white flex flex-col pb-24">
+      <div className="min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white flex flex-col pb-24">
         <div className="px-5 pt-6">
           {/* Header */}
           <div className="flex items-start justify-between mb-6">
@@ -215,7 +215,7 @@ const HomePage = () => {
                 Here's how your child is doing today.
               </p>
             </div>
-            <FaRegBell className="mt-1 text-[22px] flex-shrink-0" />
+            <FaRegBell className="mt-1 text-[22px] shrink-0" />
           </div>
 
           {/* Student Card */}
@@ -267,9 +267,9 @@ const HomePage = () => {
               <button
                 key={i}
                 onClick={() => item.screen && setScreen(item.screen)}
-                className={`border ${item.border} rounded-[8px] p-3 text-left h-[95px] w-full`}
+                className={`border ${item.border} rounded-lg p-3 text-left h-23.75 w-full`}
               >
-                <img src={item.icon} alt="" className="w-[28px] h-[28px]" />
+                <img src={item.icon} alt="" className="w-7 h-7" />
                 <p className="font-bold text-[13px] mt-1">{item.label}</p>
                 <p
                   className={`font-normal text-[12px] mt-0.5 ${item.subColor || "text-black"}`}
@@ -291,7 +291,7 @@ const HomePage = () => {
                 className="flex items-center justify-between bg-[#F8F8F8] border border-[#0000001F] rounded-[10px] px-4 py-3 shadow-sm"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <CgBookmark className="text-[#444] w-[18px] h-[18px] flex-shrink-0" />
+                  <CgBookmark className="text-[#444] w-4.5 h-4.5 shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[13px] text-[#555] font-normal truncate">
                       {item.subject}
@@ -301,7 +301,7 @@ const HomePage = () => {
                     </p>
                   </div>
                 </div>
-                <p className="text-[12px] font-medium text-[#E53935] flex-shrink-0 ml-2">
+                <p className="text-[12px] font-medium text-[#E53935] shrink-0 ml-2">
                   {item.due}
                 </p>
               </div>
@@ -317,13 +317,13 @@ const HomePage = () => {
   // ── GRADE ─────────────────────────────────────────────────────────
   if (screen === "grade") {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+      <div className="min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white pb-24">
         <div className="px-5 pt-6">
           <div
             className="flex items-center gap-3 cursor-pointer mb-4"
             onClick={() => setScreen("home")}
           >
-            <img src={back} alt="back" className="w-6 h-6 flex-shrink-0" />
+            <img src={back} alt="back" className="w-6 h-6 shrink-0" />
             <h2 className="text-[20px] font-medium">Grade Performance</h2>
           </div>
 
@@ -349,10 +349,10 @@ const HomePage = () => {
         {/* Subject Detail Modal */}
         {selectedSubject && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-5">
-            <div className="bg-white w-full max-w-[370px] rounded-[16px] p-6 relative">
+            <div className="bg-white w-full max-w-92.5 rounded-2xl p-6 relative">
               <button
                 onClick={() => setSelectedSubject(null)}
-                className="absolute top-4 right-4 w-[28px] h-[28px] rounded-full border border-gray-300 flex items-center justify-center"
+                className="absolute top-4 right-4 w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center"
               >
                 <img src={canc} alt="close" className="w-4 h-4" />
               </button>
@@ -396,20 +396,20 @@ const HomePage = () => {
   // ── ATTENDANCE ────────────────────────────────────────────────────
   if (screen === "attendance") {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+      <div className="min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white pb-24">
         <div className="px-5 pt-6">
           <div
             className="flex items-center gap-3 cursor-pointer mb-6"
             onClick={() => setScreen("home")}
           >
-            <img src={back} alt="back" className="w-6 h-6 flex-shrink-0" />
+            <img src={back} alt="back" className="w-6 h-6 shrink-0" />
             <h2 className="text-[20px] font-medium">Attendance</h2>
           </div>
 
           {/* Term Dropdown */}
           <div className="relative mb-5">
             <div
-              className="w-full h-[42px] rounded-[9px] px-4 bg-[#F3F4F6] flex items-center justify-between cursor-pointer"
+              className="w-full h-10.5 rounded-[9px] px-4 bg-[#F3F4F6] flex items-center justify-between cursor-pointer"
               onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
             >
               <p className="font-medium text-[13px] text-black truncate flex-1 pr-2">
@@ -418,13 +418,13 @@ const HomePage = () => {
               <img
                 src={arr}
                 alt=""
-                className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
+                className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                   isTermDropdownOpen ? "rotate-180" : ""
                 }`}
               />
             </div>
             {isTermDropdownOpen && (
-              <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+              <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-lg shadow-md">
                 {termYears.map((term) => (
                   <div
                     key={term}
@@ -464,7 +464,7 @@ const HomePage = () => {
             <p className="font-bold text-[16px] text-black">Attendance Log</p>
             <div className="flex items-center gap-2">
               <p className="font-medium text-[12px] text-black">June 2025</p>
-              <img src={ar} alt="" className="w-[7px] h-[13px]" />
+              <img src={ar} alt="" className="w-1.75 h-3.25" />
             </div>
           </div>
 
@@ -478,7 +478,7 @@ const HomePage = () => {
                 <img
                   src={item.icon}
                   alt=""
-                  className="w-[30px] h-[30px] flex-shrink-0"
+                  className="w-7.5 h-7.5 shrink-0"
                 />
                 <div className="flex flex-col justify-center flex-1 min-w-0">
                   <p className="font-medium text-[12px] text-black truncate">
@@ -488,7 +488,7 @@ const HomePage = () => {
                     {item.status}
                   </p>
                 </div>
-                <div className="flex flex-col justify-center text-right flex-shrink-0">
+                <div className="flex flex-col justify-center text-right shrink-0">
                   <p className="font-medium text-[12px] text-black whitespace-nowrap">
                     {item.time}
                   </p>

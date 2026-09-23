@@ -95,32 +95,32 @@ const Messagee = () => {
   /* ── CHAT SCREEN ──────────────────────────────────────────────── */
   if (activeChat) {
     return (
-      <div className="flex flex-col h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white">
+      <div className="flex flex-col h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white">
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-[#E0DCDC] flex-shrink-0">
+        <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-[#E0DCDC] shrink-0">
           <button
             onClick={() => setActiveChat(null)}
-            className="cursor-pointer flex-shrink-0"
+            className="cursor-pointer shrink-0"
             aria-label="Go back"
           >
-            <img src={arr} alt="" className="w-[32px] h-[32px]" />
+            <img src={arr} alt="" className="w-[32px] h-8" />
           </button>
 
           <img
             src={activeChat.img}
             alt=""
-            className="w-[34px] h-[34px] rounded-full object-cover flex-shrink-0"
+            className="w-8.5 h-8.5 rounded-full object-cover shrink-0"
           />
 
           <p className="flex-1 min-w-0 font-normal text-[18px] text-[#1C1C1C] truncate">
             {activeChat.name}
           </p>
 
-          <button aria-label="Voice call" className="flex-shrink-0 p-1">
-            <img src={phone} alt="" className="w-[22px] h-[22px]" />
+          <button aria-label="Voice call" className="shrink-0 p-1">
+            <img src={phone} alt="" className="w-5.5 h-5.5" />
           </button>
-          <button aria-label="Video call" className="flex-shrink-0 p-1">
-            <img src={video} alt="" className="w-[22px] h-[22px]" />
+          <button aria-label="Video call" className="shrink-0 p-1">
+            <img src={video} alt="" className="w-5.5 h-5.5" />
           </button>
         </div>
 
@@ -137,18 +137,18 @@ const Messagee = () => {
               className={`flex flex-col gap-[2px] ${msg.sender === "sent" ? "items-end" : "items-start"}`}
             >
               {msg.sender === "sent" ? (
-                <div className="inline-flex items-end gap-1 max-w-[80%] bg-[#F97316] text-white px-4 py-[10px] rounded-[18px] rounded-br-[4px] text-[15px] leading-relaxed">
+                <div className="inline-flex items-end gap-1 max-w-[80%] bg-[#F97316] text-white px-4 py-2.5 rounded-[18px] rounded-br-sm text-[15px] leading-relaxed">
                   <span>{msg.text}</span>
                   {msg.delivered && (
                     <img
                       src={delivered}
                       alt="delivered"
-                      className="w-[10px] h-[11px] flex-shrink-0 mb-0.5"
+                      className="w-2.5 h-2.75 shrink-0 mb-0.5"
                     />
                   )}
                 </div>
               ) : (
-                <div className="max-w-[75%] bg-[#F5F5F5] text-[#1C1C1C] px-4 py-[10px] rounded-[18px] rounded-bl-[4px] text-[15px] leading-relaxed">
+                <div className="max-w-[75%] bg-[#F5F5F5] text-[#1C1C1C] px-4 py-2.5 rounded-[18px] rounded-bl-sm text-[15px] leading-relaxed">
                   {msg.text}
                 </div>
               )}
@@ -160,10 +160,10 @@ const Messagee = () => {
         </div>
 
         {/* Input Bar */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-white border-t border-[#F0F0F0] flex-shrink-0">
+        <div className="flex items-center gap-2 px-4 py-3 bg-white border-t border-[#F0F0F0] shrink-0">
           <button
             aria-label="Attach"
-            className="w-[35px] h-[35px] rounded-full border border-[#ccc] flex items-center justify-center flex-shrink-0"
+            className="w-8.75 h-8.75 rounded-full border border-[#ccc] flex items-center justify-center shrink-0"
           >
             <img src={typ} alt="" className="w-5 h-5" />
           </button>
@@ -174,15 +174,16 @@ const Messagee = () => {
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type message"
-            className="flex-1 min-w-0 h-[38px] rounded-[6px] border border-[#E0DCDC] px-3 outline-none text-[14px] font-medium text-[#1C1C1C] placeholder:text-[#A3A2A2] placeholder:text-[12px]"
+            className="flex-1 min-w-0 h-9.5 rounded-md border border-[#E0DCDC] px-3 outline-none text-[14px] 
+            font-medium text-[#1C1C1C] placeholder:text-[#A3A2A2] placeholder:text-[12px]"
           />
 
           <button
             onClick={handleSend}
             aria-label="Send"
-            className="w-[35px] h-[35px] flex-shrink-0 flex items-center justify-center"
+            className="w-8.75 h-8.75 shrink-0 flex items-center justify-center"
           >
-            <img src={send} alt="" className="w-[35px] h-[35px]" />
+            <img src={send} alt="" className="w-8.75 h-8.75" />
           </button>
         </div>
       </div>
@@ -191,14 +192,14 @@ const Messagee = () => {
 
   /* ── MESSAGE LIST SCREEN ──────────────────────────────────────── */
   return (
-    <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+    <div className="min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white pb-24">
       <div className="px-5 pt-6">
         {/* Title */}
         <h1 className="font-bold text-[20px] text-black mb-5">Message</h1>
 
         {/* Search Bar */}
-        <div className="w-full h-[48px] border border-[#D9D9D9] rounded-[7px] bg-[#FCFCFC] flex items-center gap-3 px-3 mb-4">
-          <img src={srch} alt="" className="w-4 h-4 flex-shrink-0" />
+        <div className="w-full h-12 border border-[#D9D9D9] rounded-[7px] bg-[#FCFCFC] flex items-center gap-3 px-3 mb-4">
+          <img src={srch} alt="" className="w-4 h-4 shrink-0" />
           <input
             type="text"
             placeholder="Search Conversations"
@@ -214,7 +215,7 @@ const Messagee = () => {
             <button
               key={f}
               onClick={() => setActiveFilter(f)}
-              className={`flex-1 h-[35px] rounded-[5px] text-[14px] font-normal ${
+              className={`flex-1 h-8.75 rounded-[5px] text-[14px] font-normal ${
                 activeFilter === f
                   ? "bg-[#FF7B17] text-white"
                   : "bg-[#EFEFEF] text-black"
@@ -242,7 +243,7 @@ const Messagee = () => {
                 <img
                   src={conv.img}
                   alt={conv.name}
-                  className="w-[52px] h-[52px] rounded-full object-cover flex-shrink-0"
+                  className="w-13 h-13 rounded-full object-cover shrink-0"
                 />
 
                 {/* Body */}
@@ -252,7 +253,7 @@ const Messagee = () => {
                       {conv.name}
                     </p>
                     <p
-                      className={`text-[12px] flex-shrink-0 ${conv.unread ? "text-[#FF7B17]" : "text-[#9E9E9E]"}`}
+                      className={`text-[12px] shrink-0 ${conv.unread ? "text-[#FF7B17]" : "text-[#9E9E9E]"}`}
                     >
                       {conv.time}
                     </p>
@@ -264,7 +265,7 @@ const Messagee = () => {
 
                 {/* Unread dot */}
                 {conv.unread && (
-                  <div className="w-2 h-2 rounded-full bg-[#FF7B17] flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-[#FF7B17] shrink-0" />
                 )}
               </div>
             ))}

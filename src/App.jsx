@@ -16,6 +16,8 @@ import Reportt from "./parent/Reportt";
 import Messagee from "./parent/Messagee";
 import Calendarr from "./parent/Calendarr";
 import Profilee from "./parent/Profilee";
+import Login from "./parent/Login";
+import Loginn from "./teacher/Login";
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
             <Route path="/role" element={<RoleSelect />} />
             <Route path="/introduction" element={<Introduction />} />
             <Route path="/intro" element={<Intro />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/loginn" element={<Loginn />} />
             <Route path="/home" element={<HomePaget />} />
             <Route path="/homee" element={<HomePage />} />
             <Route path="/report" element={<Report />} />

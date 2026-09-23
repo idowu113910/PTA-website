@@ -106,7 +106,7 @@ const Calendarr = () => {
   // ── Reusable Event Card ────────────────────────────────────────
   const EventCard = ({ icon, title, date, time: t, location, rightImg }) => (
     <div className="flex w-full rounded-[10px] py-4 px-3 bg-[#F1F0F0] mt-4 items-center gap-3">
-      <img src={icon} alt="" className="w-8 h-8 flex-shrink-0" />
+      <img src={icon} alt="" className="w-8 h-8 shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-black font-normal text-[16px] truncate">{title}</p>
         <p className="font-normal text-[12px] text-black mt-0.5">
@@ -118,7 +118,7 @@ const Calendarr = () => {
         <img
           src={rightImg}
           alt=""
-          className="w-[68px] h-[68px] object-contain flex-shrink-0"
+          className="w-17 h-17 object-contain shrink-0"
         />
       )}
     </div>
@@ -127,12 +127,12 @@ const Calendarr = () => {
   // ── Show More Screen ────────────────────────────────────────────
   if (showMore) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-6">
+      <div className="min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white pb-6">
         <div
           className="flex items-center gap-4 px-5 pt-5 pb-2 cursor-pointer"
           onClick={() => setShowMore(false)}
         >
-          <img src={back} alt="back" className="w-6 h-6 flex-shrink-0" />
+          <img src={back} alt="back" className="w-6 h-6 shrink-0" />
           <h2 className="text-[20px] font-medium">Upcoming Event</h2>
         </div>
         <div className="px-5">
@@ -183,7 +183,7 @@ const Calendarr = () => {
 
   // ── Main Calendar View ──────────────────────────────────────────
   return (
-    <div className="relative min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+    <div className="relative min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white pb-24">
       {/* Title */}
       <h2 className="font-bold text-[20px] px-5 pt-5 pb-2">Calendar</h2>
 
@@ -282,7 +282,7 @@ const Calendarr = () => {
 
       {/* FAB */}
       <button
-        className="fixed bottom-[84px] right-5 z-10"
+        className="fixed bottom-21 right-5 z-10"
         onClick={() => setShowScreen(true)}
         aria-label="Add reminder"
       >
@@ -303,7 +303,7 @@ const Calendarr = () => {
 
       {/* ── Add Reminder Bottom Sheet ───────────────────────────── */}
       <div
-        className={`fixed left-0 bottom-0 w-full max-w-[430px] bg-white rounded-t-[24px] shadow-xl z-30
+        className={`fixed left-0 bottom-0 w-full max-w-107.5 bg-white rounded-t-3xl shadow-xl z-30
     transition-transform duration-300 ease-in-out flex flex-col`}
         style={{
           height: "min(730px, 90vh)",
@@ -314,7 +314,7 @@ const Calendarr = () => {
         }}
       >
         {/* Sheet Header */}
-        <div className="flex items-center justify-between px-5 pt-8 pb-3 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 pt-8 pb-3 shrink-0">
           <h1 className="text-2xl font-bold">Add Reminder</h1>
           <button onClick={() => setShowScreen(false)} aria-label="Close">
             <img src={cnc} alt="close" className="w-8 h-8" />
@@ -333,7 +333,7 @@ const Calendarr = () => {
               placeholder="Add title"
               value={taskTitle}
               onChange={(e) => setTaskTitle(e.target.value)}
-              className="w-full h-[55px] rounded-[10px] px-4 border border-[#D9D9D9] outline-none text-[14px]"
+              className="w-full h-13.75 rounded-[10px] px-4 border border-[#D9D9D9] outline-none text-[14px]"
             />
           </div>
 
@@ -347,7 +347,7 @@ const Calendarr = () => {
               placeholder="Add Note"
               value={taskNote}
               onChange={(e) => setTaskNote(e.target.value)}
-              className="w-full h-[55px] rounded-[10px] px-4 border border-[#D9D9D9] outline-none text-[14px]"
+              className="w-full h-13.75 rounded-[10px] px-4 border border-[#D9D9D9] outline-none text-[14px]"
             />
           </div>
 
@@ -355,12 +355,12 @@ const Calendarr = () => {
           <h4 className="font-medium text-[16px] text-black mt-4 mb-2">
             Reminder Date
           </h4>
-          <div className="w-full h-[65px] rounded-[6px] border border-[#D9D9D9] px-3 flex items-center justify-between">
+          <div className="w-full h-16.25 rounded-md border border-[#D9D9D9] px-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
                 src={rem}
                 alt=""
-                className="w-[28px] h-[28px] flex-shrink-0"
+                className="w-7 h-7 shrink-0"
               />
               <div>
                 <p className="font-medium text-[14px] text-black leading-tight">
@@ -378,7 +378,7 @@ const Calendarr = () => {
               <img
                 src={isSwitched1 ? swi2 : swi}
                 alt="toggle"
-                className="w-[44px] h-[24px]"
+                className="w-11 h-6"
               />
             </button>
           </div>
@@ -387,12 +387,12 @@ const Calendarr = () => {
           <h4 className="font-medium text-[16px] text-black mt-4 mb-2">
             Reminder Time
           </h4>
-          <div className="w-full h-[65px] rounded-[6px] border border-[#D9D9D9] px-3 flex items-center justify-between">
+          <div className="w-full h-16.25 rounded-md border border-[#D9D9D9] px-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
                 src={time}
                 alt=""
-                className="w-[28px] h-[28px] flex-shrink-0"
+                className="w-7 h-7 shrink-0"
               />
               <div>
                 <p className="font-medium text-[14px] text-black leading-tight">
@@ -408,7 +408,7 @@ const Calendarr = () => {
               <img
                 src={isSwitched2 ? swi2 : swi}
                 alt="toggle"
-                className="w-[44px] h-[24px]"
+                className="w-11 h-6"
               />
             </button>
           </div>
@@ -422,7 +422,7 @@ const Calendarr = () => {
                 placeholder="Select repeat"
                 value={repeatValue}
                 onChange={(e) => setRepeatValue(e.target.value)}
-                className="w-full h-[55px] rounded-[10px] px-4 pr-12 border border-[#D9D9D9] outline-none text-[14px]"
+                className="w-full h-13.75 rounded-[10px] px-4 pr-12 border border-[#D9D9D9] outline-none text-[14px]"
               />
               <img
                 src={arrr}
@@ -434,7 +434,7 @@ const Calendarr = () => {
         </div>
 
         {/* Bottom spacer */}
-        <div className="h-[40px] flex-shrink-0" />
+        <div className="h-10 shrink-0" />
       </div>
     </div>
   );
