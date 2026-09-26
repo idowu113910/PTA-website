@@ -9,7 +9,7 @@ import enGB from "date-fns/locale/en-GB";
 import on from "../assets/switch.svg";
 import off from "../assets/off.svg";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "../teacher/TeacherContext";
 
 registerLocale("en-GB", enGB);
 

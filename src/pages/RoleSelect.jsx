@@ -36,12 +36,9 @@ const RoleSelect = () => {
   };
 
   return (
-    // Explicit opaque background + min-h-screen so this screen is always fully light,
-    // regardless of any dark background applied higher up (e.g. a themed wrapper in App.jsx).
-    // This screen intentionally does NOT use ThemeContext/useTheme at all.
-    <div className="min-h-screen bg-white">
-      <div className="flex flex-col items-center justify-center mt-18">
-        <img src={role} alt="" />
+    <div className="min-h-screen bg-white w-full pt-12 pb-12">
+      <div className="flex flex-col items-center justify-center">
+        <img src={role} alt="ED role" />
         <div className="flex flex-col items-center justify-center mt-10">
           <h4 className="font-bold text-[20px] text-black">Choose a Role</h4>
           <p className="text-[14px] font-normal text-black">
@@ -62,31 +59,31 @@ const RoleSelect = () => {
           <p className="mt-14 pl-4 font-medium text-[18px] text-[#111214]">
             Teacher
           </p>
-          <img src={tea} alt="" />
+          <img src={tea} alt="Teacher" />
         </div>
       </div>
 
       <div
         onClick={() => setSelectedRole("parent")}
-        className={`relative w-83.75 h-36 mt-8 mx-auto rounded-[10px] bg-white overflow-hidden
-           cursor-pointer shadow-[0_2px_2px_0_#0000001A] ${
-             selectedRole === "parent"
-               ? "border-[3px] border-[#FF7B17]"
-               : "border border-[#D2DBD6]"
-           }`}
+        className={`relative w-83.75 h-36 mt-8 mx-auto rounded-[10px] bg-white overflow-hidden cursor-pointer shadow-[0_2px_2px_0_#0000001A] ${
+          selectedRole === "parent"
+            ? "border-[3px] border-[#FF7B17]"
+            : "border border-[#D2DBD6]"
+        }`}
       >
         <p className="mt-14 pl-4 font-medium text-[18px] text-[#111214]">
           Parent
         </p>
         <img
           src={pare}
-          alt=""
+          alt="Parent"
           className="absolute bottom-0 right-0 w-35.5 h-35.5 object-contain"
         />
       </div>
 
-      <div className="flex items-center justify-center mt-30">
+      <div className="flex items-center justify-center mt-16">
         <button
+          type="button"
           onClick={handleNext}
           disabled={!selectedRole}
           className={`w-83.75 h-12.5 rounded-[10px] text-[18px] font-bold ${

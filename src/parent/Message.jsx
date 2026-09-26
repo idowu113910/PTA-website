@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import BottomNavigation from "../components/BottomNavigate";
+import BottomNavigation from "../components/BottomNavigation";
 import srch from "../assets/search.svg";
 import shit from "../assets/edithh.svg";
 import phone from "../assets/phone.svg";
@@ -8,7 +8,7 @@ import arr from "../assets/arr back.svg";
 import delivered from "../assets/delivered image.svg";
 import typ from "../assets/type pareny.svg";
 import send from "../assets/send parent.svg";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "./ParentThemeContext";
 
 const initialMessages = [
   { id: 1, sender: "sent", text: "Hello", time: "10:55 AM", delivered: true },

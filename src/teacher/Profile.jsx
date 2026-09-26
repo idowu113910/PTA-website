@@ -13,7 +13,7 @@ import sthOn from "../assets/ON.svg";
 import { useUser } from "./UserContext";
 import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "./TeacherContext";
 
 const Profile = () => {
   // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
@@ -634,11 +634,7 @@ const Profile = () => {
           onClick={() => setShowLogoutModal(true)}
           className="flex items-center gap-4 mt-5 py-2 cursor-pointer"
         >
-          <img
-            src={logout}
-            alt=""
-            className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
-          />
+          <img src={logout} alt="" className="w-6 h-6 flex-shrink-0" />
           <p
             className={`font-medium text-[18px] ${
               isDarkMode ? "text-red-500" : "text-[#FF0000]"

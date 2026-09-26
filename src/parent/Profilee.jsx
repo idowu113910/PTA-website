@@ -16,8 +16,9 @@ import div from "../assets/deku.svg";
 import cir from "../assets/round.svg";
 import cnc from "../assets/cancel back btn.svg";
 import { useNavigate } from "react-router-dom";
-import BottomNavigate from "../components/BottomNavigate";
+import BottomNavigate from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
+import { useTheme } from "./ParentThemeContext";
 
 const Grade = () => {
   // ── useUser MUST come first ──────────────────────────────────────
@@ -30,6 +31,9 @@ const Grade = () => {
     updateRoom,
     updateTeacherName,
   } = useUser();
+
+  // Single source of truth for theme — comes from ParentThemeContext (wraps the parent routes in main.jsx)
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -72,7 +76,6 @@ const Grade = () => {
 
   // ── App preference toggles ───────────────────────────────────────
   const [isSwitchOn, setIsSwitchOn] = useState(false);
-  const [SwitchOn, setSwitchOn] = useState(false);
   const [SwitchAuto, setSwitchAuto] = useState(false);
 
   // ── Mobile number ────────────────────────────────────────────────
@@ -164,23 +167,53 @@ const Grade = () => {
   const MenuRow = ({ icon, label, onClick }) => (
     <div
       onClick={onClick}
-      className="flex w-full h-[57px] border border-[#9F9D9D] rounded-[10px] py-4 px-3 gap-4 mt-5 items-center cursor-pointer"
+      className={`flex w-full h-[57px] rounded-[10px] py-4 px-3 gap-4 mt-5 items-center cursor-pointer transition-colors duration-200 ${
+        isDarkMode ? "border border-gray-700" : "border border-[#9F9D9D]"
+      }`}
     >
-      <img src={icon} alt="" className="w-6 h-6 flex-shrink-0" />
-      <p className="font-medium text-[18px] text-[#1A1818] flex-1 truncate">
+      <img
+        src={icon}
+        alt=""
+        className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
+      />
+      <p
+        className={`font-medium text-[18px] flex-1 truncate ${
+          isDarkMode ? "text-white" : "text-[#1A1818]"
+        }`}
+      >
         {label}
       </p>
-      <img src={btn} alt="" className="w-[12px] h-[8px] flex-shrink-0" />
+      <img
+        src={btn}
+        alt=""
+        className={`w-[12px] h-[8px] flex-shrink-0 ${
+          isDarkMode ? "invert" : ""
+        }`}
+      />
     </div>
   );
 
   const FieldRow = ({ label, value, onEdit }) => (
-    <div className="w-full h-[57px] border border-black/10 rounded-[8px] py-2 px-3 flex items-center justify-between">
-      <span className="text-[14px] text-[#303030] truncate flex-1">
+    <div
+      className={`w-full h-[57px] rounded-[8px] py-2 px-3 flex items-center justify-between ${
+        isDarkMode
+          ? "border border-gray-700 bg-[#1c1c1c]"
+          : "border border-black/10 bg-white"
+      }`}
+    >
+      <span
+        className={`text-[14px] truncate flex-1 ${
+          isDarkMode ? "text-white" : "text-[#303030]"
+        }`}
+      >
         {value}
       </span>
       <button onClick={onEdit} className="p-1 flex-shrink-0">
-        <img src={pn} alt="edit" className="w-[18px] h-[18px]" />
+        <img
+          src={pn}
+          alt="edit"
+          className={`w-[18px] h-[18px] ${isDarkMode ? "invert" : ""}`}
+        />
       </button>
     </div>
   );
@@ -195,7 +228,11 @@ const Grade = () => {
       </button>
       <button
         onClick={onCancel}
-        className="flex-1 h-[42px] border border-black/10 rounded-[8px] text-[13px] text-[#303030]"
+        className={`flex-1 h-[42px] rounded-[8px] text-[13px] ${
+          isDarkMode
+            ? "border border-gray-700 text-gray-200 bg-[#1c1c1c]"
+            : "border border-black/10 text-[#303030]"
+        }`}
       >
         Cancel
       </button>
@@ -207,25 +244,55 @@ const Grade = () => {
   // ────────────────────────────────────────────────────────────────
   if (showAppPreference) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+      <div
+        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+        }`}
+      >
         <div className="flex items-center gap-4 px-5 pt-6 pb-4">
           <button onClick={() => setShowAppPreference(false)}>
-            <img src={back} alt="back" className="w-6 h-6" />
+            <img
+              src={back}
+              alt="back"
+              className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
           <h2 className="text-[20px] font-medium">App Preference</h2>
         </div>
         <div className="px-5 flex flex-col gap-4">
           {[
-            { label: "Notification", val: isSwitchOn, set: setIsSwitchOn },
-            { label: "Theme Appearance", val: SwitchOn, set: setSwitchOn },
-            { label: "Auto-Login", val: SwitchAuto, set: setSwitchAuto },
-          ].map(({ label, val, set }) => (
+            {
+              label: "Notification",
+              val: isSwitchOn,
+              onToggle: () => setIsSwitchOn((v) => !v),
+            },
+            {
+              label: "Theme Appearance",
+              val: isDarkMode,
+              onToggle: toggleTheme,
+            },
+            {
+              label: "Auto-Login",
+              val: SwitchAuto,
+              onToggle: () => setSwitchAuto((v) => !v),
+            },
+          ].map(({ label, val, onToggle }) => (
             <div
               key={label}
-              className="flex justify-between items-center w-full h-[61px] rounded-[10px] border border-[#9F9D9D] py-4 px-3"
+              className={`flex justify-between items-center w-full h-[61px] rounded-[10px] py-4 px-3 ${
+                isDarkMode
+                  ? "border border-gray-700"
+                  : "border border-[#9F9D9D]"
+              }`}
             >
-              <p className="font-medium text-[18px] text-[#1A1818]">{label}</p>
-              <button onClick={() => set(!val)}>
+              <p
+                className={`font-medium text-[18px] ${
+                  isDarkMode ? "text-white" : "text-[#1A1818]"
+                }`}
+              >
+                {label}
+              </p>
+              <button onClick={onToggle} aria-label={`Toggle ${label}`}>
                 <img
                   src={val ? sthOn : sth}
                   alt="toggle"
@@ -244,18 +311,34 @@ const Grade = () => {
   // ────────────────────────────────────────────────────────────────
   if (linkedStudent) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white flex flex-col pb-6">
+      <div
+        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto flex flex-col pb-6 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+        }`}
+      >
         <div className="px-5 pt-6 flex-1">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <button onClick={() => setLinkedStudents(false)}>
-              <img src={bk} alt="back" className="w-6 h-6" />
+              <img
+                src={bk}
+                alt="back"
+                className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+              />
             </button>
-            <p className="font-medium text-[20px] text-black flex-1 ml-3">
+            <p
+              className={`font-medium text-[20px] flex-1 ml-3 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               Linked Profile
             </p>
             <button onClick={() => setShowScreen(true)}>
-              <img src={add} alt="add" className="w-6 h-6" />
+              <img
+                src={add}
+                alt="add"
+                className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+              />
             </button>
           </div>
 
@@ -263,7 +346,11 @@ const Grade = () => {
           {["Divine Ekubor", "Immaculate Ekubor"].map((name) => (
             <div
               key={name}
-              className="border border-[#D9D9D9] bg-[#FBFBFB] w-full rounded-[8px] py-3 px-3 mt-4 flex items-center justify-between"
+              className={`w-full rounded-[8px] py-3 px-3 mt-4 flex items-center justify-between ${
+                isDarkMode
+                  ? "border border-gray-700 bg-[#1c1c1c]"
+                  : "border border-[#D9D9D9] bg-[#FBFBFB]"
+              }`}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <img
@@ -272,10 +359,18 @@ const Grade = () => {
                   className="w-[55px] h-[55px] flex-shrink-0"
                 />
                 <div className="min-w-0">
-                  <p className="font-bold text-[16px] text-black truncate">
+                  <p
+                    className={`font-bold text-[16px] truncate ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
                     {name}
                   </p>
-                  <p className="font-normal text-[14px] text-black truncate">
+                  <p
+                    className={`font-normal text-[14px] truncate ${
+                      isDarkMode ? "text-gray-300" : "text-black"
+                    }`}
+                  >
                     Grade 6. Room 201. Mr Robinson
                   </p>
                 </div>
@@ -283,14 +378,22 @@ const Grade = () => {
               <img
                 src={cir}
                 alt=""
-                className="w-[28px] h-[28px] flex-shrink-0 ml-3"
+                className={`w-[28px] h-[28px] flex-shrink-0 ml-3 ${
+                  isDarkMode ? "invert" : ""
+                }`}
               />
             </div>
           ))}
         </div>
 
         {/* Save button */}
-        <div className="border-t border-[#EAEAEA] px-5 pb-6 pt-4">
+        <div
+          className={`px-5 pb-6 pt-4 ${
+            isDarkMode
+              ? "border-t border-gray-800"
+              : "border-t border-[#EAEAEA]"
+          }`}
+        >
           <button className="h-[50px] w-full bg-[#FF7B17] text-white text-[18px] font-bold rounded-[10px]">
             Save changes
           </button>
@@ -308,27 +411,39 @@ const Grade = () => {
 
         {/* Add Child Bottom Sheet */}
         <div
-          className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-[20px] shadow-xl z-30 transition-transform duration-300 ${
+          className={`fixed bottom-0 left-0 right-0 rounded-t-[20px] shadow-xl z-30 transition-transform duration-300 ${
             showScreen ? "translate-y-0" : "translate-y-full"
-          }`}
+          } ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"}`}
           style={{ maxHeight: "90vh" }}
         >
           <div className="flex items-center justify-between px-5 pt-6 pb-3">
             <h1 className="text-[20px] font-medium">Add a New Child</h1>
             <button onClick={() => setShowScreen(false)}>
-              <img src={cnc} alt="close" className="w-8 h-8" />
+              <img
+                src={cnc}
+                alt="close"
+                className={`w-8 h-8 ${isDarkMode ? "invert" : ""}`}
+              />
             </button>
           </div>
           <div className="px-5 pb-8 overflow-y-auto flex flex-col gap-4">
             {["Full Name", "Class", "Student Code"].map((label) => (
               <div key={label}>
-                <h1 className="font-medium text-[16px] text-[#303030] mb-2">
+                <h1
+                  className={`font-medium text-[16px] mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   {label}
                 </h1>
                 <input
                   type="text"
                   placeholder={`Enter ${label.toLowerCase()}`}
-                  className="w-full h-[48px] rounded-[10px] px-3 border border-[#0000001F] bg-[#F8F8F8] outline-none placeholder:text-[14px] text-[#303030]"
+                  className={`w-full h-[48px] rounded-[10px] px-3 outline-none placeholder:text-[14px] ${
+                    isDarkMode
+                      ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                      : "border border-[#0000001F] bg-[#F8F8F8] text-[#303030]"
+                  }`}
                 />
               </div>
             ))}
@@ -346,10 +461,18 @@ const Grade = () => {
   // ────────────────────────────────────────────────────────────────
   if (showTeacherProfile) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-32">
+      <div
+        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-32 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+        }`}
+      >
         <div className="flex items-center gap-4 px-5 pt-6 pb-2">
           <button onClick={() => setShowTeacherProfile(false)}>
-            <img src={back} alt="back" className="w-6 h-6" />
+            <img
+              src={back}
+              alt="back"
+              className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
           <h2 className="text-[20px] font-medium">Edit Profile</h2>
         </div>
@@ -370,20 +493,36 @@ const Grade = () => {
           />
           <button
             onClick={() => fileInputRef.current.click()}
-            className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-md bg-[#D9D9D9] border border-[#D9D9D9] flex items-center justify-center"
+            className={`absolute bottom-0 right-0 w-[22px] h-[22px] rounded-md flex items-center justify-center ${
+              isDarkMode
+                ? "bg-[#262626] border border-gray-700"
+                : "bg-[#D9D9D9] border border-[#D9D9D9]"
+            }`}
           >
-            <img src={pn} alt="edit" className="w-4 h-4" />
+            <img
+              src={pn}
+              alt="edit"
+              className={`w-4 h-4 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
         </div>
 
-        <p className="font-bold text-[18px] text-black text-center mt-3">
+        <p
+          className={`font-bold text-[18px] text-center mt-3 ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
           {fullName}
         </p>
 
         <div className="px-5 flex flex-col gap-4 mt-4">
           {/* Full Name */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-2">
+            <h2
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Full Name
             </h2>
             <input
@@ -393,13 +532,21 @@ const Grade = () => {
                 setTempFullName(e.target.value);
                 setHasChanges(true);
               }}
-              className="w-full h-[57px] border border-black/10 rounded-[8px] py-2 px-3 outline-none text-[14px] text-[#303030]"
+              className={`w-full h-[57px] rounded-[8px] py-2 px-3 outline-none text-[14px] ${
+                isDarkMode
+                  ? "border border-gray-700 bg-[#1c1c1c] text-white"
+                  : "border border-black/10 text-[#303030]"
+              }`}
             />
           </div>
 
           {/* Email */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-2">
+            <h2
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Email
             </h2>
             <input
@@ -409,13 +556,21 @@ const Grade = () => {
                 setTempEmail(e.target.value);
                 setHasChanges(true);
               }}
-              className="w-full h-[57px] border border-black/10 rounded-[8px] py-2 px-3 outline-none text-[14px] text-[#303030]"
+              className={`w-full h-[57px] rounded-[8px] py-2 px-3 outline-none text-[14px] ${
+                isDarkMode
+                  ? "border border-gray-700 bg-[#1c1c1c] text-white"
+                  : "border border-black/10 text-[#303030]"
+              }`}
             />
           </div>
 
           {/* Mobile Number */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-2">
+            <h2
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Mobile Number
             </h2>
             {!isEditingPhone ? (
@@ -427,7 +582,11 @@ const Grade = () => {
               <div className="flex flex-col gap-2">
                 <div className="flex gap-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[11px] text-gray-400">
+                    <label
+                      className={`text-[11px] ${
+                        isDarkMode ? "text-gray-400" : "text-gray-400"
+                      }`}
+                    >
                       Area code
                     </label>
                     <input
@@ -438,11 +597,21 @@ const Grade = () => {
                       onKeyDown={handlePhoneKeyDown}
                       maxLength={6}
                       placeholder="+234"
-                      className="w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-center text-[14px] outline-none"
+                      className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-center text-[14px] outline-none ${
+                        isDarkMode
+                          ? "bg-[#1c1c1c] text-white"
+                          : "bg-white text-black"
+                      }`}
                     />
                   </div>
                   <div className="flex flex-col gap-1 flex-1">
-                    <label className="text-[11px] text-gray-400">Number</label>
+                    <label
+                      className={`text-[11px] ${
+                        isDarkMode ? "text-gray-400" : "text-gray-400"
+                      }`}
+                    >
+                      Number
+                    </label>
                     <input
                       type="text"
                       value={phoneNum}
@@ -450,7 +619,11 @@ const Grade = () => {
                       onKeyDown={handlePhoneKeyDown}
                       maxLength={15}
                       placeholder="703 543 2234"
-                      className="w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none"
+                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none ${
+                        isDarkMode
+                          ? "bg-[#1c1c1c] text-white"
+                          : "bg-white text-black"
+                      }`}
                     />
                   </div>
                 </div>
@@ -469,7 +642,11 @@ const Grade = () => {
 
           {/* Gender */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-2">
+            <h2
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Gender
             </h2>
             <FieldRow
@@ -487,7 +664,11 @@ const Grade = () => {
                     setTempGender(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] bg-white"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] ${
+                    isDarkMode
+                      ? "bg-[#1c1c1c] text-white"
+                      : "bg-white text-black"
+                  }`}
                 >
                   <option>Female</option>
                   <option>Male</option>
@@ -506,7 +687,11 @@ const Grade = () => {
 
           {/* Class */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-2">
+            <h2
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Class
             </h2>
             <FieldRow
@@ -525,7 +710,11 @@ const Grade = () => {
                     setTempClass(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] outline-none"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] outline-none ${
+                    isDarkMode
+                      ? "bg-[#1c1c1c] text-white"
+                      : "bg-white text-black"
+                  }`}
                 />
                 <SaveCancelRow
                   onSave={() => {
@@ -540,7 +729,13 @@ const Grade = () => {
 
           {/* Age */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-2">Age</h2>
+            <h2
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
+              Age
+            </h2>
             <FieldRow
               value={ageValue}
               onEdit={() => {
@@ -559,7 +754,11 @@ const Grade = () => {
                   }}
                   min="1"
                   max="100"
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] outline-none"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] outline-none ${
+                    isDarkMode
+                      ? "bg-[#1c1c1c] text-white"
+                      : "bg-white text-black"
+                  }`}
                 />
                 <SaveCancelRow
                   onSave={() => {
@@ -574,7 +773,13 @@ const Grade = () => {
         </div>
 
         {/* Save Changes — pinned bottom */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-5 pb-6 pt-4 z-10">
+        <div
+          className={`fixed bottom-0 left-0 right-0 px-5 pb-6 pt-4 z-10 ${
+            isDarkMode
+              ? "bg-[#121212] border-t border-gray-800"
+              : "bg-white border-t border-gray-200"
+          }`}
+        >
           <button
             disabled={!hasChanges}
             onClick={() => {
@@ -584,7 +789,11 @@ const Grade = () => {
               setHasChanges(false);
             }}
             className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-colors ${
-              hasChanges ? "bg-[#FF7B17]" : "bg-[#D3D3D3] cursor-not-allowed"
+              hasChanges
+                ? "bg-[#FF7B17]"
+                : isDarkMode
+                  ? "bg-gray-700 cursor-not-allowed"
+                  : "bg-[#D3D3D3] cursor-not-allowed"
             }`}
           >
             Save Changes
@@ -598,9 +807,19 @@ const Grade = () => {
   // Main Profile Screen
   // ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+    <div
+      className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+      }`}
+    >
       <div className="px-5 pt-6">
-        <h1 className="font-bold text-[20px] text-black mb-6">Profile</h1>
+        <h1
+          className={`font-bold text-[20px] mb-6 ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
+          Profile
+        </h1>
 
         {/* Avatar + name row */}
         <div className="flex items-center gap-4 mb-6">
@@ -610,8 +829,18 @@ const Grade = () => {
             className="w-[55px] h-[55px] rounded-full object-cover flex-shrink-0"
           />
           <div className="min-w-0">
-            <p className="font-medium text-[18px] truncate">{fullName}</p>
-            <p className="font-normal text-[14px] text-[#424242] truncate">
+            <p
+              className={`font-medium text-[18px] truncate ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
+              {fullName}
+            </p>
+            <p
+              className={`font-normal text-[14px] truncate ${
+                isDarkMode ? "text-gray-300" : "text-[#424242]"
+              }`}
+            >
               {email}
             </p>
           </div>
@@ -658,17 +887,31 @@ const Grade = () => {
 
           {/* Sheet — pushed above bottom nav */}
           <div
-            className={`relative bg-white w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-6 shadow-2xl overflow-y-auto max-h-[85vh] mb-[65px] ${
+            className={`relative w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-6 shadow-2xl overflow-y-auto max-h-[85vh] mb-[65px] ${
               isClosing ? "animate-slide-down" : "animate-slide-up"
-            }`}
+            } ${isDarkMode ? "bg-[#1c1c1c]" : "bg-white"}`}
           >
             {/* Drag handle */}
-            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
+            <div
+              className={`w-10 h-1 rounded-full mx-auto mb-5 ${
+                isDarkMode ? "bg-gray-600" : "bg-gray-200"
+              }`}
+            />
 
-            <h2 className="text-[20px] font-bold text-[#E8341A] text-center mb-4 border-b border-[#EEEEEE] pb-4">
+            <h2
+              className={`text-[20px] font-bold text-[#E8341A] text-center mb-4 pb-4 ${
+                isDarkMode
+                  ? "border-b border-gray-700"
+                  : "border-b border-[#EEEEEE]"
+              }`}
+            >
               Logout
             </h2>
-            <p className="text-[16px] font-medium text-[#616161] text-center mb-6">
+            <p
+              className={`text-[16px] font-medium text-center mb-6 ${
+                isDarkMode ? "text-gray-300" : "text-[#616161]"
+              }`}
+            >
               Are you sure you want to logout?
             </p>
 
@@ -684,7 +927,11 @@ const Grade = () => {
               </button>
               <button
                 onClick={handleClose}
-                className="w-full h-[52px] border border-[#FFDDDD] rounded-[10px] text-[#E8341A] text-[18px] font-medium bg-[#FFF8F8] active:opacity-80"
+                className={`w-full h-[52px] rounded-[10px] text-[18px] font-medium active:opacity-80 ${
+                  isDarkMode
+                    ? "border border-red-900/50 bg-[#2a1616] text-[#FF6B5C]"
+                    : "border border-[#FFDDDD] bg-[#FFF8F8] text-[#E8341A]"
+                }`}
               >
                 Cancel
               </button>

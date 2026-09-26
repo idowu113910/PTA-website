@@ -15,12 +15,13 @@ import day from "../assets/day.svg";
 import pl from "../assets/plus sign.svg";
 import arr from "../assets/arr down.svg";
 import cnc from "../assets/cancel back btn.svg";
-import BottomNavigation from "../components/BottomNavigate";
+import BottomNavigation from "../components/BottomNavigation";
 import rem from "../assets/reminder.svg";
 import swi from "../assets/switch.svg";
 import swi2 from "../assets/swi2.svg";
 import time from "../assets/time.svg";
 import arrr from "../assets/arr dwn parent.svg";
+import { useTheme } from "./ParentThemeContext";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = [
@@ -47,6 +48,9 @@ function getFirstDayOfMonth(year, month) {
 }
 
 const Calendar = () => {
+  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
+  const { isDarkMode } = useTheme();
+
   const [isSwitched1, setIsSwitched1] = useState(false);
   const [isSwitched2, setIsSwitched2] = useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -105,14 +109,34 @@ const Calendar = () => {
 
   // ── Reusable Event Card ────────────────────────────────────────
   const EventCard = ({ icon, title, date, time: t, location, rightImg }) => (
-    <div className="flex w-full rounded-[10px] py-4 px-3 bg-[#F1F0F0] mt-4 items-center gap-3">
+    <div
+      className={`flex w-full rounded-[10px] py-4 px-3 mt-4 items-center gap-3 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#1c1c1c]" : "bg-[#F1F0F0]"
+      }`}
+    >
       <img src={icon} alt="" className="w-8 h-8 shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-black font-normal text-[16px] truncate">{title}</p>
-        <p className="font-normal text-[12px] text-black mt-0.5">
+        <p
+          className={`font-normal text-[16px] truncate ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
+          {title}
+        </p>
+        <p
+          className={`font-normal text-[12px] mt-0.5 ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
           {date} <span className="font-bold text-base">·</span> {t}
         </p>
-        <p className="font-medium text-[12px] text-black mt-1.5">{location}</p>
+        <p
+          className={`font-medium text-[12px] mt-1.5 ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
+          {location}
+        </p>
       </div>
       {rightImg && (
         <img
@@ -127,12 +151,20 @@ const Calendar = () => {
   // ── Show More Screen ────────────────────────────────────────────
   if (showMore) {
     return (
-      <div className="min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white pb-6">
+      <div
+        className={`min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto pb-6 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+        }`}
+      >
         <div
           className="flex items-center gap-4 px-5 pt-5 pb-2 cursor-pointer"
           onClick={() => setShowMore(false)}
         >
-          <img src={back} alt="back" className="w-6 h-6 shrink-0" />
+          <img
+            src={back}
+            alt="back"
+            className={`w-6 h-6 shrink-0 ${isDarkMode ? "invert" : ""}`}
+          />
           <h2 className="text-[20px] font-medium">Upcoming Event</h2>
         </div>
         <div className="px-5">
@@ -183,20 +215,32 @@ const Calendar = () => {
 
   // ── Main Calendar View ──────────────────────────────────────────
   return (
-    <div className="relative min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto bg-white pb-24">
+    <div
+      className={`relative min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+      }`}
+    >
       {/* Title */}
       <h2 className="font-bold text-[20px] px-5 pt-5 pb-2">Calendar</h2>
 
       {/* Month Navigation */}
       <div className="flex items-center justify-between px-5 mb-2">
         <button onClick={prevMonth} className="p-1" aria-label="Previous month">
-          <img src={bk} alt="previous" className="w-6 h-6" />
+          <img
+            src={bk}
+            alt="previous"
+            className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+          />
         </button>
         <p className="font-bold text-[18px]">
           {MONTH_NAMES[month].slice(0, 3)} {year}
         </p>
         <button onClick={nextMonth} className="p-1" aria-label="Next month">
-          <img src={ft} alt="next" className="w-6 h-6" />
+          <img
+            src={ft}
+            alt="next"
+            className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+          />
         </button>
       </div>
 
@@ -206,7 +250,9 @@ const Calendar = () => {
           {DAYS.map((d) => (
             <div
               key={d}
-              className="text-center text-[13px] font-normal text-black py-1"
+              className={`text-center text-[13px] font-normal py-1 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
             >
               {d}
             </div>
@@ -226,7 +272,9 @@ const Calendar = () => {
                     ? "text-yellow-400"
                     : todayFlag
                       ? "bg-[#FF7B17] text-white"
-                      : "bg-transparent text-black"
+                      : isDarkMode
+                        ? "bg-transparent text-white"
+                        : "bg-transparent text-black"
                 }`}
               >
                 {day}
@@ -237,7 +285,11 @@ const Calendar = () => {
       </div>
 
       {/* Today's Events */}
-      <h2 className="text-[18px] font-bold text-black px-5 mt-4">
+      <h2
+        className={`text-[18px] font-bold px-5 mt-4 ${
+          isDarkMode ? "text-white" : "text-black"
+        }`}
+      >
         Todays Events
       </h2>
       <div className="px-5">
@@ -253,7 +305,13 @@ const Calendar = () => {
 
       {/* Upcoming Events */}
       <div className="flex items-center justify-between px-5 mt-5">
-        <p className="text-[18px] font-bold text-black">Upcoming Events</p>
+        <p
+          className={`text-[18px] font-bold ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
+          Upcoming Events
+        </p>
         <p
           onClick={() => setShowMore(true)}
           className="font-normal text-[#FF7B17] text-[14px] cursor-pointer"
@@ -303,8 +361,10 @@ const Calendar = () => {
 
       {/* ── Add Reminder Bottom Sheet ───────────────────────────── */}
       <div
-        className={`fixed left-0 bottom-0 w-full max-w-107.5 bg-white rounded-t-3xl shadow-xl z-30
-    transition-transform duration-300 ease-in-out flex flex-col`}
+        className={`fixed left-0 bottom-0 w-full max-w-107.5 rounded-t-3xl shadow-xl z-30
+    transition-transform duration-300 ease-in-out flex flex-col ${
+      isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+    }`}
         style={{
           height: "min(730px, 90vh)",
           left: "50%",
@@ -317,7 +377,11 @@ const Calendar = () => {
         <div className="flex items-center justify-between px-5 pt-8 pb-3 shrink-0">
           <h1 className="text-2xl font-bold">Add Reminder</h1>
           <button onClick={() => setShowScreen(false)} aria-label="Close">
-            <img src={cnc} alt="close" className="w-8 h-8" />
+            <img
+              src={cnc}
+              alt="close"
+              className={`w-8 h-8 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
         </div>
 
@@ -325,7 +389,11 @@ const Calendar = () => {
         <div className="flex-1 overflow-hidden px-5">
           {/* Task Title */}
           <div className="mt-4">
-            <h1 className="font-medium text-[16px] text-black mb-2">
+            <h1
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               Task Title
             </h1>
             <input
@@ -333,13 +401,21 @@ const Calendar = () => {
               placeholder="Add title"
               value={taskTitle}
               onChange={(e) => setTaskTitle(e.target.value)}
-              className="w-full h-13.75 rounded-[10px] px-4 border border-[#D9D9D9] outline-none text-[14px]"
+              className={`w-full h-13.75 rounded-[10px] px-4 outline-none text-[14px] ${
+                isDarkMode
+                  ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                  : "border border-[#D9D9D9] bg-white text-black"
+              }`}
             />
           </div>
 
           {/* Note */}
           <div className="mt-4">
-            <h1 className="font-medium text-[16px] text-black mb-2">
+            <h1
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               Note (optional)
             </h1>
             <input
@@ -347,22 +423,48 @@ const Calendar = () => {
               placeholder="Add Note"
               value={taskNote}
               onChange={(e) => setTaskNote(e.target.value)}
-              className="w-full h-13.75 rounded-[10px] px-4 border border-[#D9D9D9] outline-none text-[14px]"
+              className={`w-full h-13.75 rounded-[10px] px-4 outline-none text-[14px] ${
+                isDarkMode
+                  ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                  : "border border-[#D9D9D9] bg-white text-black"
+              }`}
             />
           </div>
 
           {/* Reminder Date */}
-          <h4 className="font-medium text-[16px] text-black mt-4 mb-2">
+          <h4
+            className={`font-medium text-[16px] mt-4 mb-2 ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
             Reminder Date
           </h4>
-          <div className="w-full h-16.25 rounded-md border border-[#D9D9D9] px-3 flex items-center justify-between">
+          <div
+            className={`w-full h-16.25 rounded-md px-3 flex items-center justify-between ${
+              isDarkMode
+                ? "border border-gray-700 bg-[#1c1c1c]"
+                : "border border-[#D9D9D9] bg-white"
+            }`}
+          >
             <div className="flex items-center gap-3">
-              <img src={rem} alt="" className="w-7 h-7 shrink-0" />
+              <img
+                src={rem}
+                alt=""
+                className={`w-7 h-7 shrink-0 ${isDarkMode ? "invert" : ""}`}
+              />
               <div>
-                <p className="font-medium text-[14px] text-black leading-tight">
+                <p
+                  className={`font-medium text-[14px] leading-tight ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   Date
                 </p>
-                <p className="font-normal text-[12px] text-black">
+                <p
+                  className={`font-normal text-[12px] ${
+                    isDarkMode ? "text-gray-300" : "text-black"
+                  }`}
+                >
                   Monday, June 30, 2025
                 </p>
               </div>
@@ -380,17 +482,41 @@ const Calendar = () => {
           </div>
 
           {/* Reminder Time */}
-          <h4 className="font-medium text-[16px] text-black mt-4 mb-2">
+          <h4
+            className={`font-medium text-[16px] mt-4 mb-2 ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
             Reminder Time
           </h4>
-          <div className="w-full h-16.25 rounded-md border border-[#D9D9D9] px-3 flex items-center justify-between">
+          <div
+            className={`w-full h-16.25 rounded-md px-3 flex items-center justify-between ${
+              isDarkMode
+                ? "border border-gray-700 bg-[#1c1c1c]"
+                : "border border-[#D9D9D9] bg-white"
+            }`}
+          >
             <div className="flex items-center gap-3">
-              <img src={time} alt="" className="w-7 h-7 shrink-0" />
+              <img
+                src={time}
+                alt=""
+                className={`w-7 h-7 shrink-0 ${isDarkMode ? "invert" : ""}`}
+              />
               <div>
-                <p className="font-medium text-[14px] text-black leading-tight">
+                <p
+                  className={`font-medium text-[14px] leading-tight ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   Time
                 </p>
-                <p className="font-normal text-[12px] text-black">11:00 AM</p>
+                <p
+                  className={`font-normal text-[12px] ${
+                    isDarkMode ? "text-gray-300" : "text-black"
+                  }`}
+                >
+                  11:00 AM
+                </p>
               </div>
             </div>
             <button
@@ -407,19 +533,31 @@ const Calendar = () => {
 
           {/* Repeat */}
           <div className="mt-4 mb-90">
-            <h1 className="font-medium text-[16px] text-black mb-2">Repeat</h1>
+            <h1
+              className={`font-medium text-[16px] mb-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
+              Repeat
+            </h1>
             <div className="relative w-full">
               <input
                 type="text"
                 placeholder="Select repeat"
                 value={repeatValue}
                 onChange={(e) => setRepeatValue(e.target.value)}
-                className="w-full h-13.75 rounded-[10px] px-4 pr-12 border border-[#D9D9D9] outline-none text-[14px]"
+                className={`w-full h-13.75 rounded-[10px] px-4 pr-12 outline-none text-[14px] ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                    : "border border-[#D9D9D9] bg-white text-black"
+                }`}
               />
               <img
                 src={arrr}
                 alt=""
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+                className={`absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none ${
+                  isDarkMode ? "invert" : ""
+                }`}
               />
             </div>
           </div>

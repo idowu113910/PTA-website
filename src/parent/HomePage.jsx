@@ -16,10 +16,10 @@ import gr from "../assets/green parent.svg";
 import canc from "../assets/canc parent.svg";
 import { CgBookmark } from "react-icons/cg";
 import { useUser } from "../teacher/UserContext";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "./ParentThemeContext";
 
 const HomePage = () => {
-  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
+  // Single source of truth for theme — comes from ParentThemeContext (wraps the parent routes in App.jsx)
   const { isDarkMode } = useTheme();
 
   const [screen, setScreen] = useState("home");
@@ -213,7 +213,7 @@ const HomePage = () => {
         }`}
       >
         <div className="px-5 pt-6">
-          {/* Header — canvas element, toggles with theme */}
+          {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div>
               <p
@@ -278,7 +278,7 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Quick Access — section header toggles, but the tiles are fixed white cards with black text */}
+          {/* Quick Access — colored-border tiles now use a dark card surface instead of a fixed white one */}
           <h5
             className={`text-[18px] font-medium mt-6 mb-4 ${
               isDarkMode ? "text-white" : "text-black"
@@ -291,14 +291,23 @@ const HomePage = () => {
               <button
                 key={i}
                 onClick={() => item.screen && setScreen(item.screen)}
-                className={`border ${item.border} bg-white rounded-lg p-3 text-left h-23.75 w-full`}
+                className={`border ${item.border} rounded-lg p-3 text-left h-23.75 w-full transition-colors duration-200 ${
+                  isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+                }`}
               >
                 <img src={item.icon} alt="" className="w-7 h-7" />
-                <p className="font-bold text-[13px] mt-1 text-black">
+                <p
+                  className={`font-bold text-[13px] mt-1 ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   {item.label}
                 </p>
                 <p
-                  className={`font-normal text-[12px] mt-0.5 ${item.subColor || "text-black"}`}
+                  className={`font-normal text-[12px] mt-0.5 ${
+                    item.subColor ||
+                    (isDarkMode ? "text-gray-300" : "text-black")
+                  }`}
                 >
                   {item.sub}
                 </p>
@@ -306,7 +315,7 @@ const HomePage = () => {
             ))}
           </div>
 
-          {/* Upcoming Homework — section header toggles, rows are fixed light cards with black text */}
+          {/* Upcoming Homework — rows now use a dark card surface instead of a fixed light one */}
           <h5
             className={`text-[18px] font-medium mt-6 mb-3 ${
               isDarkMode ? "text-white" : "text-black"
@@ -318,15 +327,31 @@ const HomePage = () => {
             {homeworkItems.map((item, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between bg-[#F8F8F8] border border-[#0000001F] rounded-[10px] px-4 py-3 shadow-sm"
+                className={`flex items-center justify-between rounded-[10px] px-4 py-3 shadow-sm transition-colors duration-200 ${
+                  isDarkMode
+                    ? "bg-[#1c1c1c] border border-gray-700"
+                    : "bg-[#F8F8F8] border border-[#0000001F]"
+                }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <CgBookmark className="text-[#444] w-4.5 h-4.5 shrink-0" />
+                  <CgBookmark
+                    className={`w-4.5 h-4.5 shrink-0 ${
+                      isDarkMode ? "text-gray-300" : "text-[#444]"
+                    }`}
+                  />
                   <div className="min-w-0">
-                    <p className="text-[13px] text-[#555] font-normal truncate">
+                    <p
+                      className={`text-[13px] font-normal truncate ${
+                        isDarkMode ? "text-gray-400" : "text-[#555]"
+                      }`}
+                    >
                       {item.subject}
                     </p>
-                    <p className="text-[15px] font-bold text-[#1a1a1a] truncate">
+                    <p
+                      className={`text-[15px] font-bold truncate ${
+                        isDarkMode ? "text-white" : "text-[#1a1a1a]"
+                      }`}
+                    >
                       {item.title}
                     </p>
                   </div>
@@ -371,19 +396,31 @@ const HomePage = () => {
             </h2>
           </div>
 
-          {/* Subject cards — fixed white surface, black text */}
+          {/* Subject cards — now use a dark card surface instead of a fixed white one */}
           <div className="flex flex-col gap-4">
             {subjectData.map((item, index) => (
               <div
                 key={index}
                 onClick={() => setSelectedSubject(item)}
-                className="border border-[#D9D9D9] bg-white rounded-[9px] py-3 px-4 w-full cursor-pointer"
+                className={`rounded-[9px] py-3 px-4 w-full cursor-pointer transition-colors duration-200 ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-[#1c1c1c]"
+                    : "border border-[#D9D9D9] bg-white"
+                }`}
               >
-                <h2 className="font-medium text-[14px] text-black">
+                <h2
+                  className={`font-medium text-[14px] ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   {item.subject}
                 </h2>
                 <img src={gr} alt="" className="mt-2 w-full" />
-                <p className="flex justify-end font-bold text-black text-[14px] mt-1">
+                <p
+                  className={`flex justify-end font-bold text-[14px] mt-1 ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   {item.grade}
                 </p>
               </div>
@@ -391,17 +428,31 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Subject Detail Modal — fixed white surface, black text */}
+        {/* Subject Detail Modal — now uses a dark surface instead of a fixed white one */}
         {selectedSubject && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-5">
-            <div className="bg-white w-full max-w-92.5 rounded-2xl p-6 relative">
+            <div
+              className={`w-full max-w-92.5 rounded-2xl p-6 relative ${
+                isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+              }`}
+            >
               <button
                 onClick={() => setSelectedSubject(null)}
-                className="absolute top-4 right-4 w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center"
+                className={`absolute top-4 right-4 w-7 h-7 rounded-full border flex items-center justify-center ${
+                  isDarkMode ? "border-gray-600" : "border-gray-300"
+                }`}
               >
-                <img src={canc} alt="close" className="w-4 h-4" />
+                <img
+                  src={canc}
+                  alt="close"
+                  className={`w-4 h-4 ${isDarkMode ? "invert" : ""}`}
+                />
               </button>
-              <h2 className="font-bold text-[20px] text-black mb-5 mt-6">
+              <h2
+                className={`font-bold text-[20px] mb-5 mt-6 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 {selectedSubject.fullName}
               </h2>
               <div className="flex flex-col gap-4">
@@ -411,21 +462,43 @@ const HomePage = () => {
                   { label: "Total", value: selectedSubject.total },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between">
-                    <p className="text-[16px] font-medium text-black">
+                    <p
+                      className={`text-[16px] font-medium ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
                       {label} =
                     </p>
-                    <p className="font-black text-[16px] text-black">{value}</p>
+                    <p
+                      className={`font-black text-[16px] ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {value}
+                    </p>
                   </div>
                 ))}
               </div>
               <p className="text-right font-medium text-[18px] text-[#22C55E] mt-4">
                 {selectedSubject.grade} ({selectedSubject.percent})
               </p>
-              <div className="border-t border-gray-200 mt-5 mb-4" />
-              <h3 className="font-bold text-[16px] text-black mb-2">
+              <div
+                className={`border-t mt-5 mb-4 ${
+                  isDarkMode ? "border-gray-700" : "border-gray-200"
+                }`}
+              />
+              <h3
+                className={`font-bold text-[16px] mb-2 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 Grade System
               </h3>
-              <p className="text-[13px] text-[#535151] leading-5">
+              <p
+                className={`text-[13px] leading-5 ${
+                  isDarkMode ? "text-gray-400" : "text-[#535151]"
+                }`}
+              >
                 (A+)= 90-100, (A)= 85-89, (B+)= 80-85, (B)= 70-79, (C+)= 60-69,
                 (C-)= 50-59, (D)= 1-49
               </p>
@@ -465,13 +538,19 @@ const HomePage = () => {
             </h2>
           </div>
 
-          {/* Term Dropdown — fixed light surface, black text */}
+          {/* Term Dropdown — now uses a dark surface instead of a fixed light one */}
           <div className="relative mb-5">
             <div
-              className="w-full h-10.5 rounded-[9px] px-4 bg-[#F3F4F6] flex items-center justify-between cursor-pointer"
+              className={`w-full h-10.5 rounded-[9px] px-4 flex items-center justify-between cursor-pointer transition-colors duration-200 ${
+                isDarkMode ? "bg-[#1c1c1c]" : "bg-[#F3F4F6]"
+              }`}
               onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
             >
-              <p className="font-medium text-[13px] text-black truncate flex-1 pr-2">
+              <p
+                className={`font-medium text-[13px] truncate flex-1 pr-2 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 {selectedTermYear}
               </p>
               <img
@@ -479,11 +558,17 @@ const HomePage = () => {
                 alt=""
                 className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                   isTermDropdownOpen ? "rotate-180" : ""
-                }`}
+                } ${isDarkMode ? "invert" : ""}`}
               />
             </div>
             {isTermDropdownOpen && (
-              <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-lg shadow-md">
+              <div
+                className={`absolute z-10 mt-1 w-full rounded-lg shadow-md ${
+                  isDarkMode
+                    ? "bg-[#1c1c1c] border border-gray-700"
+                    : "bg-white border border-[#E5E7EB]"
+                }`}
+              >
                 {termYears.map((term) => (
                   <div
                     key={term}
@@ -491,7 +576,11 @@ const HomePage = () => {
                       setSelectedTermYear(term);
                       setIsTermDropdownOpen(false);
                     }}
-                    className="px-4 py-3 text-[14px] font-normal text-black cursor-pointer hover:bg-[#EFF6FF]"
+                    className={`px-4 py-3 text-[14px] font-normal cursor-pointer ${
+                      isDarkMode
+                        ? "text-white hover:bg-[#262626]"
+                        : "text-black hover:bg-[#EFF6FF]"
+                    }`}
                   >
                     {term}
                   </div>
@@ -500,23 +589,37 @@ const HomePage = () => {
             )}
           </div>
 
-          {/* Stats Row — fixed tinted surfaces, colored text (unaffected by theme) */}
+          {/* Stats Row — tinted surfaces darken instead of staying white, text stays colored */}
           <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="rounded-[9px] py-3 px-2 bg-[#F0FDF4] flex flex-col items-center text-center">
-              <p className="font-normal text-[14px] text-black">43</p>
-              <p className="font-semibold text-[14px] text-black">Present</p>
+            <div
+              className={`rounded-[9px] py-3 px-2 flex flex-col items-center text-center transition-colors duration-200 ${
+                isDarkMode ? "bg-[#0f2a1c]" : "bg-[#F0FDF4]"
+              }`}
+            >
+              <p className="font-normal text-[14px] text-[#10B981]">43</p>
+              <p className="font-semibold text-[14px] text-[#10B981]">
+                Present
+              </p>
             </div>
-            <div className="rounded-[9px] py-3 px-2 bg-[#FEF2F2] flex flex-col items-center text-center">
-              <p className="font-normal text-[14px] text-black">0</p>
-              <p className="font-semibold text-[14px] text-black">Absent</p>
+            <div
+              className={`rounded-[9px] py-3 px-2 flex flex-col items-center text-center transition-colors duration-200 ${
+                isDarkMode ? "bg-[#2a0f0f]" : "bg-[#FEF2F2]"
+              }`}
+            >
+              <p className="font-normal text-[14px] text-[#DC2626]">0</p>
+              <p className="font-semibold text-[14px] text-[#DC2626]">Absent</p>
             </div>
-            <div className="rounded-[9px] py-3 px-2 bg-[#FEFCE8] flex flex-col items-center text-center">
+            <div
+              className={`rounded-[9px] py-3 px-2 flex flex-col items-center text-center transition-colors duration-200 ${
+                isDarkMode ? "bg-[#2a2610]" : "bg-[#FEFCE8]"
+              }`}
+            >
               <p className="font-normal text-[14px] text-[#E7C905]">3</p>
               <p className="font-semibold text-[14px] text-[#E7C905]">Late</p>
             </div>
           </div>
 
-          {/* Attendance Log Header — canvas element, toggles with theme */}
+          {/* Attendance Log Header */}
           <div className="flex items-center justify-between mb-4">
             <p
               className={`font-bold text-[16px] ${
@@ -541,27 +644,47 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Attendance Log Items — fixed white surface, black text */}
+          {/* Attendance Log Items — now use a dark card surface instead of a fixed white one */}
           <div className="flex flex-col gap-3">
             {attendanceData.map((item, index) => (
               <div
                 key={index}
-                className="flex w-full rounded-[9px] border border-[#D9D9D9] bg-white py-2 px-3 gap-3 items-center"
+                className={`flex w-full rounded-[9px] py-2 px-3 gap-3 items-center transition-colors duration-200 ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-[#1c1c1c]"
+                    : "border border-[#D9D9D9] bg-white"
+                }`}
               >
                 <img src={item.icon} alt="" className="w-7.5 h-7.5 shrink-0" />
                 <div className="flex flex-col justify-center flex-1 min-w-0">
-                  <p className="font-medium text-[12px] text-black truncate">
+                  <p
+                    className={`font-medium text-[12px] truncate ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
                     {item.date}
                   </p>
-                  <p className="font-medium text-[12px] text-black mt-0.5">
+                  <p
+                    className={`font-medium text-[12px] mt-0.5 ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
                     {item.status}
                   </p>
                 </div>
                 <div className="flex flex-col justify-center text-right shrink-0">
-                  <p className="font-medium text-[12px] text-black whitespace-nowrap">
+                  <p
+                    className={`font-medium text-[12px] whitespace-nowrap ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
                     {item.time}
                   </p>
-                  <p className="font-medium text-[12px] text-black mt-0.5">
+                  <p
+                    className={`font-medium text-[12px] mt-0.5 ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
                     {item.duration}
                   </p>
                 </div>

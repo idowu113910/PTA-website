@@ -10,17 +10,26 @@ import rpp from "../assets/report2.svg";
 import caa from "../assets/callender 2.svg";
 import prr from "../assets/pro2.svg";
 import mss from "../assets/message2.svg";
-import { useTheme } from "../ThemeContext";
+import { useTheme as useParentTheme } from "../parent/ParentThemeContext";
+import { useTheme as useTeacherTheme } from "../teacher/TeacherContext";
 
 const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
-  const { isDarkMode } = useTheme();
 
   // Detect role from current URL prefix ("/teacher/..." vs "/parent/...")
   const isTeacher = location.pathname.startsWith("/teacher");
   const rolePrefix = isTeacher ? "/teacher" : "/parent";
+
+  // This component is shared between both role trees, so it can't statically
+  // pick one context. Both hooks are always called (no conditional hook calls —
+  // that would break the rules of hooks); whichever provider isn't an ancestor
+  // for the current route simply returns undefined, and we use the URL-derived
+  // role to pick the one that's actually live.
+  const parentTheme = useParentTheme();
+  const teacherTheme = useTeacherTheme();
+  const isDarkMode =
+    (isTeacher ? teacherTheme : parentTheme)?.isDarkMode ?? false;
 
   const tabs = [
     { key: "home", label: "Home", icon: hmm, activeIcon: home },

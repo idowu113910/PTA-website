@@ -27,7 +27,7 @@ import kids from "../assets/kdd.jpg";
 import re from "../assets/re-time.svg";
 import loc from "../assets/loc.svg";
 import BottomNavigation from "../components/BottomNavigation";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "./TeacherContext";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = [

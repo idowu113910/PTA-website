@@ -37,7 +37,7 @@ import { useUser } from "./UserContext";
 import parentImg1 from "../assets/divine.svg";
 import parentImg2 from "../assets/Shayla.svg";
 import parentImg3 from "../assets/Tamara.svg";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "./TeacherContext";
 
 registerLocale("en-GB", enGB);
 

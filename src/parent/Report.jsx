@@ -6,17 +6,17 @@ import beh2 from "../assets/behaviour 2 parent.svg";
 import arr from "../assets/arr down.svg";
 import circ from "../assets/circle parent.svg";
 import gr from "../assets/green parent.svg";
-import BottomNavigation from "../components/BottomNavigate";
+import BottomNavigation from "../components/BottomNavigation";
 import tm from "../assets/tm parent.svg";
 import cm from "../assets/cm parent.svg";
 import rsp from "../assets/rsp parent.svg";
 import rsb from "../assets/rsb parent.svg";
 import dv from "../assets/divine parent.svg";
 import cnc from "../assets/Grade cnc.svg";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "./ParentThemeContext";
 
 const Report = () => {
-  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
+  // Single source of truth for theme — comes from ParentThemeContext (wraps the parent routes in App.jsx)
   const { isDarkMode } = useTheme();
 
   const [activeTab, setActiveTab] = useState("academic");
@@ -71,14 +71,14 @@ const Report = () => {
 
   return (
     <div
-      className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 dark:bg-[#121212] dark:text-white ${
+      className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
         isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
       }`}
     >
       <div className="px-5 pt-6">
         {/* Page Title */}
         <h1
-          className={`font-bold text-[20px] mb-5 dark:text-white ${
+          className={`font-bold text-[20px] mb-5 ${
             isDarkMode ? "text-white" : "text-black"
           }`}
         >
@@ -87,7 +87,7 @@ const Report = () => {
 
         {/* Tab Switcher */}
         <div
-          className={`flex w-full rounded-[9px] py-[7px] px-[8px] gap-2 h-[62px] items-center dark:border-gray-700 ${
+          className={`flex w-full rounded-[9px] py-[7px] px-[8px] gap-2 h-[62px] items-center ${
             isDarkMode ? "border border-gray-700" : "border border-[#D9D9D9]"
           }`}
         >
@@ -105,7 +105,9 @@ const Report = () => {
             <img
               src={activeTab === "academic" ? aca2 : aca}
               alt=""
-              className="w-[18px] h-[18px] flex-shrink-0"
+              className={`w-[18px] h-[18px] flex-shrink-0 ${
+                activeTab !== "academic" && isDarkMode ? "invert" : ""
+              }`}
             />
             <p
               className={`font-medium text-[16px] ${
@@ -134,7 +136,9 @@ const Report = () => {
             <img
               src={activeTab === "behavior" ? beh2 : beh}
               alt=""
-              className="w-[18px] h-[18px] flex-shrink-0"
+              className={`w-[18px] h-[18px] flex-shrink-0 ${
+                activeTab !== "behavior" && isDarkMode ? "invert" : ""
+              }`}
             />
             <p
               className={`font-medium text-[16px] ${
@@ -158,7 +162,11 @@ const Report = () => {
             }`}
             onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
           >
-            <p className="font-medium text-[13px] truncate flex-1 pr-2 text-black">
+            <p
+              className={`font-medium text-[13px] truncate flex-1 pr-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               {selectedTermYear}
             </p>
             <img
@@ -188,7 +196,7 @@ const Report = () => {
                   className={`px-4 py-3 text-[14px] font-normal cursor-pointer ${
                     isDarkMode
                       ? "text-white hover:bg-[#262626]"
-                      : "hover:bg-[#EFF6FF]"
+                      : "text-black hover:bg-[#EFF6FF]"
                   }`}
                 >
                   {term}

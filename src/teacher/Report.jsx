@@ -34,9 +34,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ch from "../assets/choose.svg";
 import on from "../assets/switch.svg";
 import off from "../assets/off.svg";
-import ana from "../assets/analytics.svg";
+import ana from "../assets/report rewww.svg";
 import rr from "../assets/report review.svg";
-import { useTheme } from "../ThemeContext";
+import { useTheme } from "./TeacherContext";
 
 registerLocale("en-GB", enGB);
 
@@ -812,7 +812,11 @@ const Report = () => {
 
                 {/* DOB */}
                 <div>
-                  <label className="block text-[15px] font-medium mb-2">
+                  <label
+                    className={`block text-[15px] font-medium mb-2 ${
+                      isDarkMode ? "text-white" : "text-[#303030]"
+                    }`}
+                  >
                     Date Of Birth
                   </label>
                   <div className="relative">
@@ -830,11 +834,19 @@ const Report = () => {
                       src={cal}
                       alt="calendar"
                       onClick={() => setIsDOBOpen(true)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer"
+                      className={`absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer transition-all ${
+                        isDarkMode ? "brightness-0 invert opacity-80" : ""
+                      }`}
                     />
                     {isDOBOpen && (
-                      <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 px-4">
-                        <div className="bg-white rounded-xl p-4 shadow-lg w-full max-w-[320px]">
+                      <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 px-4">
+                        <div
+                          className={`rounded-xl p-4 shadow-lg w-full max-w-[320px] transition-colors ${
+                            isDarkMode
+                              ? "bg-[#1E1E1E] text-white"
+                              : "bg-white text-gray-900"
+                          }`}
+                        >
                           <DatePicker
                             selected={studentDOB}
                             onChange={(d) => {
@@ -847,8 +859,9 @@ const Report = () => {
                             locale="en-GB"
                           />
                           <button
+                            type="button"
                             onClick={() => setIsDOBOpen(false)}
-                            className="mt-2 px-4 py-2 bg-[#3B82F6] text-white rounded-md w-full"
+                            className="mt-2 px-4 py-2 bg-[#FF7B17] hover:bg-[#E06A10] text-white font-medium rounded-md w-full transition-colors"
                           >
                             Close
                           </button>
@@ -1408,14 +1421,16 @@ const Report = () => {
             className="flex items-center gap-4 px-5 py-5 cursor-pointer"
             onClick={() => setScreen("report")}
           >
-            <img src={back} alt="back" />
+            <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
             <h2 className="text-[20px] font-medium">Generate Report</h2>
           </div>
 
           <div className="px-5 flex flex-col gap-5">
             {/* Student Name */}
             <div>
-              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+              <label
+                className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-[#303030]"}`}
+              >
                 Student Name
               </label>
               <input
@@ -1429,7 +1444,11 @@ const Report = () => {
 
             {/* Academic Term */}
             <div>
-              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+              <label
+                className={`block text-[15px] font-medium mb-2 ${
+                  isDarkMode ? "text-white" : "text-[#303030]"
+                }`}
+              >
                 Academic Term
               </label>
               <div className="relative">
@@ -1439,11 +1458,19 @@ const Report = () => {
                     setIsTermOpen(!isTermOpen);
                     setIsReportTypeOpen(false);
                   }}
-                  className={dropdownBtnClass}
+                  className={`w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
+                    isDarkMode
+                      ? "bg-[#1E1E1E] border-[#2A2A2A]"
+                      : "bg-[#FCFCFC] border-[#D9D9D9]"
+                  }`}
                 >
                   <span
                     className={
-                      selectedTerm ? "text-[#303030]" : "text-gray-400"
+                      selectedTerm
+                        ? isDarkMode
+                          ? "text-white"
+                          : "text-[#303030]"
+                        : "text-gray-400"
                     }
                   >
                     {selectedTerm || "Select an Academic Term"}
@@ -1451,16 +1478,29 @@ const Report = () => {
                   <img
                     src={arr}
                     alt=""
-                    className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isTermOpen ? "rotate-180" : ""
+                    } ${isDarkMode ? "brightness-200" : ""}`}
                   />
                 </button>
+
                 {isTermOpen && (
-                  <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                  <div
+                    className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
+                      isDarkMode
+                        ? "bg-[#121212] border-[#2A2A2A] text-white"
+                        : "bg-white border-[#E5E7EB] text-gray-900"
+                    }`}
+                  >
                     {terms.map((t) => (
                       <div
                         key={t}
                         onClick={() => handleSelectTerm(t)}
-                        className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                        className={`px-4 py-3 text-[14px] cursor-pointer ${
+                          isDarkMode
+                            ? "hover:bg-[#1E1E1E]"
+                            : "hover:bg-[#EFF6FF]"
+                        }`}
                       >
                         {t}
                       </div>
@@ -1472,7 +1512,11 @@ const Report = () => {
 
             {/* Report Type */}
             <div>
-              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+              <label
+                className={`block text-[15px] font-medium mb-2 ${
+                  isDarkMode ? "text-white" : "text-[#303030]"
+                }`}
+              >
                 Report Type
               </label>
               <div className="relative">
@@ -1482,11 +1526,19 @@ const Report = () => {
                     setIsReportTypeOpen(!isReportTypeOpen);
                     setIsTermOpen(false);
                   }}
-                  className={dropdownBtnClass}
+                  className={`w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
+                    isDarkMode
+                      ? "bg-[#1E1E1E] border-[#2A2A2A]"
+                      : "bg-[#FCFCFC] border-[#D9D9D9]"
+                  }`}
                 >
                   <span
                     className={
-                      selectedReportType ? "text-[#303030]" : "text-gray-400"
+                      selectedReportType
+                        ? isDarkMode
+                          ? "text-white"
+                          : "text-[#303030]"
+                        : "text-gray-400"
                     }
                   >
                     {selectedReportType || "Select a report type"}
@@ -1494,16 +1546,29 @@ const Report = () => {
                   <img
                     src={arr}
                     alt=""
-                    className={`transition-transform duration-200 ${isReportTypeOpen ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isReportTypeOpen ? "rotate-180" : ""
+                    } ${isDarkMode ? "brightness-200" : ""}`}
                   />
                 </button>
+
                 {isReportTypeOpen && (
-                  <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md max-h-[220px] overflow-y-auto">
+                  <div
+                    className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md max-h-[220px] overflow-y-auto ${
+                      isDarkMode
+                        ? "bg-[#121212] border-[#2A2A2A] text-white"
+                        : "bg-white border-[#E5E7EB] text-gray-900"
+                    }`}
+                  >
                     {reportTypes.map((rt) => (
                       <div
                         key={rt}
                         onClick={() => handleSelectReportType(rt)}
-                        className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                        className={`px-4 py-3 text-[14px] cursor-pointer ${
+                          isDarkMode
+                            ? "hover:bg-[#1E1E1E]"
+                            : "hover:bg-[#EFF6FF]"
+                        }`}
                       >
                         {rt}
                       </div>
@@ -1514,25 +1579,59 @@ const Report = () => {
             </div>
 
             {/* Preview card */}
-            <div className="border border-dashed border-black rounded-[8px] h-[160px] flex flex-col items-center justify-center mt-2">
-              <img src={ana} alt="" className="mb-2" />
+            <div
+              className={`border border-dashed rounded-[8px] h-[160px] flex flex-col items-center justify-center mt-2 transition-colors ${
+                isDarkMode
+                  ? "bg-[#1E1E1E] border-[#2A2A2A]"
+                  : "bg-[#FCFCFC] border-black"
+              }`}
+            >
+              <img
+                src={ana}
+                alt=""
+                className={`mb-2 transition-all ${isDarkMode ? "brightness-200" : ""}`}
+              />
               <div className="flex items-center gap-1 mb-1">
-                <img src={rr} alt="" className="w-6 h-6" />
-                <p className="font-semibold text-[15px] text-black">
+                <img
+                  src={rr}
+                  alt=""
+                  className={`w-6 h-6 transition-all ${isDarkMode ? "brightness-200" : ""}`}
+                />
+                <p
+                  className={`font-semibold text-[15px] ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   View Report Review
                 </p>
               </div>
-              <p className="text-[12px] text-[#9E9E9E] text-center px-6 leading-tight">
+              <p
+                className={`text-[12px] text-center px-6 leading-tight ${
+                  isDarkMode ? "text-[#737373]" : "text-[#9E9E9E]"
+                }`}
+              >
                 Preview the generated attendance summary report for Shayla
                 Jason.
               </p>
             </div>
           </div>
 
-          <div className={fixedBtnWrapper}>
+          <div
+            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+              isDarkMode
+                ? "bg-black border-[#1F1F1F]"
+                : "bg-white border-[#E3E3E3]"
+            }`}
+          >
             <button
               disabled={!isBehaviourFormValid}
-              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white ${isBehaviourFormValid ? "bg-[#FF7B17] cursor-pointer" : "bg-gray-300 cursor-not-allowed"}`}
+              className={`w-full h-[50px] rounded-[12px] font-semibold text-[16px] transition-all ${
+                isBehaviourFormValid
+                  ? "bg-[#FF7B17] hover:bg-[#E06A10] text-white cursor-pointer shadow-md"
+                  : isDarkMode
+                    ? "bg-[#262626] text-[#737373] cursor-not-allowed"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
               Save
             </button>
