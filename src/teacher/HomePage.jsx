@@ -37,10 +37,14 @@ import { useUser } from "./UserContext";
 import parentImg1 from "../assets/divine.svg";
 import parentImg2 from "../assets/Shayla.svg";
 import parentImg3 from "../assets/Tamara.svg";
+import { useTheme } from "../ThemeContext";
 
 registerLocale("en-GB", enGB);
 
-const HomePaget = () => {
+const HomePage = () => {
+  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
+  const { isDarkMode } = useTheme();
+
   const [percentage, setPercentage] = useState(0);
   const [percentage89, setPercentage89] = useState(0);
   const [percentage22, setPercentage22] = useState(0);
@@ -355,16 +359,35 @@ const HomePaget = () => {
     return date.toLocaleDateString("en-US", options);
   };
 
-  // Shared input class
+  // Shared input class — base (light-mode) styling; dark-mode overrides applied inline via isDarkMode
   const inputClass =
-    "w-full h-[52px] rounded-[8px] border border-[#0000001F] py-2 px-3 text-[14px] font-normal placeholder:text-[14px] placeholder:text-gray-400 focus:outline-none focus:border-[#FF7B17]";
+    "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[14px] font-normal focus:outline-none";
+
+  const inputClassLight =
+    "border-[#0000001F] bg-white text-[#303030] placeholder:text-[14px] placeholder:text-gray-400 focus:border-[#FF7B17]";
+
+  const inputClassDark =
+    "border-gray-600 bg-transparent text-white placeholder:text-[14px] placeholder:text-gray-400 focus:border-[#FF7B17]";
 
   // Shared dropdown button class
-  const dropdownBtnClass =
+  const dropdownBtnClassLight =
     "w-full h-[52px] px-3 border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between text-[14px]";
 
+  const dropdownBtnClassDark =
+    "w-full h-[52px] px-3 border border-gray-600 rounded-[8px] bg-transparent flex items-center justify-between text-[14px]";
+
+  // Shared dropdown list panel + item classes
+  const dropdownPanelLight =
+    "absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md";
+  const dropdownPanelDark =
+    "absolute z-10 mt-1 w-full bg-[#1e1e1e] border border-gray-700 rounded-[8px] shadow-md";
+  const dropdownItemLight =
+    "px-4 py-3 text-[14px] text-[#303030] cursor-pointer hover:bg-[#EFF6FF]";
+  const dropdownItemDark =
+    "px-4 py-3 text-[14px] text-white cursor-pointer hover:bg-[#2a2a2a]";
+
   return (
-    <div className="w-full max-w-[430px] mx-auto min-h-screen bg-white">
+    <div className="w-full max-w-[430px] mx-auto min-h-screen">
       {/* ================= NOTIFICATIONS ================= */}
       {showNotifications && (
         <>
@@ -372,11 +395,19 @@ const HomePaget = () => {
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setShowNotifications(false)}
           />
-          <div className="fixed inset-0 bg-white z-50 overflow-y-auto max-w-[430px] mx-auto">
+          <div
+            className={`fixed inset-0 z-50 overflow-y-auto max-w-[430px] mx-auto transition-colors duration-200 ${
+              isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+            }`}
+          >
             <div className="p-5">
               <div className="flex items-center gap-4 mb-6">
                 <button onClick={() => setShowNotifications(false)}>
-                  <img src={back} alt="back" />
+                  <img
+                    src={back}
+                    alt="back"
+                    className={isDarkMode ? "invert" : ""}
+                  />
                 </button>
                 <h2 className="text-[20px] font-medium">Notifications</h2>
               </div>
@@ -392,10 +423,26 @@ const HomePaget = () => {
                 ].map(([title, desc], i) => (
                   <div
                     key={i}
-                    className="border border-[#D9D9D9] rounded-[6px] p-3"
+                    className={`rounded-[6px] p-3 ${
+                      isDarkMode
+                        ? "border border-gray-600 bg-transparent"
+                        : "border border-[#D9D9D9] bg-white"
+                    }`}
                   >
-                    <p className="text-[14px] font-medium">{title}</p>
-                    <p className="text-[12px] text-[#656363]">{desc}</p>
+                    <p
+                      className={`text-[14px] font-medium ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {title}
+                    </p>
+                    <p
+                      className={`text-[12px] ${
+                        isDarkMode ? "text-gray-400" : "text-[#656363]"
+                      }`}
+                    >
+                      {desc}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -406,7 +453,11 @@ const HomePaget = () => {
 
       {/* ================= HOME SCREEN ================= */}
       {screen === "home" && (
-        <div className="pb-24">
+        <div
+          className={`pb-24 transition-colors duration-200 ${
+            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+          }`}
+        >
           {/* Header */}
           <div className="flex justify-between items-center px-5 pt-6">
             <div className="flex gap-3 items-center">
@@ -416,29 +467,53 @@ const HomePaget = () => {
                 className="w-10 h-10 flex-shrink-0 rounded-full object-cover"
               />
               <div>
-                <p className="text-[13px]">Welcome,</p>
-                <p className="text-[15px] font-semibold leading-tight">
+                <p
+                  className={`text-[13px] ${isDarkMode ? "text-gray-300" : ""}`}
+                >
+                  Welcome,
+                </p>
+                <p
+                  className={`text-[15px] font-semibold leading-tight ${
+                    isDarkMode ? "text-white" : ""
+                  }`}
+                >
                   {fullName}
                 </p>
                 {grade && room && (
-                  <p className="text-[12px] text-gray-500">
+                  <p
+                    className={`text-[12px] ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}
+                  >
                     Grade {grade}. Room {room}.
                   </p>
                 )}
               </div>
             </div>
             <FaRegBell
-              className="w-5 h-5 cursor-pointer flex-shrink-0"
+              className={`w-5 h-5 cursor-pointer flex-shrink-0 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
               onClick={() => setShowNotifications(true)}
             />
           </div>
 
-          <h4 className="text-[17px] font-medium px-5 mt-8">
+          <h4
+            className={`text-[17px] font-medium px-5 mt-8 ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
             Catch Up on Today's Quick Stats
           </h4>
 
-          {/* Three circles */}
-          <div className="bg-[#FFF0E5E0] mt-4 rounded-[10px] mx-5 py-5 px-2">
+          {/* Three circles — outlined dark card in dark mode, matching the reference screenshot */}
+          <div
+            className={`mt-4 rounded-[10px] mx-5 py-5 px-2 ${
+              isDarkMode
+                ? "border border-gray-600 bg-transparent"
+                : "bg-[#FFF0E5E0]"
+            }`}
+          >
             <div className="flex justify-around items-start">
               {[
                 {
@@ -490,11 +565,19 @@ const HomePaget = () => {
                         cy={radius}
                       />
                     </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-[13px] font-semibold text-black">
+                    <div
+                      className={`absolute inset-0 flex items-center justify-center text-[13px] font-semibold ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
                       {pct}%
                     </div>
                   </div>
-                  <p className="mt-2 font-semibold text-black text-[11px] w-[72px] text-center leading-tight">
+                  <p
+                    className={`mt-2 font-semibold text-[11px] w-[72px] text-center leading-tight ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
                     {label}
                   </p>
                 </div>
@@ -502,47 +585,95 @@ const HomePaget = () => {
             </div>
           </div>
 
-          <h5 className="text-[17px] font-medium px-5 mt-6">
+          <h5
+            className={`text-[17px] font-medium px-5 mt-6 ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
             Get on Today's Task
           </h5>
 
-          {/* Task grid — 2 cols, full width */}
+          {/* Task grid — outlined cards, transparent in dark mode so the dark page bg shows through */}
           <div className="grid grid-cols-2 gap-3 px-5 mt-4">
             <button
               onClick={() => setScreen("post-homework")}
-              className="border border-[#3B82F6] rounded-[8px] p-3 text-left h-[90px]"
+              className={`border rounded-[8px] p-3 text-left h-[90px] ${
+                isDarkMode
+                  ? "border-[#3B82F6] bg-transparent"
+                  : "border-[#3B82F6] bg-white"
+              }`}
             >
               <img src={hm} alt="" className="w-9" />
-              <p className="font-bold text-[13px] mt-2">Post Homework</p>
+              <p
+                className={`font-bold text-[13px] mt-2 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Post Homework
+              </p>
             </button>
 
             <button
               onClick={() => setScreen("mark-attendance")}
-              className="border border-[#F97316] rounded-[8px] p-3 text-left h-[90px]"
+              className={`border rounded-[8px] p-3 text-left h-[90px] ${
+                isDarkMode
+                  ? "border-[#F97316] bg-transparent"
+                  : "border-[#F97316] bg-white"
+              }`}
             >
               <img src={att} alt="" className="w-9" />
-              <p className="font-bold text-[13px] mt-2">Mark Attendance</p>
+              <p
+                className={`font-bold text-[13px] mt-2 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Mark Attendance
+              </p>
             </button>
 
             <button
               onClick={() => setScreen("add-grade")}
-              className="border border-[#0F766E] rounded-[8px] p-3 text-left h-[90px]"
+              className={`border rounded-[8px] p-3 text-left h-[90px] ${
+                isDarkMode
+                  ? "border-[#0F766E] bg-transparent"
+                  : "border-[#0F766E] bg-white"
+              }`}
             >
               <img src={gd} alt="" className="w-9" />
-              <p className="font-bold text-[13px] mt-2">Add Grade</p>
+              <p
+                className={`font-bold text-[13px] mt-2 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Add Grade
+              </p>
             </button>
 
             <button
               onClick={() => setScreen("add-students")}
-              className="border border-[#3B82F6] rounded-[8px] p-3 text-left h-[90px]"
+              className={`border rounded-[8px] p-3 text-left h-[90px] ${
+                isDarkMode
+                  ? "border-[#3B82F6] bg-transparent"
+                  : "border-[#3B82F6] bg-white"
+              }`}
             >
               <img src={st} alt="" className="w-9" />
-              <p className="font-bold text-[13px] mt-2">Add Students</p>
+              <p
+                className={`font-bold text-[13px] mt-2 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Add Students
+              </p>
             </button>
           </div>
 
           {/* Recent Messages */}
-          <p className="font-medium text-[17px] text-black px-5 mt-6 mb-3">
+          <p
+            className={`font-medium text-[17px] px-5 mt-6 mb-3 ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
             Recent Messages
           </p>
 
@@ -572,7 +703,11 @@ const HomePaget = () => {
             ].map((chat, index) => (
               <div
                 key={index}
-                className="flex items-center gap-3 bg-[#F8F8F8] border border-[#0000001F] px-3 py-3 rounded-[6px]"
+                className={`flex items-center gap-3 px-3 py-3 rounded-[6px] ${
+                  isDarkMode
+                    ? "border border-gray-600 bg-transparent"
+                    : "bg-[#F8F8F8] border border-[#0000001F]"
+                }`}
               >
                 <img
                   src={chat.img}
@@ -581,15 +716,27 @@ const HomePaget = () => {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-center">
-                    <p className="font-semibold text-[14px] text-[#1a1a1a] truncate">
+                    <p
+                      className={`font-semibold text-[14px] truncate ${
+                        isDarkMode ? "text-white" : "text-[#1a1a1a]"
+                      }`}
+                    >
                       {chat.name}
                     </p>
-                    <p className="text-[11px] text-[#888] ml-2 flex-shrink-0">
+                    <p
+                      className={`text-[11px] ml-2 flex-shrink-0 ${
+                        isDarkMode ? "text-gray-400" : "text-[#888]"
+                      }`}
+                    >
                       {chat.time}
                     </p>
                   </div>
                   <div className="flex justify-between items-center mt-[2px]">
-                    <p className="text-[12px] text-[#666] truncate">
+                    <p
+                      className={`text-[12px] truncate ${
+                        isDarkMode ? "text-gray-300" : "text-[#666]"
+                      }`}
+                    >
                       {chat.message}
                     </p>
                     <span className="ml-2 flex-shrink-0 bg-[#22C55E] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
@@ -610,53 +757,107 @@ const HomePaget = () => {
 
       {/* ================= MARK ATTENDANCE SCREEN ================= */}
       {screen === "mark-attendance" && (
-        <div className="pb-28">
+        <div
+          className={`pb-28 transition-colors duration-200 ${
+            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+          }`}
+        >
           <div
             className="flex items-center gap-4 px-5 py-5 cursor-pointer"
             onClick={() => setScreen("home")}
           >
-            <img src={back} alt="back" />
-            <h2 className="text-[20px] font-medium">Attendance</h2>
+            <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
+            <h2
+              className={`text-[20px] font-medium ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
+              Attendance
+            </h2>
           </div>
 
           {/* Class Attendance header */}
           <div className="px-5">
             <div className="flex justify-between items-center">
-              <p className="font-semibold text-[15px] text-black">
+              <p
+                className={`font-semibold text-[15px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 Class Attendance
               </p>
-              <p className="font-medium text-[13px] text-black">Today</p>
+              <p
+                className={`font-medium text-[13px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Today
+              </p>
             </div>
           </div>
 
-          {/* Date navigator */}
-          <div className="border border-[#E3E3E3] rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3">
+          {/* Date navigator — outlined, transparent in dark mode */}
+          <div
+            className={`rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3 ${
+              isDarkMode
+                ? "border border-gray-600 bg-transparent"
+                : "border border-[#E3E3E3] bg-white"
+            }`}
+          >
             <img
               src={back3}
               alt="previous day"
               onClick={handlePrevDay}
-              className="cursor-pointer flex-shrink-0 w-5 h-5"
+              className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
+                isDarkMode ? "invert" : ""
+              }`}
             />
-            <p className="font-medium text-[13px] text-black text-center truncate mx-2">
+            <p
+              className={`font-medium text-[13px] text-center truncate mx-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               {formatDate(currentDate)}
             </p>
             <img
               src={front}
               alt="next day"
               onClick={handleNextDay}
-              className="cursor-pointer flex-shrink-0 w-5 h-5"
+              className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
+                isDarkMode ? "invert" : ""
+              }`}
             />
           </div>
 
-          {/* Today's Summary */}
-          <div className="border border-[#E3E3E3] rounded-[6px] mx-5 mt-4 p-3">
-            <h2 className="font-medium text-[13px] text-black mb-2">
+          {/* Today's Summary — outlined, transparent in dark mode */}
+          <div
+            className={`rounded-[6px] mx-5 mt-4 p-3 ${
+              isDarkMode
+                ? "border border-gray-600 bg-transparent"
+                : "border border-[#E3E3E3] bg-white"
+            }`}
+          >
+            <h2
+              className={`font-medium text-[13px] mb-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               Today's Summary
             </h2>
             <div className="flex justify-between gap-2">
               {/* Present */}
-              <div className="flex-1 bg-[#F0FDF4] rounded-[4px] py-2 flex flex-col items-center">
-                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mb-1">
+              <div
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#F0FDF4]"
+                }`}
+              >
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
+                    isDarkMode ? "bg-green-900/40" : "bg-green-100"
+                  }`}
+                >
                   <svg
                     className="w-4 h-4 text-green-500"
                     fill="none"
@@ -671,53 +872,115 @@ const HomePaget = () => {
                     />
                   </svg>
                 </div>
-                <p className="text-[14px] font-semibold text-black">
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   {counts.present}
                 </p>
-                <p className="text-[12px] font-medium text-black">Present</p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Present
+                </p>
               </div>
 
               {/* Absent */}
-              <div className="flex-1 bg-[#FDF1F1] rounded-[4px] py-2 flex flex-col items-center">
+              <div
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#FDF1F1]"
+                }`}
+              >
                 <img src={pre} alt="" className="w-6 h-6 mb-1" />
-                <p className="text-[14px] font-semibold text-black">
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   {counts.absent}
                 </p>
-                <p className="text-[12px] font-medium text-black">Absent</p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Absent
+                </p>
               </div>
 
               {/* Late */}
-              <div className="flex-1 bg-[#FEFCE9] rounded-[4px] py-2 flex flex-col items-center">
+              <div
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#FEFCE9]"
+                }`}
+              >
                 <img src={late} alt="" className="w-6 h-6 mb-1" />
-                <p className="text-[14px] font-semibold text-black">
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
                   {counts.late}
                 </p>
-                <p className="text-[12px] font-medium text-black">Late</p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Late
+                </p>
               </div>
             </div>
 
-            <div className="w-full h-[1px] bg-[#D9D9D9] mt-3 mb-2" />
+            <div
+              className={`w-full h-[1px] mt-3 mb-2 ${
+                isDarkMode ? "bg-gray-700" : "bg-[#D9D9D9]"
+              }`}
+            />
 
             <div className="flex justify-between">
-              <p className="font-medium text-black text-[14px]">
+              <p
+                className={`font-medium text-[14px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 Total Students
               </p>
-              <p className="font-semibold text-black text-[14px]">
+              <p
+                className={`font-semibold text-[14px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 {students.length}
               </p>
             </div>
           </div>
 
-          <p className="font-medium text-[17px] text-black px-5 mt-4 mb-2">
+          <p
+            className={`font-medium text-[17px] px-5 mt-4 mb-2 ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
             Student List
           </p>
 
-          {/* Student rows */}
+          {/* Student rows — outlined, transparent in dark mode */}
           <div className="px-5 flex flex-col gap-3">
             {studentss.map((student) => (
               <div
                 key={student.id}
-                className="border border-[#E3E3E3] rounded-[6px] px-3 py-2 flex items-center justify-between"
+                className={`rounded-[6px] px-3 py-2 flex items-center justify-between ${
+                  isDarkMode
+                    ? "border border-gray-600 bg-transparent"
+                    : "border border-[#E3E3E3] bg-white"
+                }`}
               >
                 {/* Left: avatar + info */}
                 <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -727,10 +990,18 @@ const HomePaget = () => {
                     className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
                   />
                   <div className="min-w-0">
-                    <p className="font-semibold text-[14px] text-black truncate">
+                    <p
+                      className={`font-semibold text-[14px] truncate ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
                       {student.name}
                     </p>
-                    <p className="font-medium text-[12px] text-[#9C9C9C]">
+                    <p
+                      className={`font-medium text-[12px] ${
+                        isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+                      }`}
+                    >
                       ID: {student.id}
                     </p>
                   </div>
@@ -768,7 +1039,13 @@ const HomePaget = () => {
           </div>
 
           {/* Fixed Save Button */}
-          <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-50">
+          <div
+            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
+              isDarkMode
+                ? "bg-[#121212] border-gray-800"
+                : "bg-white border-[#E3E3E3]"
+            }`}
+          >
             <button className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
               Save
             </button>
@@ -778,20 +1055,38 @@ const HomePaget = () => {
 
       {/* ================= ADD GRADE SCREEN ================= */}
       {screen === "add-grade" && (
-        <div className="relative min-h-screen bg-white">
+        <div
+          className={`relative min-h-screen transition-colors duration-200 ${
+            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"
+          }`}
+        >
           <div className="pb-28 overflow-y-auto">
             <div
               className="flex items-center gap-4 px-5 py-5 cursor-pointer"
               onClick={() => setScreen("home")}
             >
-              <img src={back} alt="back" />
-              <h2 className="text-[20px] font-medium">Add Grade</h2>
+              <img
+                src={back}
+                alt="back"
+                className={isDarkMode ? "invert" : ""}
+              />
+              <h2
+                className={`text-[20px] font-medium ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Add Grade
+              </h2>
             </div>
 
             <div className="px-5 flex flex-col gap-5">
               {/* Student Name */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Student Name
                 </label>
                 <input
@@ -799,13 +1094,17 @@ const HomePaget = () => {
                   placeholder="E.g. John Smith"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
-                  className={inputClass}
+                  className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
               </div>
 
               {/* Subject */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Subject
                 </label>
                 <div className="relative">
@@ -816,11 +1115,17 @@ const HomePaget = () => {
                       setIsGradeOpen(false);
                       setIsAssessmentOpen(false);
                     }}
-                    className={dropdownBtnClass}
+                    className={
+                      isDarkMode ? dropdownBtnClassDark : dropdownBtnClassLight
+                    }
                   >
                     <span
                       className={
-                        selectedSubject ? "text-[#303030]" : "text-gray-400"
+                        selectedSubject
+                          ? isDarkMode
+                            ? "text-white"
+                            : "text-[#303030]"
+                          : "text-gray-400"
                       }
                     >
                       {selectedSubject || "Select subject"}
@@ -828,16 +1133,24 @@ const HomePaget = () => {
                     <img
                       src={arr}
                       alt="dropdown"
-                      className={`transition-transform duration-200 ${isSubjectOpen ? "rotate-180" : ""}`}
+                      className={`transition-transform duration-200 ${
+                        isSubjectOpen ? "rotate-180" : ""
+                      } ${isDarkMode ? "invert" : ""}`}
                     />
                   </button>
                   {isSubjectOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    <div
+                      className={
+                        isDarkMode ? dropdownPanelDark : dropdownPanelLight
+                      }
+                    >
                       {subjects.map((subject) => (
                         <div
                           key={subject}
                           onClick={() => handleSelect("subject", subject)}
-                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          className={
+                            isDarkMode ? dropdownItemDark : dropdownItemLight
+                          }
                         >
                           {subject}
                         </div>
@@ -849,7 +1162,11 @@ const HomePaget = () => {
 
               {/* Assessment */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Assessment
                 </label>
                 <div className="relative">
@@ -860,11 +1177,17 @@ const HomePaget = () => {
                       setIsGradeOpen(false);
                       setIsSubjectOpen(false);
                     }}
-                    className={dropdownBtnClass}
+                    className={
+                      isDarkMode ? dropdownBtnClassDark : dropdownBtnClassLight
+                    }
                   >
                     <span
                       className={
-                        selectedAssessment ? "text-[#303030]" : "text-gray-400"
+                        selectedAssessment
+                          ? isDarkMode
+                            ? "text-white"
+                            : "text-[#303030]"
+                          : "text-gray-400"
                       }
                     >
                       {selectedAssessment || "Select an assessment"}
@@ -872,16 +1195,24 @@ const HomePaget = () => {
                     <img
                       src={arr}
                       alt="dropdown"
-                      className={`transition-transform duration-200 ${isAssessmentOpen ? "rotate-180" : ""}`}
+                      className={`transition-transform duration-200 ${
+                        isAssessmentOpen ? "rotate-180" : ""
+                      } ${isDarkMode ? "invert" : ""}`}
                     />
                   </button>
                   {isAssessmentOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    <div
+                      className={
+                        isDarkMode ? dropdownPanelDark : dropdownPanelLight
+                      }
+                    >
                       {assessments.map((assessment) => (
                         <div
                           key={assessment}
                           onClick={() => handleSelect("assessment", assessment)}
-                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          className={
+                            isDarkMode ? dropdownItemDark : dropdownItemLight
+                          }
                         >
                           {assessment}
                         </div>
@@ -893,7 +1224,11 @@ const HomePaget = () => {
 
               {/* Grade */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Grade
                 </label>
                 <div className="relative">
@@ -904,11 +1239,17 @@ const HomePaget = () => {
                       setIsSubjectOpen(false);
                       setIsAssessmentOpen(false);
                     }}
-                    className={dropdownBtnClass}
+                    className={
+                      isDarkMode ? dropdownBtnClassDark : dropdownBtnClassLight
+                    }
                   >
                     <span
                       className={
-                        selectedGrade ? "text-[#303030]" : "text-gray-400"
+                        selectedGrade
+                          ? isDarkMode
+                            ? "text-white"
+                            : "text-[#303030]"
+                          : "text-gray-400"
                       }
                     >
                       {selectedGrade || "Select grade"}
@@ -916,16 +1257,24 @@ const HomePaget = () => {
                     <img
                       src={arr}
                       alt="dropdown"
-                      className={`transition-transform duration-200 ${isGradeOpen ? "rotate-180" : ""}`}
+                      className={`transition-transform duration-200 ${
+                        isGradeOpen ? "rotate-180" : ""
+                      } ${isDarkMode ? "invert" : ""}`}
                     />
                   </button>
                   {isGradeOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    <div
+                      className={
+                        isDarkMode ? dropdownPanelDark : dropdownPanelLight
+                      }
+                    >
                       {grades.map((g) => (
                         <div
                           key={g}
                           onClick={() => handleSelect("grade", g)}
-                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          className={
+                            isDarkMode ? dropdownItemDark : dropdownItemLight
+                          }
                         >
                           {g}
                         </div>
@@ -937,7 +1286,11 @@ const HomePaget = () => {
 
               {/* Total Mark */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Total Mark
                 </label>
                 <input
@@ -945,13 +1298,17 @@ const HomePaget = () => {
                   placeholder="Input Maximum Score"
                   value={totalMark}
                   onChange={(e) => setTotalMark(e.target.value)}
-                  className={inputClass}
+                  className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
               </div>
 
               {/* Date */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Date
                 </label>
                 <div className="relative">
@@ -965,17 +1322,23 @@ const HomePaget = () => {
                     }
                     placeholder="Select date"
                     onClick={() => setIsOpen(true)}
-                    className={`${inputClass} cursor-pointer pr-10`}
+                    className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight} cursor-pointer pr-10`}
                   />
                   <img
                     src={cal}
                     alt="calendar"
                     onClick={() => setIsOpen(true)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5"
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5 ${
+                      isDarkMode ? "invert" : ""
+                    }`}
                   />
                   {isOpen && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 px-4">
-                      <div className="bg-white rounded-xl p-4 shadow-lg w-full max-w-[320px]">
+                      <div
+                        className={`rounded-xl p-4 shadow-lg w-full max-w-[320px] ${
+                          isDarkMode ? "bg-[#1e1e1e]" : "bg-white"
+                        }`}
+                      >
                         <DatePicker
                           selected={selectedDate}
                           onChange={(date) => {
@@ -1003,14 +1366,22 @@ const HomePaget = () => {
           </div>
 
           {/* Fixed Save Button */}
-          <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-40">
+          <div
+            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+              isDarkMode
+                ? "bg-[#121212] border-[#2A2A2A]"
+                : "bg-white border-[#E3E3E3]"
+            }`}
+          >
             <button
               onClick={handleSaveGrade}
               disabled={!isFormValid}
-              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
+              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] transition-all ${
                 isFormValid
-                  ? "bg-[#FF7B17] cursor-pointer"
-                  : "bg-gray-300 cursor-not-allowed"
+                  ? "bg-[#FF7B17] hover:bg-[#E06A10] text-white cursor-pointer shadow-md"
+                  : isDarkMode
+                    ? "bg-[#2A2A2A] text-gray-500 cursor-not-allowed border border-[#333333]"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             >
               Save Grade
@@ -1024,9 +1395,17 @@ const HomePaget = () => {
                 className="absolute inset-0 bg-black/30"
                 onClick={handleCloseSuccess}
               />
-              <div className="relative bg-white rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up">
+              <div
+                className={`relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up ${
+                  isDarkMode ? "bg-[#1e1e1e]" : "bg-white"
+                }`}
+              >
                 <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <div
+                    className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                      isDarkMode ? "bg-green-900/40" : "bg-green-100"
+                    }`}
+                  >
                     <svg
                       className="w-8 h-8 text-green-500"
                       fill="none"
@@ -1041,10 +1420,18 @@ const HomePaget = () => {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-[20px] font-bold text-[#303030] mb-2">
+                  <h3
+                    className={`text-[20px] font-bold mb-2 ${
+                      isDarkMode ? "text-white" : "text-[#303030]"
+                    }`}
+                  >
                     Successful!
                   </h3>
-                  <p className="text-[14px] text-gray-600 text-center mb-6">
+                  <p
+                    className={`text-[14px] text-center mb-6 ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     You have successfully added a new grade
                   </p>
                   <button
@@ -1076,24 +1463,46 @@ const HomePaget = () => {
 
       {/* ================= ADD STUDENTS SCREEN ================= */}
       {screen === "add-students" && (
-        <div className="relative min-h-screen bg-white">
+        <div
+          className={`relative min-h-screen transition-colors duration-200 ${
+            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+          }`}
+        >
           <div className="pb-28 overflow-y-auto">
             <div
               className="flex items-center gap-4 px-5 py-5 cursor-pointer"
               onClick={() => setScreen("home")}
             >
-              <img src={back} alt="back" />
-              <h2 className="text-[20px] font-medium">Add Student</h2>
+              <img
+                src={back}
+                alt="back"
+                className={isDarkMode ? "invert" : ""}
+              />
+              <h2
+                className={`text-[20px] font-medium ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Add Student
+              </h2>
             </div>
 
             <div className="px-5 flex flex-col gap-5">
-              <h4 className="font-semibold text-[17px] text-black">
+              <h4
+                className={`font-semibold text-[17px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 Student Information
               </h4>
 
               {/* Student Name */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Student Name
                 </label>
                 <input
@@ -1101,13 +1510,17 @@ const HomePaget = () => {
                   placeholder="E.g. John Smith"
                   value={studentNameAdd}
                   onChange={(e) => setStudentNameAdd(e.target.value)}
-                  className={inputClass}
+                  className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
               </div>
 
               {/* Date of Birth */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Date Of Birth
                 </label>
                 <div className="relative">
@@ -1119,17 +1532,23 @@ const HomePaget = () => {
                     }
                     placeholder="Select date"
                     onClick={() => setIsDOBOpen(true)}
-                    className={`${inputClass} cursor-pointer pr-10`}
+                    className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight} cursor-pointer pr-10`}
                   />
                   <img
                     src={cal}
                     alt="calendar"
                     onClick={() => setIsDOBOpen(true)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5"
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5 ${
+                      isDarkMode ? "invert" : ""
+                    }`}
                   />
                   {isDOBOpen && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 px-4">
-                      <div className="bg-white rounded-xl p-4 shadow-lg w-full max-w-[320px]">
+                      <div
+                        className={`rounded-xl p-4 shadow-lg w-full max-w-[320px] ${
+                          isDarkMode ? "bg-[#1e1e1e]" : "bg-white"
+                        }`}
+                      >
                         <DatePicker
                           selected={studentDOB}
                           onChange={(date) => {
@@ -1155,18 +1574,28 @@ const HomePaget = () => {
 
               {/* Gender */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Gender
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setIsGenderOpen(!isGenderOpen)}
-                    className={dropdownBtnClass}
+                    className={
+                      isDarkMode ? dropdownBtnClassDark : dropdownBtnClassLight
+                    }
                   >
                     <span
                       className={
-                        selectedGender ? "text-[#303030]" : "text-gray-400"
+                        selectedGender
+                          ? isDarkMode
+                            ? "text-white"
+                            : "text-[#303030]"
+                          : "text-gray-400"
                       }
                     >
                       {selectedGender || "Select a gender"}
@@ -1174,16 +1603,24 @@ const HomePaget = () => {
                     <img
                       src={arr}
                       alt="dropdown"
-                      className={`transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""}`}
+                      className={`transition-transform duration-200 ${
+                        isGenderOpen ? "rotate-180" : ""
+                      } ${isDarkMode ? "invert" : ""}`}
                     />
                   </button>
                   {isGenderOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    <div
+                      className={
+                        isDarkMode ? dropdownPanelDark : dropdownPanelLight
+                      }
+                    >
                       {genders.map((gender) => (
                         <div
                           key={gender}
                           onClick={() => handleSelectGender(gender)}
-                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          className={
+                            isDarkMode ? dropdownItemDark : dropdownItemLight
+                          }
                         >
                           {gender}
                         </div>
@@ -1195,7 +1632,11 @@ const HomePaget = () => {
 
               {/* Student ID */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Student ID
                 </label>
                 <input
@@ -1203,21 +1644,35 @@ const HomePaget = () => {
                   placeholder="E.g. Stu/020/25h"
                   value={studentID}
                   onChange={(e) => setStudentID(e.target.value)}
-                  className={inputClass}
+                  className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
               </div>
 
               {/* Upload Photo */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Upload Photo
                 </label>
                 <div
-                  className="flex items-center justify-between border border-[#0000001F] rounded-[8px] h-[52px] px-3 cursor-pointer"
+                  className={`flex items-center justify-between rounded-[8px] h-[52px] px-3 cursor-pointer ${
+                    isDarkMode
+                      ? "border border-gray-600 bg-transparent"
+                      : "border border-[#0000001F] bg-white"
+                  }`}
                   onClick={handleFileClick}
                 >
                   <span
-                    className={`text-[14px] truncate flex-1 ${selectedFile ? "text-[#303030]" : "text-gray-400"}`}
+                    className={`text-[14px] truncate flex-1 ${
+                      selectedFile
+                        ? isDarkMode
+                          ? "text-white"
+                          : "text-[#303030]"
+                        : "text-gray-400"
+                    }`}
                   >
                     {selectedFile ? selectedFile.name : "Choose File"}
                   </span>
@@ -1231,19 +1686,29 @@ const HomePaget = () => {
                   <img
                     src={ch}
                     alt=""
-                    className="w-[18px] h-[18px] flex-shrink-0 ml-2"
+                    className={`w-[18px] h-[18px] flex-shrink-0 ml-2 ${
+                      isDarkMode ? "invert" : ""
+                    }`}
                   />
                 </div>
               </div>
 
-              <h4 className="font-semibold text-[17px] text-black pt-2">
+              <h4
+                className={`font-semibold text-[17px] pt-2 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 Class & Academic Info
               </h4>
 
               {/* Class + Academic Session side by side */}
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  <label
+                    className={`block text-[15px] font-medium mb-2 ${
+                      isDarkMode ? "text-white" : "text-[#303030]"
+                    }`}
+                  >
                     Class
                   </label>
                   <input
@@ -1251,11 +1716,19 @@ const HomePaget = () => {
                     placeholder="e.g Grade 5"
                     value={studentClass}
                     onChange={(e) => setStudentClass(e.target.value)}
-                    className="w-full h-[52px] rounded-[8px] border border-[#0000001F] px-3 text-[14px] placeholder:text-gray-400 focus:outline-none focus:border-[#FF7B17]"
+                    className={`w-full h-[52px] rounded-[8px] border px-3 text-[14px] focus:outline-none focus:border-[#FF7B17] ${
+                      isDarkMode
+                        ? "border-gray-600 bg-transparent text-white placeholder:text-gray-400"
+                        : "border-[#0000001F] placeholder:text-gray-400"
+                    }`}
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  <label
+                    className={`block text-[15px] font-medium mb-2 ${
+                      isDarkMode ? "text-white" : "text-[#303030]"
+                    }`}
+                  >
                     Academic Session
                   </label>
                   <input
@@ -1263,25 +1736,39 @@ const HomePaget = () => {
                     placeholder="E.g 2024/2025"
                     value={academicSession}
                     onChange={(e) => setAcademicSession(e.target.value)}
-                    className="w-full h-[52px] rounded-[8px] border border-[#0000001F] px-3 text-[14px] placeholder:text-gray-400 focus:outline-none focus:border-[#FF7B17]"
+                    className={`w-full h-[52px] rounded-[8px] border px-3 text-[14px] focus:outline-none focus:border-[#FF7B17] ${
+                      isDarkMode
+                        ? "border-gray-600 bg-transparent text-white placeholder:text-gray-400"
+                        : "border-[#0000001F] placeholder:text-gray-400"
+                    }`}
                   />
                 </div>
               </div>
 
               {/* Term */}
               <div>
-                <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[15px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Term
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setIsTermOpen(!isTermOpen)}
-                    className={dropdownBtnClass}
+                    className={
+                      isDarkMode ? dropdownBtnClassDark : dropdownBtnClassLight
+                    }
                   >
                     <span
                       className={
-                        selectedTerm ? "text-[#303030]" : "text-gray-400"
+                        selectedTerm
+                          ? isDarkMode
+                            ? "text-white"
+                            : "text-[#303030]"
+                          : "text-gray-400"
                       }
                     >
                       {selectedTerm || "Select Term"}
@@ -1289,16 +1776,24 @@ const HomePaget = () => {
                     <img
                       src={arr}
                       alt="dropdown"
-                      className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""}`}
+                      className={`transition-transform duration-200 ${
+                        isTermOpen ? "rotate-180" : ""
+                      } ${isDarkMode ? "invert" : ""}`}
                     />
                   </button>
                   {isTermOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    <div
+                      className={
+                        isDarkMode ? dropdownPanelDark : dropdownPanelLight
+                      }
+                    >
                       {terms.map((term) => (
                         <div
                           key={term}
                           onClick={() => handleSelectTerm(term)}
-                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          className={
+                            isDarkMode ? dropdownItemDark : dropdownItemLight
+                          }
                         >
                           {term}
                         </div>
@@ -1311,7 +1806,13 @@ const HomePaget = () => {
           </div>
 
           {/* Fixed Add Student Button */}
-          <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-40">
+          <div
+            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+              isDarkMode
+                ? "bg-[#121212] border-gray-800"
+                : "bg-white border-[#E3E3E3]"
+            }`}
+          >
             <button
               onClick={handleSaveStudent}
               disabled={!isStudentFormValid}
@@ -1332,9 +1833,17 @@ const HomePaget = () => {
                 className="absolute inset-0 bg-black/30"
                 onClick={handleCloseStudentSuccess}
               />
-              <div className="relative bg-white rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up">
+              <div
+                className={`relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up ${
+                  isDarkMode ? "bg-[#1e1e1e]" : "bg-white"
+                }`}
+              >
                 <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <div
+                    className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                      isDarkMode ? "bg-green-900/40" : "bg-green-100"
+                    }`}
+                  >
                     <svg
                       className="w-8 h-8 text-green-500"
                       fill="none"
@@ -1349,10 +1858,18 @@ const HomePaget = () => {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-[20px] font-bold text-[#303030] mb-2">
+                  <h3
+                    className={`text-[20px] font-bold mb-2 ${
+                      isDarkMode ? "text-white" : "text-[#303030]"
+                    }`}
+                  >
                     Successful!
                   </h3>
-                  <p className="text-[14px] text-gray-600 text-center mb-6">
+                  <p
+                    className={`text-[14px] text-center mb-6 ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
                     You have successfully added a new student
                   </p>
                   <button
@@ -1387,4 +1904,4 @@ const HomePaget = () => {
   );
 };
 
-export default HomePaget;
+export default HomePage;

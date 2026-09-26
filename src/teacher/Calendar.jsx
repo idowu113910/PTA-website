@@ -27,6 +27,7 @@ import kids from "../assets/kdd.jpg";
 import re from "../assets/re-time.svg";
 import loc from "../assets/loc.svg";
 import BottomNavigation from "../components/BottomNavigation";
+import { useTheme } from "../ThemeContext";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = [
@@ -53,6 +54,9 @@ function getFirstDayOfMonth(year, month) {
 }
 
 const Notifications = () => {
+  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
+  const { isDarkMode } = useTheme();
+
   const [studentDOB, setStudentDOB] = useState(null);
   const [isDOBOpen, setIsDOBOpen] = useState(false);
   const [selectedGender, setSelectedGender] = useState("");
@@ -171,14 +175,34 @@ const Notifications = () => {
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   const EventCard = ({ icon, title, date, time, location, rightImg }) => (
-    <div className="flex w-full rounded-[10px] py-4 px-3 bg-[#F1F0F0] mt-4 items-center gap-3">
+    <div
+      className={`flex w-full rounded-[10px] py-4 px-3 mt-4 items-center gap-3 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#1c1c1c]" : "bg-[#F1F0F0]"
+      }`}
+    >
       <img src={icon} alt="" className="w-8 h-8 flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-black font-normal text-[16px] truncate">{title}</p>
-        <p className="font-normal text-[12px] text-black mt-0.5">
+        <p
+          className={`font-normal text-[16px] truncate ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
+          {title}
+        </p>
+        <p
+          className={`font-normal text-[12px] mt-0.5 ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
           {date} <span className="font-bold text-[16px]">·</span> {time}
         </p>
-        <p className="font-medium text-[12px] text-black mt-1.5">{location}</p>
+        <p
+          className={`font-medium text-[12px] mt-1.5 ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
+          {location}
+        </p>
       </div>
       {rightImg && (
         <img
@@ -192,9 +216,23 @@ const Notifications = () => {
 
   const TimePicker = ({ label, time, setTime, pickerKey }) => (
     <div className="relative flex-1">
-      <h2 className="font-medium text-[16px] text-[#303030]">{label}</h2>
-      <div className="h-[55px] rounded-[8px] border border-black/10 py-2 px-3 flex items-center justify-between mt-2">
-        <p className="font-normal text-[14px] text-[#303030]">
+      <h2
+        className={`font-medium text-[16px] ${
+          isDarkMode ? "text-white" : "text-[#303030]"
+        }`}
+      >
+        {label}
+      </h2>
+      <div
+        className={`h-[55px] rounded-[8px] py-2 px-3 flex items-center justify-between mt-2 ${
+          isDarkMode ? "border border-gray-700" : "border border-black/10"
+        }`}
+      >
+        <p
+          className={`font-normal text-[14px] ${
+            isDarkMode ? "text-white" : "text-[#303030]"
+          }`}
+        >
           {formatTime(time)}
         </p>
         <button
@@ -202,18 +240,32 @@ const Notifications = () => {
             setOpenPicker(openPicker === pickerKey ? null : pickerKey)
           }
         >
-          <img src={cl} alt="" className="w-5 h-[18px]" />
+          <img
+            src={cl}
+            alt=""
+            className={`w-5 h-[18px] ${isDarkMode ? "invert" : ""}`}
+          />
         </button>
       </div>
       {openPicker === pickerKey && (
-        <div className="absolute top-[calc(100%+6px)] left-0 w-full min-w-[160px] bg-white rounded-[12px] border border-black/10 shadow-lg p-3 z-50">
+        <div
+          className={`absolute top-[calc(100%+6px)] left-0 w-full min-w-[160px] rounded-[12px] shadow-lg p-3 z-50 ${
+            isDarkMode
+              ? "bg-[#1c1c1c] border border-gray-700"
+              : "bg-white border border-black/10"
+          }`}
+        >
           <div className="flex items-center gap-1 mb-2">
             <select
               value={time.hour}
               onChange={(e) =>
                 setTime({ ...time, hour: Number(e.target.value) })
               }
-              className="border border-black/15 rounded-md px-1 py-1 text-sm font-medium text-[#303030] w-12 text-center"
+              className={`border rounded-md px-1 py-1 text-sm font-medium w-12 text-center ${
+                isDarkMode
+                  ? "border-gray-600 bg-[#1c1c1c] text-white"
+                  : "border-black/15 text-[#303030]"
+              }`}
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => (
                 <option key={h} value={h}>
@@ -221,13 +273,23 @@ const Notifications = () => {
                 </option>
               ))}
             </select>
-            <span className="font-semibold text-[#303030]">:</span>
+            <span
+              className={`font-semibold ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
+              :
+            </span>
             <select
               value={time.min}
               onChange={(e) =>
                 setTime({ ...time, min: Number(e.target.value) })
               }
-              className="border border-black/15 rounded-md px-1 py-1 text-sm font-medium text-[#303030] w-12 text-center"
+              className={`border rounded-md px-1 py-1 text-sm font-medium w-12 text-center ${
+                isDarkMode
+                  ? "border-gray-600 bg-[#1c1c1c] text-white"
+                  : "border-black/15 text-[#303030]"
+              }`}
             >
               {[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55].map((m) => (
                 <option key={m} value={m}>
@@ -236,7 +298,11 @@ const Notifications = () => {
               ))}
             </select>
           </div>
-          <div className="flex rounded-md overflow-hidden border border-black/10 mb-3 w-full">
+          <div
+            className={`flex rounded-md overflow-hidden border mb-3 w-full ${
+              isDarkMode ? "border-gray-700" : "border-black/10"
+            }`}
+          >
             {["AM", "PM"].map((p) => (
               <button
                 key={p}
@@ -244,7 +310,9 @@ const Notifications = () => {
                 className={`flex-1 py-1 text-xs font-semibold transition-colors ${
                   time.period === p
                     ? "bg-indigo-600 text-white"
-                    : "bg-gray-50 text-gray-500"
+                    : isDarkMode
+                      ? "bg-[#262626] text-gray-300"
+                      : "bg-gray-50 text-gray-500"
                 }`}
               >
                 {p}
@@ -264,12 +332,20 @@ const Notifications = () => {
 
   if (showMore) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-6">
+      <div
+        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-6 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+        }`}
+      >
         <div
           className="flex items-center gap-4 px-5 pt-5 pb-2 cursor-pointer"
           onClick={() => setShowMore(false)}
         >
-          <img src={back} alt="back" className="w-6 h-6 flex-shrink-0" />
+          <img
+            src={back}
+            alt="back"
+            className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
+          />
           <h2 className="text-[20px] font-medium">Upcoming Event</h2>
         </div>
         <div className="px-5 mt-2">
@@ -319,19 +395,31 @@ const Notifications = () => {
   }
 
   return (
-    <div className="relative min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white">
+    <div
+      className={`relative min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto transition-colors duration-200 ${
+        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+      }`}
+    >
       <h2 className="font-bold text-[20px] px-5 pt-5 pb-2">Calendar</h2>
 
       {/* Month Navigation */}
       <div className="flex items-center justify-between px-5 mb-2">
         <button onClick={prevMonth} className="p-1">
-          <img src={bk} alt="previous" className="w-6 h-6" />
+          <img
+            src={bk}
+            alt="previous"
+            className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+          />
         </button>
         <p className="font-bold text-[18px]">
           {MONTH_NAMES[month].slice(0, 3)} {year}
         </p>
         <button onClick={nextMonth} className="p-1">
-          <img src={ft} alt="next" className="w-6 h-6" />
+          <img
+            src={ft}
+            alt="next"
+            className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+          />
         </button>
       </div>
 
@@ -341,7 +429,9 @@ const Notifications = () => {
           {DAYS.map((d) => (
             <div
               key={d}
-              className="text-center text-[13px] font-normal text-black py-1"
+              className={`text-center text-[13px] font-normal py-1 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
             >
               {d}
             </div>
@@ -361,7 +451,9 @@ const Notifications = () => {
                     ? "text-yellow-400"
                     : todayFlag
                       ? "bg-[#FF7B17] text-white rounded-full"
-                      : "bg-transparent text-black"
+                      : isDarkMode
+                        ? "bg-transparent text-white"
+                        : "bg-transparent text-black"
                 }`}
               >
                 {day}
@@ -372,7 +464,11 @@ const Notifications = () => {
       </div>
 
       {/* Today's Events */}
-      <h2 className="text-[18px] font-bold text-black px-5 mt-4">
+      <h2
+        className={`text-[18px] font-bold px-5 mt-4 ${
+          isDarkMode ? "text-white" : "text-black"
+        }`}
+      >
         Todays Events
       </h2>
       <div className="px-5">
@@ -388,7 +484,13 @@ const Notifications = () => {
 
       {/* Upcoming Events */}
       <div className="flex items-center justify-between px-5 mt-5">
-        <p className="text-[18px] font-bold text-black">Upcoming Events</p>
+        <p
+          className={`text-[18px] font-bold ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
+          Upcoming Events
+        </p>
         <p
           onClick={() => setShowMore(true)}
           className="font-normal text-[#FF7B17] text-[14px] cursor-pointer"
@@ -448,9 +550,9 @@ const Notifications = () => {
 
           {/* Sheet */}
           <div
-            className={`fixed inset-x-0 bottom-0 top-[4%] bg-white rounded-t-[20px] z-50 flex flex-col transition-transform duration-300 ease-out ${
+            className={`fixed inset-x-0 bottom-0 top-[4%] rounded-t-[20px] z-50 flex flex-col transition-transform duration-300 ease-out ${
               isVisible && !isClosing ? "translate-y-0" : "translate-y-full"
-            }`}
+            } ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"}`}
           >
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto">
@@ -458,13 +560,21 @@ const Notifications = () => {
               <div className="flex items-center justify-between px-5 pt-6 pb-2">
                 <h1 className="text-2xl font-bold">Add New Event</h1>
                 <button onClick={handleClose} className="p-1">
-                  <img src={cncc} alt="close" className="w-8 h-8" />
+                  <img
+                    src={cncc}
+                    alt="close"
+                    className={`w-8 h-8 ${isDarkMode ? "invert" : ""}`}
+                  />
                 </button>
               </div>
 
               {/* Event Title */}
               <div className="px-5 mt-4">
-                <h4 className="font-medium text-[16px] text-[#303030] mb-2">
+                <h4
+                  className={`font-medium text-[16px] mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Event Title
                 </h4>
                 <input
@@ -472,13 +582,21 @@ const Notifications = () => {
                   value={eventTitle}
                   onChange={(e) => setEventTitle(e.target.value)}
                   placeholder="enter event title"
-                  className="w-full h-[55px] rounded-[8px] border border-[#0000001F] py-2 px-3 placeholder:text-[14px] font-normal outline-none"
+                  className={`w-full h-[55px] rounded-[8px] py-2 px-3 placeholder:text-[14px] font-normal outline-none ${
+                    isDarkMode
+                      ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                      : "border border-[#0000001F]"
+                  }`}
                 />
               </div>
 
               {/* Date */}
               <div className="px-5 mt-4">
-                <h5 className="font-medium text-[16px] text-[#303030] mb-2">
+                <h5
+                  className={`font-medium text-[16px] mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Date
                 </h5>
                 <div className="relative">
@@ -490,17 +608,27 @@ const Notifications = () => {
                     }
                     placeholder="dd/mm/yy"
                     onClick={() => setIsDOBOpen(true)}
-                    className="w-full h-[57px] rounded-[8px] border border-[#0000001F] font-normal text-[#303030] pl-3 pr-12 cursor-pointer outline-none"
+                    className={`w-full h-[57px] rounded-[8px] font-normal pl-3 pr-12 cursor-pointer outline-none ${
+                      isDarkMode
+                        ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                        : "border border-[#0000001F] text-[#303030]"
+                    }`}
                   />
                   <img
                     src={cal}
                     alt="calendar"
                     onClick={() => setIsDOBOpen(true)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-6 h-6"
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-6 h-6 ${
+                      isDarkMode ? "invert" : ""
+                    }`}
                   />
                   {isDOBOpen && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[60]">
-                      <div className="bg-white rounded-xl p-4 shadow-lg">
+                      <div
+                        className={`rounded-xl p-4 shadow-lg ${
+                          isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+                        }`}
+                      >
                         <DatePicker
                           selected={studentDOB}
                           onChange={(date) => {
@@ -525,19 +653,27 @@ const Notifications = () => {
 
               {/* Gender */}
               <div className="px-5 mt-4">
-                <label className="block text-[16px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[16px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Gender
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setIsGenderOpen(!isGenderOpen)}
-                    className="w-full h-[57px] px-3 border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
+                    className={`w-full h-[57px] px-3 rounded-[8px] flex items-center justify-between ${
+                      isDarkMode
+                        ? "border border-gray-700 bg-[#1c1c1c]"
+                        : "border border-[#0000001F] bg-white"
+                    }`}
                   >
                     <span
                       className={
                         selectedGender
-                          ? "text-[14px] text-[#303030]"
+                          ? `text-[14px] ${isDarkMode ? "text-white" : "text-[#303030]"}`
                           : "text-[14px] text-gray-400"
                       }
                     >
@@ -546,16 +682,28 @@ const Notifications = () => {
                     <img
                       src={arr}
                       alt="dropdown"
-                      className={`transition-transform duration-200 w-5 h-5 ${isGenderOpen ? "rotate-180" : ""}`}
+                      className={`transition-transform duration-200 w-5 h-5 ${
+                        isGenderOpen ? "rotate-180" : ""
+                      } ${isDarkMode ? "invert" : ""}`}
                     />
                   </button>
                   {isGenderOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                    <div
+                      className={`absolute z-10 mt-1 w-full rounded-[8px] shadow-md ${
+                        isDarkMode
+                          ? "bg-[#1c1c1c] border border-gray-700"
+                          : "bg-white border border-[#E5E7EB]"
+                      }`}
+                    >
                       {genders.map((g) => (
                         <div
                           key={g}
                           onClick={() => handleSelectGender(g)}
-                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          className={`px-4 py-3 text-[14px] cursor-pointer ${
+                            isDarkMode
+                              ? "text-white hover:bg-[#262626]"
+                              : "hover:bg-[#EFF6FF]"
+                          }`}
                         >
                           {g}
                         </div>
@@ -583,7 +731,11 @@ const Notifications = () => {
 
               {/* Location */}
               <div className="px-5 mt-4">
-                <h4 className="font-medium text-[16px] text-[#303030] mb-2">
+                <h4
+                  className={`font-medium text-[16px] mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Location
                 </h4>
                 <input
@@ -591,25 +743,37 @@ const Notifications = () => {
                   value={eventLocation}
                   onChange={(e) => setEventLocation(e.target.value)}
                   placeholder="enter event location"
-                  className="w-full h-[55px] rounded-[8px] border border-[#0000001F] py-2 px-3 placeholder:text-[14px] font-normal outline-none"
+                  className={`w-full h-[55px] rounded-[8px] py-2 px-3 placeholder:text-[14px] font-normal outline-none ${
+                    isDarkMode
+                      ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                      : "border border-[#0000001F]"
+                  }`}
                 />
               </div>
 
               {/* Event Type */}
               <div className="px-5 mt-4 pb-6">
-                <label className="block text-[16px] font-medium text-[#303030] mb-2">
+                <label
+                  className={`block text-[16px] font-medium mb-2 ${
+                    isDarkMode ? "text-white" : "text-[#303030]"
+                  }`}
+                >
                   Event Types
                 </label>
                 <div className="relative">
                   <button
                     type="button"
                     onClick={() => setIsEventTypeOpen(!isEventTypeOpen)}
-                    className="w-full h-[57px] px-3 border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between"
+                    className={`w-full h-[57px] px-3 rounded-[8px] flex items-center justify-between ${
+                      isDarkMode
+                        ? "border border-gray-700 bg-[#1c1c1c]"
+                        : "border border-[#0000001F] bg-white"
+                    }`}
                   >
                     <span
                       className={
                         selectedEventType
-                          ? "text-[14px] text-[#303030]"
+                          ? `text-[14px] ${isDarkMode ? "text-white" : "text-[#303030]"}`
                           : "text-[14px] text-gray-400"
                       }
                     >
@@ -618,16 +782,28 @@ const Notifications = () => {
                     <img
                       src={arr}
                       alt="dropdown"
-                      className={`transition-transform duration-200 w-5 h-5 ${isEventTypeOpen ? "rotate-180" : ""}`}
+                      className={`transition-transform duration-200 w-5 h-5 ${
+                        isEventTypeOpen ? "rotate-180" : ""
+                      } ${isDarkMode ? "invert" : ""}`}
                     />
                   </button>
                   {isEventTypeOpen && (
-                    <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md max-h-[200px] overflow-y-auto">
+                    <div
+                      className={`absolute z-10 mt-1 w-full rounded-[8px] shadow-md max-h-[200px] overflow-y-auto ${
+                        isDarkMode
+                          ? "bg-[#1c1c1c] border border-gray-700"
+                          : "bg-white border border-[#E5E7EB]"
+                      }`}
+                    >
                       {eventTypes.map((type) => (
                         <div
                           key={type}
                           onClick={() => handleSelectEventType(type)}
-                          className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                          className={`px-4 py-3 text-[14px] cursor-pointer ${
+                            isDarkMode
+                              ? "text-white hover:bg-[#262626]"
+                              : "hover:bg-[#EFF6FF]"
+                          }`}
                         >
                           {type}
                         </div>
@@ -639,7 +815,13 @@ const Notifications = () => {
             </div>
 
             {/* Save Button */}
-            <div className="bg-white border-t border-[#E3E3E3] py-4 px-5">
+            <div
+              className={`py-4 px-5 ${
+                isDarkMode
+                  ? "bg-[#121212] border-t border-gray-800"
+                  : "bg-white border-t border-[#E3E3E3]"
+              }`}
+            >
               <button
                 onClick={() => setShowEventCard(true)}
                 disabled={!isEventFormValid}
@@ -656,7 +838,11 @@ const Notifications = () => {
             {/* Event Card Modal */}
             {showEventCard && (
               <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] px-5">
-                <div className="bg-white rounded-[10px] w-full max-w-[370px] overflow-hidden shadow-2xl">
+                <div
+                  className={`rounded-[10px] w-full max-w-[370px] overflow-hidden shadow-2xl ${
+                    isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+                  }`}
+                >
                   <div className="relative">
                     <img src={kids} alt="" className="w-full object-cover" />
                     <button
@@ -671,19 +857,33 @@ const Notifications = () => {
                     </button>
                   </div>
                   <div className="p-4 space-y-3">
-                    <h2 className="text-[20px] font-medium text-black">
+                    <h2
+                      className={`text-[20px] font-medium ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
                       {eventTitle}
                     </h2>
-                    <div className="flex items-center gap-2 text-[18px] font-normal text-black">
+                    <div
+                      className={`flex items-center gap-2 text-[18px] font-normal ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
                       <img src={ihs} alt="" className="w-6 h-6 flex-shrink-0" />
                       <span>{selectedEventType}</span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3 text-[14px] font-normal text-black">
+                    <div
+                      className={`flex flex-wrap items-center gap-3 text-[14px] font-normal ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
                       <div className="flex items-center gap-1">
                         <img
                           src={cal}
                           alt=""
-                          className="w-5 h-5 flex-shrink-0"
+                          className={`w-5 h-5 flex-shrink-0 ${
+                            isDarkMode ? "invert" : ""
+                          }`}
                         />
                         <span>
                           {studentDOB
@@ -699,15 +899,27 @@ const Notifications = () => {
                         <img
                           src={re}
                           alt=""
-                          className="w-5 h-5 flex-shrink-0"
+                          className={`w-5 h-5 flex-shrink-0 ${
+                            isDarkMode ? "invert" : ""
+                          }`}
                         />
                         <span>
                           {formatTime(startTime)}–{formatTime(endTime)}
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 text-[16px] text-black font-normal">
-                      <img src={loc} alt="" className="w-5 h-5 flex-shrink-0" />
+                    <div
+                      className={`flex items-center gap-2 text-[16px] font-normal ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
+                      <img
+                        src={loc}
+                        alt=""
+                        className={`w-5 h-5 flex-shrink-0 ${
+                          isDarkMode ? "invert" : ""
+                        }`}
+                      />
                       <span>{eventLocation}</span>
                     </div>
                     <button

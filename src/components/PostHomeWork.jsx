@@ -9,10 +9,12 @@ import enGB from "date-fns/locale/en-GB";
 import on from "../assets/switch.svg";
 import off from "../assets/off.svg";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../ThemeContext";
 
 registerLocale("en-GB", enGB);
 
 const PostHomeWork = ({ onBack }) => {
+  const { isDarkMode } = useTheme();
   const [isGradeOpen, setIsGradeOpen] = useState(false);
   const [isSubjectOpen, setIsSubjectOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +64,7 @@ const PostHomeWork = ({ onBack }) => {
         className="flex items-center gap-3 px-4 py-4 cursor-pointer"
         onClick={onBack}
       >
-        <img src={back} alt="back" className="w-5 h-5" />
+        <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
         <h2 className="text-[18px] sm:text-[20px] font-medium">
           Post Homework
         </h2>

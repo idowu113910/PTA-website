@@ -13,8 +13,12 @@ import sthOn from "../assets/ON.svg";
 import { useUser } from "./UserContext";
 import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
+import { useTheme } from "../ThemeContext";
 
-const Grade = () => {
+const Profile = () => {
+  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
+  const { isDarkMode, toggleTheme } = useTheme();
+
   const {
     fullName,
     updateFullName,
@@ -56,7 +60,6 @@ const Grade = () => {
   const [isEditingAge, setIsEditingAge] = useState(false);
 
   const [isSwitchOn, setIsSwitchOn] = useState(false);
-  const [SwitchOn, setSwitchOn] = useState(false);
   const [SwitchAuto, setSwitchAuto] = useState(false);
 
   const [isEditingPhone, setIsEditingPhone] = useState(false);
@@ -133,23 +136,51 @@ const Grade = () => {
   const MenuRow = ({ icon, label, onClick }) => (
     <div
       onClick={onClick}
-      className="flex w-full h-[57px] border border-[#9F9D9D] rounded-[10px] py-4 px-3 gap-4 mt-5 items-center cursor-pointer active:bg-gray-50"
+      className={`flex w-full h-[57px] rounded-[10px] py-4 px-3 gap-4 mt-5 items-center cursor-pointer transition-colors duration-200 ${
+        isDarkMode
+          ? "border border-gray-700 active:bg-gray-800"
+          : "border border-[#9F9D9D] active:bg-gray-50"
+      }`}
     >
-      <img src={icon} alt="" className="w-6 h-6 flex-shrink-0" />
-      <p className="font-medium text-[18px] text-[#1A1818] flex-1 truncate">
+      <img
+        src={icon}
+        alt=""
+        className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
+      />
+      <p
+        className={`font-medium text-[18px] flex-1 truncate ${
+          isDarkMode ? "text-white" : "text-[#1A1818]"
+        }`}
+      >
         {label}
       </p>
-      <img src={btn} alt="" className="w-[12px] h-[8px] flex-shrink-0" />
+      <img
+        src={btn}
+        alt=""
+        className={`w-[12px] h-[8px] flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
+      />
     </div>
   );
 
   const FieldRow = ({ value, onEdit }) => (
-    <div className="w-full h-[57px] border border-black/10 rounded-[8px] py-2 px-3 mt-2 flex items-center justify-between">
-      <span className="text-[14px] text-[#303030] flex-1 truncate">
+    <div
+      className={`w-full h-[57px] rounded-[8px] py-2 px-3 mt-2 flex items-center justify-between ${
+        isDarkMode ? "border border-gray-700" : "border border-black/10"
+      }`}
+    >
+      <span
+        className={`text-[14px] flex-1 truncate ${
+          isDarkMode ? "text-white" : "text-[#303030]"
+        }`}
+      >
         {value}
       </span>
       <button onClick={onEdit} className="p-1 flex-shrink-0">
-        <img src={pn} alt="edit" className="w-[18px] h-[18px]" />
+        <img
+          src={pn}
+          alt="edit"
+          className={`w-[18px] h-[18px] ${isDarkMode ? "invert" : ""}`}
+        />
       </button>
     </div>
   );
@@ -164,7 +195,11 @@ const Grade = () => {
       </button>
       <button
         onClick={onCancel}
-        className="flex-1 h-[42px] border border-black/10 rounded-[8px] text-[13px] text-[#303030]"
+        className={`flex-1 h-[42px] rounded-[8px] text-[13px] ${
+          isDarkMode
+            ? "border border-gray-700 text-white"
+            : "border border-black/10 text-[#303030]"
+        }`}
       >
         Cancel
       </button>
@@ -174,25 +209,46 @@ const Grade = () => {
   // ── App Preference Screen ────────────────────────────────────────
   if (showAppPreference) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+      <div
+        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
+        }`}
+      >
         <div className="flex items-center gap-4 px-5 pt-6 pb-4">
           <button onClick={() => setShowAppPreference(false)}>
-            <img src={back} alt="back" className="w-6 h-6" />
+            <img
+              src={back}
+              alt="back"
+              className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
           <h2 className="text-[20px] font-medium">App Preference</h2>
         </div>
+
         <div className="px-5 flex flex-col gap-4">
           {[
-            { label: "Notification", val: isSwitchOn, set: setIsSwitchOn },
-            { label: "Theme Appearance", val: SwitchOn, set: setSwitchOn },
-            { label: "Auto-Login", val: SwitchAuto, set: setSwitchAuto },
+            {
+              label: "Notification",
+              val: isSwitchOn,
+              set: () => setIsSwitchOn(!isSwitchOn),
+            },
+            { label: "Theme Appearance", val: isDarkMode, set: toggleTheme },
+            {
+              label: "Auto-Login",
+              val: SwitchAuto,
+              set: () => setSwitchAuto(!SwitchAuto),
+            },
           ].map(({ label, val, set }) => (
             <div
               key={label}
-              className="flex items-center justify-between w-full h-[61px] rounded-[10px] border border-[#9F9D9D] py-4 px-3"
+              className={`flex items-center justify-between w-full h-[61px] rounded-[10px] py-4 px-3 ${
+                isDarkMode
+                  ? "border border-gray-700 bg-[#1c1c1c]"
+                  : "border border-gray-200 bg-white"
+              }`}
             >
-              <p className="font-medium text-[18px] text-[#1A1818]">{label}</p>
-              <button onClick={() => set(!val)}>
+              <p className="font-medium text-[18px]">{label}</p>
+              <button onClick={set}>
                 <img
                   src={val ? sthOn : sth}
                   alt="toggle"
@@ -202,6 +258,7 @@ const Grade = () => {
             </div>
           ))}
         </div>
+
         <BottomNavigation />
       </div>
     );
@@ -210,10 +267,18 @@ const Grade = () => {
   // ── Edit Profile Screen ──────────────────────────────────────────
   if (showTeacherProfile) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-32">
+      <div
+        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-32 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
+        }`}
+      >
         <div className="flex items-center gap-4 px-5 pt-6 pb-2">
           <button onClick={() => setShowTeacherProfile(false)}>
-            <img src={back} alt="back" className="w-6 h-6" />
+            <img
+              src={back}
+              alt="back"
+              className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
           <h2 className="text-[20px] font-medium">Edit Profile</h2>
         </div>
@@ -236,18 +301,26 @@ const Grade = () => {
             onClick={() => fileInputRef.current.click()}
             className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-md bg-[#D9D9D9] border border-[#D9D9D9] flex items-center justify-center"
           >
-            <img src={pn} alt="edit" className="w-4 h-4" />
+            <img
+              src={pn}
+              alt="edit"
+              className={`w-4 h-4 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
         </div>
 
-        <p className="font-bold text-[18px] text-black text-center mt-3 px-5 truncate">
+        <p className="font-bold text-[18px] text-center mt-3 px-5 truncate">
           {fullName}
         </p>
 
         <div className="px-5 mt-4 flex flex-col gap-4">
           {/* Full Name */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-1">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Full Name
             </h2>
             <input
@@ -257,13 +330,21 @@ const Grade = () => {
                 setTempFullName(e.target.value);
                 setHasChanges(true);
               }}
-              className="w-full h-[57px] border border-black/10 rounded-[8px] px-3 outline-none text-[14px] text-[#303030]"
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+                isDarkMode
+                  ? "border border-gray-700 bg-[#1c1c1c] text-white"
+                  : "border border-black/10 text-[#303030]"
+              }`}
             />
           </div>
 
           {/* Email */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-1">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Email
             </h2>
             <input
@@ -273,13 +354,21 @@ const Grade = () => {
                 setTempEmail(e.target.value);
                 setHasChanges(true);
               }}
-              className="w-full h-[57px] border border-black/10 rounded-[8px] px-3 outline-none text-[14px] text-[#303030]"
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+                isDarkMode
+                  ? "border border-gray-700 bg-[#1c1c1c] text-white"
+                  : "border border-black/10 text-[#303030]"
+              }`}
             />
           </div>
 
           {/* Mobile Number */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-1">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Mobile Number
             </h2>
             {!isEditingPhone ? (
@@ -302,7 +391,9 @@ const Grade = () => {
                       onKeyDown={handleKeyDown}
                       maxLength={6}
                       placeholder="+234"
-                      className="w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[14px] outline-none"
+                      className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[14px] outline-none ${
+                        isDarkMode ? "bg-[#1c1c1c] text-white" : ""
+                      }`}
                     />
                   </div>
                   <div className="flex flex-col gap-1 flex-1">
@@ -314,7 +405,9 @@ const Grade = () => {
                       onKeyDown={handleKeyDown}
                       maxLength={15}
                       placeholder="703 543 2234"
-                      className="w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none"
+                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none ${
+                        isDarkMode ? "bg-[#1c1c1c] text-white" : ""
+                      }`}
                     />
                   </div>
                 </div>
@@ -333,7 +426,11 @@ const Grade = () => {
 
           {/* Gender */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-1">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Gender
             </h2>
             <FieldRow
@@ -351,7 +448,9 @@ const Grade = () => {
                     setTempGender(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] bg-white"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] ${
+                    isDarkMode ? "bg-[#1c1c1c] text-white" : "bg-white"
+                  }`}
                 >
                   <option>Female</option>
                   <option>Male</option>
@@ -370,7 +469,11 @@ const Grade = () => {
 
           {/* Class */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-1">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Class
             </h2>
             <FieldRow
@@ -389,7 +492,9 @@ const Grade = () => {
                     setTempClass(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px]"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                    isDarkMode ? "bg-[#1c1c1c] text-white" : ""
+                  }`}
                 />
                 <SaveCancel
                   onSave={() => {
@@ -404,7 +509,13 @@ const Grade = () => {
 
           {/* Age */}
           <div>
-            <h2 className="font-medium text-[16px] text-[#303030] mb-1">Age</h2>
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
+              Age
+            </h2>
             <FieldRow
               value={ageValue}
               onEdit={() => {
@@ -423,7 +534,9 @@ const Grade = () => {
                     setTempAge(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px]"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                    isDarkMode ? "bg-[#1c1c1c] text-white" : ""
+                  }`}
                 />
                 <SaveCancel
                   onSave={() => {
@@ -438,7 +551,13 @@ const Grade = () => {
         </div>
 
         {/* Save Changes */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-5 pb-6 pt-4 z-10">
+        <div
+          className={`fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4 z-10 ${
+            isDarkMode
+              ? "bg-[#121212] border-gray-800"
+              : "bg-white border-gray-200"
+          }`}
+        >
           <button
             disabled={!hasChanges}
             onClick={() => {
@@ -454,17 +573,25 @@ const Grade = () => {
             Save Changes
           </button>
         </div>
-
-    
       </div>
     );
   }
 
   // ── Main Profile Screen ──────────────────────────────────────────
   return (
-    <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto bg-white pb-24">
+    <div
+      className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
+      }`}
+    >
       <div className="px-5 pt-6">
-        <h1 className="font-bold text-[20px] text-black mb-6">Profile</h1>
+        <h1
+          className={`font-bold text-[20px] mb-6 ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
+          Profile
+        </h1>
 
         <div className="flex items-center gap-4 mb-6">
           <img
@@ -473,8 +600,18 @@ const Grade = () => {
             className="w-[55px] h-[55px] rounded-full object-cover flex-shrink-0"
           />
           <div className="min-w-0">
-            <p className="font-medium text-[18px] truncate">{fullName}</p>
-            <p className="font-normal text-[14px] text-[#424242] truncate">
+            <p
+              className={`font-medium text-[18px] truncate ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
+              {fullName}
+            </p>
+            <p
+              className={`font-normal text-[14px] truncate ${
+                isDarkMode ? "text-white" : "text-[#424242]"
+              }`}
+            >
               {email}
             </p>
           </div>
@@ -497,8 +634,18 @@ const Grade = () => {
           onClick={() => setShowLogoutModal(true)}
           className="flex items-center gap-4 mt-5 py-2 cursor-pointer"
         >
-          <img src={logout} alt="" className="w-6 h-6 flex-shrink-0" />
-          <p className="font-medium text-[18px] text-[#FF0000]">Log out</p>
+          <img
+            src={logout}
+            alt=""
+            className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
+          />
+          <p
+            className={`font-medium text-[18px] ${
+              isDarkMode ? "text-red-500" : "text-[#FF0000]"
+            }`}
+          >
+            Log out
+          </p>
         </div>
       </div>
 
@@ -507,20 +654,36 @@ const Grade = () => {
         <div className="fixed inset-0 flex items-end justify-center z-20">
           {!hideBackdrop && (
             <div
-              className="absolute inset-0 bg-black/40"
+              className={`absolute inset-0 ${
+                isDarkMode ? "bg-black/60" : "bg-black/40"
+              }`}
               onClick={handleClose}
             />
           )}
           <div
-            className={`relative bg-white w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-8 shadow-2xl overflow-y-auto max-h-[90vh] mb-[65px] ${
-              isClosing ? "animate-slide-down" : "animate-slide-up"
-            }`}
+            className={`relative w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-8 shadow-2xl overflow-y-auto max-h-[90vh] mb-[65px] transition-colors duration-200 ${
+              isDarkMode ? "bg-[#1c1c1c] text-white" : "bg-white text-gray-900"
+            } ${isClosing ? "animate-slide-down" : "animate-slide-up"}`}
           >
-            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
-            <h2 className="text-[20px] font-bold text-[#E8341A] text-center mb-4 border-b border-[#EEEEEE] pb-4">
+            <div
+              className={`w-10 h-1 rounded-full mx-auto mb-5 ${
+                isDarkMode ? "bg-gray-700" : "bg-gray-200"
+              }`}
+            />
+            <h2
+              className={`text-[20px] font-bold text-center mb-4 border-b pb-4 ${
+                isDarkMode
+                  ? "text-red-400 border-gray-700"
+                  : "text-[#E8341A] border-[#EEEEEE]"
+              }`}
+            >
               Logout
             </h2>
-            <p className="text-[16px] font-medium text-[#616161] text-center mb-6">
+            <p
+              className={`text-[16px] font-medium text-center mb-6 ${
+                isDarkMode ? "text-white" : "text-[#616161]"
+              }`}
+            >
               Are you sure you want to logout?
             </p>
             <div className="flex flex-col gap-3">
@@ -529,13 +692,17 @@ const Grade = () => {
                   setShowLogoutModal(false);
                   navigate("/role");
                 }}
-                className="w-full h-[52px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold active:opacity-80"
+                className="w-full h-[52px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold active:opacity-80 cursor-pointer"
               >
                 Yes, Logout
               </button>
               <button
                 onClick={handleClose}
-                className="w-full h-[52px] border border-[#FFDDDD] rounded-[10px] text-[#E8341A] text-[18px] font-medium bg-[#FFF8F8] active:opacity-80"
+                className={`w-full h-[52px] border rounded-[10px] text-[18px] font-medium active:opacity-80 cursor-pointer ${
+                  isDarkMode
+                    ? "border-red-900/40 text-red-400 bg-red-950/20"
+                    : "border-[#FFDDDD] text-[#E8341A] bg-[#FFF8F8]"
+                }`}
               >
                 Cancel
               </button>
@@ -562,4 +729,4 @@ const Grade = () => {
   );
 };
 
-export default Grade;
+export default Profile;

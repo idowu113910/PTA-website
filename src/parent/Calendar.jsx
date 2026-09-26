@@ -46,7 +46,7 @@ function getFirstDayOfMonth(year, month) {
   return day === 0 ? 6 : day - 1;
 }
 
-const Calendarr = () => {
+const Calendar = () => {
   const [isSwitched1, setIsSwitched1] = useState(false);
   const [isSwitched2, setIsSwitched2] = useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -357,11 +357,7 @@ const Calendarr = () => {
           </h4>
           <div className="w-full h-16.25 rounded-md border border-[#D9D9D9] px-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img
-                src={rem}
-                alt=""
-                className="w-7 h-7 shrink-0"
-              />
+              <img src={rem} alt="" className="w-7 h-7 shrink-0" />
               <div>
                 <p className="font-medium text-[14px] text-black leading-tight">
                   Date
@@ -389,11 +385,7 @@ const Calendarr = () => {
           </h4>
           <div className="w-full h-16.25 rounded-md border border-[#D9D9D9] px-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img
-                src={time}
-                alt=""
-                className="w-7 h-7 shrink-0"
-              />
+              <img src={time} alt="" className="w-7 h-7 shrink-0" />
               <div>
                 <p className="font-medium text-[14px] text-black leading-tight">
                   Time
@@ -440,4 +432,4 @@ const Calendarr = () => {
   );
 };
 
-export default Calendarr;
+export default Calendar;

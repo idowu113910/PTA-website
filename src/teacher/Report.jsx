@@ -36,10 +36,12 @@ import on from "../assets/switch.svg";
 import off from "../assets/off.svg";
 import ana from "../assets/analytics.svg";
 import rr from "../assets/report review.svg";
+import { useTheme } from "../ThemeContext";
 
 registerLocale("en-GB", enGB);
 
 const Report = () => {
+  const { isDarkMode } = useTheme();
   const [screen, setScreen] = useState("report");
   const mainScreens = ["report"];
   const navigate = useNavigate();
@@ -279,18 +281,32 @@ const Report = () => {
 
   // Shared classes
   const inputClass =
-    "w-full h-[52px] rounded-[8px] border border-[#0000001F] py-2 px-3 text-[14px] placeholder:text-gray-400 focus:outline-none focus:border-[#FF7B17]";
-  const dropdownBtnClass =
-    "w-full h-[52px] px-3 border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between text-[14px]";
+    "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[14px] font-normal focus:outline-none";
+
+  const dropdownBtnClass = `w-full h-[52px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
+    isDarkMode
+      ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
+      : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
+  }`;
   const fixedBtnWrapper =
     "fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-50";
 
   return (
-    <div className="w-full max-w-[430px] mx-auto min-h-screen bg-white">
+    <div
+      className={`w-full max-w-[430px] mx-auto min-h-screen ${
+        isDarkMode ? "bg-[#121212] text-white" : "bg-[#FFFFFF] text-[#303030]"
+      }`}
+    >
       {/* ================= REPORT HOME ================= */}
       {screen === "report" && (
-        <div className="pb-24 px-5 pt-6">
-          <h1 className="font-bold text-[20px] text-black">Report</h1>
+        <div
+          className={`pb-24 px-5 pt-6 min-h-screen ${
+            isDarkMode
+              ? "bg-[#121212] text-white"
+              : "bg-[#FFFFFF] text-[#303030]"
+          }`}
+        >
+          <h1 className="font-bold text-[20px]">Report</h1>
 
           {/* Term year dropdown */}
           <div className="relative mt-6">
@@ -314,6 +330,7 @@ const Report = () => {
                     key={term}
                     onClick={() => {
                       setSelectedTermYear(term);
+
                       setIsTermDropdownOpen(false);
                     }}
                     className="px-4 py-3 text-[13px] cursor-pointer hover:bg-[#EFF6FF]"
@@ -364,51 +381,99 @@ const Report = () => {
 
       {/* ================= MARK ATTENDANCE ================= */}
       {screen === "mark-attendance" && (
-        <div className="pb-28">
+        <div
+          className={`pb-28  ${
+            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+          }`}
+        >
           <div
             className="flex items-center gap-4 px-5 py-5 cursor-pointer"
             onClick={() => setScreen("report")}
           >
-            <img src={back} alt="back" />
+            <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
             <h2 className="text-[20px] font-medium">Attendance</h2>
           </div>
 
           <div className="px-5">
             <div className="flex justify-between items-center">
-              <p className="font-semibold text-[15px] text-black">
+              <p
+                className={`font-semibold text-[15px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 Class Attendance
               </p>
-              <p className="font-medium text-[13px] text-black">Today</p>
+              <p
+                className={`font-semibold text-[15px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Today
+              </p>
             </div>
           </div>
 
           {/* Date navigator */}
-          <div className="border border-[#E3E3E3] rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3">
+          <div
+            className={`rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3 ${
+              isDarkMode
+                ? "border border-gray-600 bg-transparent"
+                : "border border-[#E3E3E3] bg-white"
+            }`}
+          >
             <img
               src={back3}
               alt="prev"
               onClick={handlePrevDay}
-              className="cursor-pointer w-5 h-5 flex-shrink-0"
+              className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
+                isDarkMode ? "invert" : ""
+              }`}
             />
-            <p className="font-medium text-[13px] text-black truncate mx-2">
+            <p
+              className={`font-medium text-[13px] text-center truncate mx-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               {formatDate(currentDate)}
             </p>
             <img
               src={front}
               alt="next"
               onClick={handleNextDay}
-              className="cursor-pointer w-5 h-5 flex-shrink-0"
+              className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
+                isDarkMode ? "invert" : ""
+              }`}
             />
           </div>
 
           {/* Summary card */}
-          <div className="border border-[#E3E3E3] rounded-[6px] mx-5 mt-4 p-3">
-            <h2 className="font-medium text-[13px] text-black mb-2">
+          <div
+            className={`rounded-[6px] mx-5 mt-4 p-3 ${
+              isDarkMode
+                ? "border border-gray-600 bg-transparent"
+                : "border border-[#E3E3E3] bg-white"
+            }`}
+          >
+            <h2
+              className={`font-medium text-[13px] mb-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               Today's Summary
             </h2>
             <div className="flex justify-between gap-2">
-              <div className="flex-1 bg-[#F0FDF4] rounded py-2 flex flex-col items-center">
-                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mb-1">
+              <div
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#F0FDF4]"
+                }`}
+              >
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
+                    isDarkMode ? "bg-green-900/40" : "bg-green-100"
+                  }`}
+                >
                   <svg
                     className="w-4 h-4 text-green-500"
                     fill="none"
@@ -423,32 +488,97 @@ const Report = () => {
                     />
                   </svg>
                 </div>
-                <p className="text-[14px] font-semibold">{counts.present}</p>
-                <p className="text-[12px] font-medium">Present</p>
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  {counts.present}
+                </p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Present
+                </p>
               </div>
-              <div className="flex-1 bg-[#FDF1F1] rounded py-2 flex flex-col items-center">
+              <div
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#FDF1F1]"
+                }`}
+              >
                 <img src={pre} alt="" className="w-6 h-6 mb-1" />
-                <p className="text-[14px] font-semibold">{counts.absent}</p>
-                <p className="text-[12px] font-medium">Absent</p>
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  {counts.absent}
+                </p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Absent
+                </p>
               </div>
-              <div className="flex-1 bg-[#FEFCE9] rounded py-2 flex flex-col items-center">
+              <div
+                c
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#FEFCE9]"
+                }`}
+              >
                 <img src={late} alt="" className="w-6 h-6 mb-1" />
-                <p className="text-[14px] font-semibold">{counts.late}</p>
-                <p className="text-[12px] font-medium">Late</p>
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  {counts.late}
+                </p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Late
+                </p>
               </div>
             </div>
-            <div className="w-full h-[1px] bg-[#D9D9D9] mt-3 mb-2" />
+            <div
+              className={`w-full h-[1px] mt-3 mb-2 ${
+                isDarkMode ? "bg-gray-700" : "bg-[#D9D9D9]"
+              }`}
+            />
             <div className="flex justify-between">
-              <p className="font-medium text-black text-[14px]">
+              <p
+                className={`font-medium text-[14px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 Total Students
               </p>
-              <p className="font-semibold text-black text-[14px]">
+              <p
+                className={`font-semibold text-[14px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
                 {students.length}
               </p>
             </div>
           </div>
 
-          <p className="font-medium text-[17px] text-black px-5 mt-4 mb-2">
+          <p
+            className={`font-medium text-[17px] px-5 mt-4 mb-2 ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
             Student List
           </p>
 
@@ -456,7 +586,11 @@ const Report = () => {
             {students.map((student) => (
               <div
                 key={student.id}
-                className="border border-[#E3E3E3] rounded-[6px] px-3 py-2 flex items-center justify-between"
+                className={`rounded-[6px] px-3 py-2 flex items-center justify-between ${
+                  isDarkMode
+                    ? "border border-gray-600 bg-transparent"
+                    : "border border-[#E3E3E3] bg-white"
+                }`}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <img
@@ -465,7 +599,11 @@ const Report = () => {
                     className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
                   />
                   <div className="min-w-0">
-                    <p className="font-semibold text-[14px] text-black truncate">
+                    <p
+                      className={`font-semibold text-[14px] truncate ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
                       {student.name}
                     </p>
                     <p className="font-medium text-[12px] text-[#9C9C9C]">
@@ -503,7 +641,13 @@ const Report = () => {
             ))}
           </div>
 
-          <div className={fixedBtnWrapper}>
+          <div
+            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
+              isDarkMode
+                ? "bg-[#121212] border-gray-800"
+                : "bg-white border-[#E3E3E3]"
+            }`}
+          >
             <button className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
               Save
             </button>
@@ -521,7 +665,11 @@ const Report = () => {
                 className="flex items-center gap-4 px-5 py-5 cursor-pointer"
                 onClick={() => setScreen("report")}
               >
-                <img src={back} alt="back" />
+                <img
+                  src={back}
+                  alt="back"
+                  className={isDarkMode ? "invert" : ""}
+                />
                 <h2 className="text-[20px] font-medium flex-1">My Students</h2>
                 <div
                   onClick={(e) => {
@@ -530,19 +678,37 @@ const Report = () => {
                   }}
                   className="cursor-pointer"
                 >
-                  <img src={add} alt="add student" />
+                  <img
+                    src={add}
+                    alt="add student"
+                    className={isDarkMode ? "invert" : ""}
+                  />
                 </div>
               </div>
 
               {/* Search */}
-              <div className="mx-5 mt-2 border border-[#D9D9D9] rounded-[7px] bg-[#FCFCFC] h-[48px] flex items-center gap-3 px-3">
-                <img src={srch} alt="" className="w-5 h-5 flex-shrink-0" />
+              <div
+                className={`mx-5 mt-2 border rounded-[7px] h-[48px] flex items-center gap-3 px-3 ${
+                  isDarkMode
+                    ? "bg-[#1E1E1E] border-[#2A2A2A]"
+                    : "bg-[#FCFCFC] border-[#D9D9D9]"
+                }`}
+              >
+                <img
+                  src={srch}
+                  alt=""
+                  className={`w-5 h-5 flex-shrink-0 ${isDarkMode ? "brightness-200" : ""}`}
+                />
                 <input
                   type="text"
                   placeholder="Search Students"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="outline-none text-[14px] text-[#616161] bg-transparent flex-1"
+                  className={`outline-none text-[14px] bg-transparent flex-1 ${
+                    isDarkMode
+                      ? "text-white placeholder-gray-400"
+                      : "text-[#616161] placeholder-gray-400"
+                  }`}
                 />
               </div>
 
@@ -559,10 +725,14 @@ const Report = () => {
                       className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[14px] text-black truncate">
+                      <p className="font-semibold text-[14px] truncate">
                         {student.name}
                       </p>
-                      <p className="font-medium text-[12px] text-[#9C9C9C]">
+                      <p
+                        className={`font-medium text-[12px] ${
+                          isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+                        }`}
+                      >
                         ID: {student.id}
                       </p>
                     </div>
@@ -571,8 +741,11 @@ const Report = () => {
                         View
                       </button>
                       <button
-                        onClick={() => handleRemoveStudent(student.id)}
-                        className="text-[13px] font-normal text-[#FF0000]"
+                        className={`text-[13px] transition-colors ${
+                          isDarkMode
+                            ? "text-gray-400 hover:text-red-400"
+                            : "text-gray-500 hover:text-red-600"
+                        }`}
                       >
                         Remove
                       </button>
@@ -583,24 +756,26 @@ const Report = () => {
             </>
           ) : (
             /* Add Student form */
-            <div className="pb-28">
+            <div
+              className={`pb-28 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"}`}
+            >
               <div className="flex items-center gap-4 px-5 py-5">
                 <img
                   src={back}
                   alt="back"
                   onClick={() => setShowAddStudent(false)}
-                  className="cursor-pointer"
+                  className={isDarkMode ? "invert cursor-pointer" : ""}
                 />
                 <h2 className="text-[20px] font-medium">Add Student</h2>
               </div>
 
               <div className="px-5 flex flex-col gap-5">
-                <h4 className="font-semibold text-[17px] text-black">
+                <h4 className="font-semibold text-[17px]">
                   Student Information
                 </h4>
 
                 <div>
-                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  <label className="block text-[15px] font-medium mb-2">
                     Student Name
                   </label>
                   <input
@@ -614,7 +789,7 @@ const Report = () => {
 
                 {/* DOB */}
                 <div>
-                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  <label className="block text-[15px] font-medium mb-2">
                     Date Of Birth
                   </label>
                   <div className="relative">
@@ -662,18 +837,30 @@ const Report = () => {
 
                 {/* Gender */}
                 <div>
-                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  <label
+                    className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                  >
                     Gender
                   </label>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setIsGenderOpen(!isGenderOpen)}
-                      className={dropdownBtnClass}
+                      className={`w-full h-[48px] px-3 border rounded-[7px] flex items-center justify-between transition-colors ${
+                        isDarkMode
+                          ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
+                          : "bg-[#FCFCFC] border-[#D9D9D9] text-[#303030]"
+                      }`}
                     >
                       <span
                         className={
-                          selectedGender ? "text-[#303030]" : "text-gray-400"
+                          selectedGender
+                            ? isDarkMode
+                              ? "text-white"
+                              : "text-[#303030]"
+                            : isDarkMode
+                              ? "text-gray-400"
+                              : "text-gray-400"
                         }
                       >
                         {selectedGender || "Select a gender"}
@@ -681,16 +868,27 @@ const Report = () => {
                       <img
                         src={arr}
                         alt=""
-                        className={`transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""}`}
+                        className={`w-4 h-4 transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""} ${isDarkMode ? "brightness-200" : ""}`}
                       />
                     </button>
+
                     {isGenderOpen && (
-                      <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                      <div
+                        className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
+                          isDarkMode
+                            ? "bg-[#121212] border-[#2A2A2A] text-white"
+                            : "bg-white border-[#E5E7EB] text-gray-900"
+                        }`}
+                      >
                         {genders.map((g) => (
                           <div
                             key={g}
                             onClick={() => handleSelectGender(g)}
-                            className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                            className={`px-4 py-3 text-[14px] cursor-pointer ${
+                              isDarkMode
+                                ? "hover:bg-[#1E1E1E]"
+                                : "hover:bg-[#EFF6FF]"
+                            }`}
                           >
                             {g}
                           </div>
@@ -699,10 +897,9 @@ const Report = () => {
                     )}
                   </div>
                 </div>
-
                 {/* Student ID */}
                 <div>
-                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  <label className="block text-[15px] font-medium mb-2">
                     Student ID
                   </label>
                   <input
@@ -716,15 +913,27 @@ const Report = () => {
 
                 {/* Upload Photo */}
                 <div>
-                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  <label
+                    className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                  >
                     Upload Photo
                   </label>
                   <div
-                    className="flex items-center justify-between border border-[#0000001F] rounded-[8px] h-[52px] px-3 cursor-pointer"
+                    className={`flex items-center justify-between border rounded-[8px] h-[52px] px-3 cursor-pointer transition-colors ${
+                      isDarkMode
+                        ? "bg-[#1E1E1E] border-[#2A2A2A]"
+                        : "bg-[#FCFCFC] border-[#0000001F]"
+                    }`}
                     onClick={handleFileClick}
                   >
                     <span
-                      className={`text-[14px] truncate flex-1 ${selectedFile ? "text-[#303030]" : "text-gray-400"}`}
+                      className={`text-[14px] truncate flex-1 ${
+                        selectedFile
+                          ? isDarkMode
+                            ? "text-white"
+                            : "text-[#303030]"
+                          : "text-gray-400"
+                      }`}
                     >
                       {selectedFile ? selectedFile.name : "Choose File"}
                     </span>
@@ -738,19 +947,21 @@ const Report = () => {
                     <img
                       src={ch}
                       alt=""
-                      className="w-[18px] h-[18px] flex-shrink-0 ml-2"
+                      className={`w-[18px] h-[18px] flex-shrink-0 ml-2 ${isDarkMode ? "brightness-200" : ""}`}
                     />
                   </div>
                 </div>
 
-                <h4 className="font-semibold text-[17px] text-black pt-1">
+                <h4 className="font-semibold text-[17px] pt-1">
                   Class & Academic Info
                 </h4>
 
                 {/* Class + Session */}
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    <label
+                      className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                    >
                       Class
                     </label>
                     <input
@@ -758,11 +969,17 @@ const Report = () => {
                       placeholder="e.g Grade 5"
                       value={studentClass}
                       onChange={(e) => setStudentClass(e.target.value)}
-                      className="w-full h-[52px] rounded-[8px] border border-[#0000001F] px-3 text-[14px] placeholder:text-gray-400 focus:outline-none"
+                      className={`w-full h-[52px] rounded-[8px] border px-3 text-[14px] placeholder:text-gray-400 focus:outline-none transition-colors ${
+                        isDarkMode
+                          ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
+                          : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
+                      }`}
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                    <label
+                      className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                    >
                       Academic Session
                     </label>
                     <input
@@ -770,25 +987,39 @@ const Report = () => {
                       placeholder="E.g 2024/2025"
                       value={academicSession}
                       onChange={(e) => setAcademicSession(e.target.value)}
-                      className="w-full h-[52px] rounded-[8px] border border-[#0000001F] px-3 text-[14px] placeholder:text-gray-400 focus:outline-none"
+                      className={`w-full h-[52px] rounded-[8px] border px-3 text-[14px] placeholder:text-gray-400 focus:outline-none transition-colors ${
+                        isDarkMode
+                          ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
+                          : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
+                      }`}
                     />
                   </div>
                 </div>
 
                 {/* Term */}
                 <div>
-                  <label className="block text-[15px] font-medium text-[#303030] mb-2">
+                  <label
+                    className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
+                  >
                     Term
                   </label>
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setIsTermOpen(!isTermOpen)}
-                      className={dropdownBtnClass}
+                      className={`w-full h-[52px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
+                        isDarkMode
+                          ? "bg-[#1E1E1E] border-[#2A2A2A]"
+                          : "bg-[#FCFCFC] border-[#0000001F]"
+                      }`}
                     >
                       <span
                         className={
-                          selectedTerm ? "text-[#303030]" : "text-gray-400"
+                          selectedTerm
+                            ? isDarkMode
+                              ? "text-white"
+                              : "text-[#303030]"
+                            : "text-gray-400"
                         }
                       >
                         {selectedTerm || "Select Term"}
@@ -796,16 +1027,27 @@ const Report = () => {
                       <img
                         src={arr}
                         alt=""
-                        className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""}`}
+                        className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""} ${isDarkMode ? "brightness-200" : ""}`}
                       />
                     </button>
+
                     {isTermOpen && (
-                      <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                      <div
+                        className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
+                          isDarkMode
+                            ? "bg-[#121212] border-[#2A2A2A] text-white"
+                            : "bg-white border-[#E5E7EB] text-gray-900"
+                        }`}
+                      >
                         {terms.map((t) => (
                           <div
                             key={t}
                             onClick={() => handleSelectTerm(t)}
-                            className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                            className={`px-4 py-3 text-[14px] cursor-pointer ${
+                              isDarkMode
+                                ? "hover:bg-[#1E1E1E]"
+                                : "hover:bg-[#EFF6FF]"
+                            }`}
                           >
                             {t}
                           </div>
@@ -816,11 +1058,23 @@ const Report = () => {
                 </div>
               </div>
 
-              <div className={fixedBtnWrapper}>
+              <div
+                className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+                  isDarkMode
+                    ? "bg-[#121212] border-[#2A2A2A]"
+                    : "bg-white border-[#E3E3E3]"
+                }`}
+              >
                 <button
                   onClick={handleSaveStudent}
                   disabled={!isStudentFormValid}
-                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${isStudentFormValid ? "bg-[#FF7B17] cursor-pointer" : "bg-gray-300 cursor-not-allowed"}`}
+                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] transition-all ${
+                    isStudentFormValid
+                      ? "bg-[#FF7B17] hover:bg-[#E06A10] text-white cursor-pointer shadow-md"
+                      : isDarkMode
+                        ? "bg-[#2A2A2A] text-gray-500 cursor-not-allowed border border-[#333333]"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
                 >
                   Add Student
                 </button>
@@ -872,19 +1126,28 @@ const Report = () => {
 
       {/* ================= BEHAVIOUR ================= */}
       {screen === "behaviour" && (
-        <div className="pb-28" onMouseUp={handleMouseUp}>
+        <div
+          className={`pb-28 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"}`}
+          onMouseUp={handleMouseUp}
+        >
           <div
             className="flex items-center gap-4 px-5 py-5 cursor-pointer"
             onClick={() => setScreen("report")}
           >
-            <img src={back} alt="back" />
-            <h2 className="text-[20px] font-medium">Add Behaviour</h2>
+            <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
+            <h2
+              className={`text-[20px] font-medium ${isDarkMode ? "bg-[#121212] text-white" : "bg-white  text-[#000000]"}`}
+            >
+              Add Behaviour
+            </h2>
           </div>
 
           <div className="px-5 flex flex-col gap-5">
             {/* Student Name */}
             <div>
-              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+              <label
+                className={`block text-[15px] font-medium ] mb-2 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"}`}
+              >
                 Student Name
               </label>
               <input
@@ -898,18 +1161,28 @@ const Report = () => {
 
             {/* Gender */}
             <div>
-              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+              <label
+                className={`block text-[15px] font-medium ] mb-2 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"}`}
+              >
                 Gender
               </label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsGenderOpen(!isGenderOpen)}
-                  className={dropdownBtnClass}
+                  className={`w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
+                    isDarkMode
+                      ? "bg-[#1E1E1E] border-[#2A2A2A]"
+                      : "bg-[#FCFCFC] border-[#D9D9D9]"
+                  }`}
                 >
                   <span
                     className={
-                      selectedGender ? "text-[#303030]" : "text-gray-400"
+                      selectedGender
+                        ? isDarkMode
+                          ? "text-white"
+                          : "text-[#303030]"
+                        : "text-gray-400"
                     }
                   >
                     {selectedGender || "Select a gender"}
@@ -917,16 +1190,29 @@ const Report = () => {
                   <img
                     src={arr}
                     alt=""
-                    className={`transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isGenderOpen ? "rotate-180" : ""
+                    } ${isDarkMode ? "brightness-200" : ""}`}
                   />
                 </button>
+
                 {isGenderOpen && (
-                  <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                  <div
+                    className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
+                      isDarkMode
+                        ? "bg-[#121212] border-[#2A2A2A] text-white"
+                        : "bg-white border-[#E5E7EB] text-gray-900"
+                    }`}
+                  >
                     {genders.map((g) => (
                       <div
                         key={g}
                         onClick={() => handleSelectGender(g)}
-                        className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                        className={`px-4 py-3 text-[14px] cursor-pointer ${
+                          isDarkMode
+                            ? "hover:bg-[#1E1E1E]"
+                            : "hover:bg-[#EFF6FF]"
+                        }`}
                       >
                         {g}
                       </div>
@@ -938,18 +1224,30 @@ const Report = () => {
 
             {/* Academic Term */}
             <div>
-              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+              <label
+                className={`block text-[15px] font-medium mb-2 ${
+                  isDarkMode ? "text-white" : "text-[#303030]"
+                }`}
+              >
                 Academic Term
               </label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsTermOpen(!isTermOpen)}
-                  className={dropdownBtnClass}
+                  className={`w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
+                    isDarkMode
+                      ? "bg-[#1E1E1E] border-[#2A2A2A]"
+                      : "bg-[#FCFCFC] border-[#D9D9D9]"
+                  }`}
                 >
                   <span
                     className={
-                      selectedTerm ? "text-[#303030]" : "text-gray-400"
+                      selectedTerm
+                        ? isDarkMode
+                          ? "text-white"
+                          : "text-[#303030]"
+                        : "text-gray-400"
                     }
                   >
                     {selectedTerm || "Select an Academic Term"}
@@ -957,16 +1255,29 @@ const Report = () => {
                   <img
                     src={arr}
                     alt=""
-                    className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isTermOpen ? "rotate-180" : ""
+                    } ${isDarkMode ? "brightness-200" : ""}`}
                   />
                 </button>
+
                 {isTermOpen && (
-                  <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+                  <div
+                    className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
+                      isDarkMode
+                        ? "bg-[#121212] border-[#2A2A2A] text-white"
+                        : "bg-white border-[#E5E7EB] text-gray-900"
+                    }`}
+                  >
                     {terms.map((t) => (
                       <div
                         key={t}
                         onClick={() => handleSelectTerm(t)}
-                        className="px-4 py-3 text-[14px] cursor-pointer hover:bg-[#EFF6FF]"
+                        className={`px-4 py-3 text-[14px] cursor-pointer ${
+                          isDarkMode
+                            ? "hover:bg-[#1E1E1E]"
+                            : "hover:bg-[#EFF6FF]"
+                        }`}
                       >
                         {t}
                       </div>
@@ -975,17 +1286,20 @@ const Report = () => {
                 )}
               </div>
             </div>
-
             {/* Social Skills */}
             <div>
-              <h2 className="font-medium text-[15px] text-black mb-3">
+              <h2
+                className={`font-medium text-[15px] text-black mb-3 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#000000]"}`}
+              >
                 Social Skills Assessment
               </h2>
               <div className="flex flex-col gap-5">
                 {skills.map((skill) => (
                   <div key={skill.id}>
                     <div className="flex justify-between mb-1">
-                      <p className="font-normal text-[14px] text-black">
+                      <p
+                        className={`font-normal text-[14px] ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#000000]"}`}
+                      >
                         {skill.label}
                       </p>
                       <span className="text-[13px] font-semibold">
@@ -1016,7 +1330,9 @@ const Report = () => {
 
             {/* Comments */}
             <div>
-              <label className="block text-[15px] font-medium text-[#303030] mb-2">
+              <label
+                className={`block text-[15px] font-medium text-[#303030] mb-2 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"}`}
+              >
                 Add Comments
               </label>
               <input
@@ -1030,7 +1346,9 @@ const Report = () => {
 
             {/* Notify Parents */}
             <div className="flex justify-between items-center pb-2">
-              <h6 className="font-medium text-[15px] text-black">
+              <h6
+                className={`font-medium text-[15px] ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"}`}
+              >
                 Notify Parents
               </h6>
               <img
@@ -1042,11 +1360,17 @@ const Report = () => {
             </div>
           </div>
 
-          <div className={fixedBtnWrapper}>
+          <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-black border-t border-[#1F1F1F] px-5 py-3 z-40">
             <button
               onClick={() => {}}
               disabled={!isBehaviourFormValid}
-              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white ${isBehaviourFormValid ? "bg-[#FF7B17] cursor-pointer" : "bg-gray-300 cursor-not-allowed"}`}
+              className={`w-full h-[50px] rounded-[12px] font-semibold text-[16px] transition-all ${
+                isBehaviourFormValid
+                  ? "bg-[#FF7B17] hover:bg-[#E06A10] text-white cursor-pointer shadow-md"
+                  : isDarkMode
+                    ? "bg-[#262626] text-[#737373] cursor-not-allowed"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
               Save
             </button>

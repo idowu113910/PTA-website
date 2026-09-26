@@ -29,7 +29,7 @@ body,
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Optional keyframes */
+/* Keyframe animations */
 @keyframes slideUp {
   from {
     transform: translateY(100%);

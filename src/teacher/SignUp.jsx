@@ -3,13 +3,11 @@ import ED from "../assets/ED role.svg";
 import back from "../assets/back2.svg";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { FaFacebook, FaApple } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
 import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
 import app from "../assets/Apple.svg";
 
-const Introduction = () => {
+const SignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     fullName: "",
@@ -44,30 +42,32 @@ const Introduction = () => {
 
   const handleNext = () => {
     if (isFormValid()) {
-      navigate("/homee");
+      navigate("/teacher/home");
     }
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-6 max-w-107.5 mx-auto flex flex-col justify-between">
+    // Explicit white background — this screen intentionally does NOT use ThemeContext/useTheme
+    // and should never be affected by light/dark mode.
+    <div className="min-h-screen bg-[#ffffff] px-6 py-6 max-w-107.5 mx-auto flex flex-col justify-between">
       <div>
         {/* Header Navigation */}
-        <div className="relative flex items-center justify-center pt-2">
+        <div className="relative flex items-center justify-center pt-2 ">
           <button
             onClick={() => navigate("/role")}
-            className="absolute left-0 p-2 flex items-center justify-center"
+            className="absolute left-0 p-2  flex items-center justify-center"
           >
-            <img src={back} alt="Back" className="w-5 h-5" />
+            <img src={back} alt="Back" className="w-5 h-5 -mt-8" />
           </button>
-          <img src={ED} alt="Logo" className="h-16 object-contain" />
+          <img src={ED} alt="Logo" className="h-16 object-contain mt-5" />
         </div>
 
         {/* Title */}
         <div className="text-center mt-6 mb-6">
-          <h1 className="text-[22px] font-bold text-gray-900">
+          <h1 className="text-[22px] font-bold text-[#001216]">
             Create Your Account
           </h1>
-          <p className="text-[14px] text-gray-600 mt-1">
+          <p className="text-[14px] text-[#001216] mt-1">
             We’re Excited To Have You!
           </p>
         </div>
@@ -75,8 +75,8 @@ const Introduction = () => {
         {/* Form Inputs */}
         <div className="space-y-4">
           {/* Full Name */}
-          <div>
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
+          <div className="mt-8">
+            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
               Full Name
             </label>
             <input
@@ -84,63 +84,67 @@ const Introduction = () => {
               name="fullName"
               value={formData.fullName}
               onChange={handleInputChange}
-              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[14px] text-gray-900
-               placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] text-gray-900 
+              placeholder:text-[#969696] focus:outline-none focus:border-gray-400 font-normal"
               placeholder="Enter your full name"
             />
           </div>
 
           {/* Work Email */}
           <div>
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
-              Email Address
+            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
+              Work Email
             </label>
             <input
               type="email"
               name="workEmail"
               value={formData.workEmail}
-              onChange={handleInputChange}
-              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[14px] text-gray-900
-               placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+              onChange={(e) => {
+                // Keep only A-Z, a-z, @, ., _, and -
+                const lettersOnlyValue = e.target.value.replace(
+                  /[^a-zA-Z@._-]/g,
+                  "",
+                );
+                setFormData((prev) => ({
+                  ...prev,
+                  workEmail: lettersOnlyValue,
+                }));
+              }}
+              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] font-normal
+               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
               placeholder="Example@gmail.com"
             />
           </div>
 
+          {/* Name of school */}
           <div>
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
+            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
               Name of school
             </label>
             <input
               type="text"
               name="schoolName"
               value={formData.schoolName}
-              onChange={handleInputChange}
-              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[14px] text-gray-900
-               placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
-              placeholder="E.g afrotech"
+              onChange={(e) => {
+                // Strip out anything that is NOT a letter or space
+                const lettersOnly = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                handleInputChange({
+                  ...e,
+                  target: {
+                    ...e.target,
+                    name: "schoolName",
+                    value: lettersOnly,
+                  },
+                });
+              }}
+              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] text-gray-900 placeholder:text-[#969696] font-normal focus:outline-none focus:border-gray-400"
+              placeholder="E.g. Afrotech Academy"
             />
           </div>
-
-          <div>
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
-              Student Code
-            </label>
-            <input
-              type="email"
-              name="workEmail"
-              value={formData.workEmail}
-              onChange={handleInputChange}
-              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[14px] text-gray-900
-               placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
-              placeholder="E.g 344555u"
-            />
-          </div>
-
-          {/* Name of school */}
 
           {/* Password */}
           <div>
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
+            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
               Password
             </label>
             <div className="relative">
@@ -149,7 +153,8 @@ const Introduction = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] pl-4 pr-12 text-[14px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+                className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] pl-4 pr-12 text-[12px] font-normal text-gray-900
+                 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
                 placeholder="Enter your Password"
               />
               <button
@@ -173,7 +178,8 @@ const Introduction = () => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] pl-4 pr-12 text-[14px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+                className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] pl-4 pr-12 text-[12px] text-gray-900
+                 placeholder:text-[#969696] font-normal focus:outline-none focus:border-gray-400"
                 placeholder="Confirm Password"
               />
               <button
@@ -216,7 +222,7 @@ const Introduction = () => {
       </div>
 
       {/* Submit Button */}
-      <div className="mt-6">
+      <div className="mt-8 mb-4">
         <button
           onClick={handleNext}
           disabled={!isFormValid()}
@@ -266,7 +272,7 @@ const Introduction = () => {
 
       <div
         onClick={() => {
-          navigate("/login");
+          navigate("/teacher/login");
         }}
         className="flex gap-3 items-center justify-center mt-10"
       >
@@ -280,4 +286,4 @@ const Introduction = () => {
   );
 };
 
-export default Introduction;
+export default SignUp;

@@ -164,7 +164,7 @@ const Login = () => {
 
         <div
           onClick={() => {
-            navigate("/introduction");
+            navigate("/teacher/signup");
           }}
           className="flex gap-3 items-center justify-center mt-10"
         >

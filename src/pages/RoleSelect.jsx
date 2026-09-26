@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import role from "../assets/ED role.svg";
 import tea from "../assets/teacher.svg";
 import pare from "../assets/rolee.jpg";
 
 const RoleSelect = () => {
   const [selectedRole, setSelectedRole] = useState(null);
+  const navigate = useNavigate();
 
   const handleNext = () => {
     if (!selectedRole) return;
@@ -19,24 +21,25 @@ const RoleSelect = () => {
       savedEmail.trim() !== "";
 
     if (selectedRole === "parent") {
-      // If already onboarded, skip straight to parent home
       if (alreadyOnboarded) {
-        window.location.href = "/homee";
+        navigate("/parent/home");
       } else {
-        window.location.href = "/intro";
+        navigate("/parent/signup");
       }
     } else if (selectedRole === "teacher") {
-      // If already onboarded, skip straight to teacher home
       if (alreadyOnboarded) {
-        window.location.href = "/home";
+        navigate("/teacher/home");
       } else {
-        window.location.href = "/introduction";
+        navigate("/teacher/signup");
       }
     }
   };
 
   return (
-    <div>
+    // Explicit opaque background + min-h-screen so this screen is always fully light,
+    // regardless of any dark background applied higher up (e.g. a themed wrapper in App.jsx).
+    // This screen intentionally does NOT use ThemeContext/useTheme at all.
+    <div className="min-h-screen bg-white">
       <div className="flex flex-col items-center justify-center mt-18">
         <img src={role} alt="" />
         <div className="flex flex-col items-center justify-center mt-10">
@@ -67,10 +70,10 @@ const RoleSelect = () => {
         onClick={() => setSelectedRole("parent")}
         className={`relative w-83.75 h-36 mt-8 mx-auto rounded-[10px] bg-white overflow-hidden
            cursor-pointer shadow-[0_2px_2px_0_#0000001A] ${
-          selectedRole === "parent"
-            ? "border-[3px] border-[#FF7B17]"
-            : "border border-[#D2DBD6]"
-        }`}
+             selectedRole === "parent"
+               ? "border-[3px] border-[#FF7B17]"
+               : "border border-[#D2DBD6]"
+           }`}
       >
         <p className="mt-14 pl-4 font-medium text-[18px] text-[#111214]">
           Parent
