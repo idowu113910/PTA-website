@@ -4,6 +4,9 @@ html {
   height: 100%;
 }
 
+:root {
+  color-scheme: light dark;
+}
 body,
 #root {
   width: 100%;

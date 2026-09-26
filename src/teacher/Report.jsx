@@ -293,14 +293,14 @@ const Report = () => {
 
   return (
     <div
-      className={`w-full max-w-[430px] mx-auto min-h-screen ${
+      className={`w-full max-w-[430px] mx-auto min-h-screen min-h-dvh ${
         isDarkMode ? "bg-[#121212] text-white" : "bg-[#FFFFFF] text-[#303030]"
       }`}
     >
       {/* ================= REPORT HOME ================= */}
       {screen === "report" && (
         <div
-          className={`pb-24 px-5 pt-6 min-h-screen ${
+          className={`pb-24 px-5 pt-6 min-h-screen min-h-dvh ${
             isDarkMode
               ? "bg-[#121212] text-white"
               : "bg-[#FFFFFF] text-[#303030]"
