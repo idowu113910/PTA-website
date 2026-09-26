@@ -311,29 +311,52 @@ const Report = () => {
           {/* Term year dropdown */}
           <div className="relative mt-6">
             <button
+              type="button"
               onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
-              className="w-full h-[42px] rounded-[9px] px-3 bg-[#F3F4F6] flex items-center justify-between"
+              className={`w-full h-[42px] rounded-[9px] px-3 flex items-center justify-between transition-colors ${
+                isDarkMode
+                  ? "bg-[#1E1E1E] border border-[#2A2A2A]"
+                  : "bg-[#F3F4F6] border border-transparent"
+              }`}
             >
-              <p className="font-medium text-[13px] text-black truncate flex-1 text-left">
+              <p
+                className={`font-medium text-[13px] truncate flex-1 text-left ${
+                  selectedTermYear
+                    ? isDarkMode
+                      ? "text-white"
+                      : "text-black"
+                    : "text-gray-400"
+                }`}
+              >
                 {selectedTermYear}
               </p>
               <img
                 src={arr}
                 alt=""
-                className={`ml-2 flex-shrink-0 transition-transform duration-200 ${isTermDropdownOpen ? "rotate-180" : ""}`}
+                className={`ml-2 flex-shrink-0 transition-transform duration-200 ${
+                  isTermDropdownOpen ? "rotate-180" : ""
+                } ${isDarkMode ? "brightness-200" : ""}`}
               />
             </button>
+
             {isTermDropdownOpen && (
-              <div className="absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md">
+              <div
+                className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
+                  isDarkMode
+                    ? "bg-[#121212] border-[#2A2A2A] text-white"
+                    : "bg-white border-[#E5E7EB] text-gray-900"
+                }`}
+              >
                 {termYears.map((term) => (
                   <div
                     key={term}
                     onClick={() => {
                       setSelectedTermYear(term);
-
                       setIsTermDropdownOpen(false);
                     }}
-                    className="px-4 py-3 text-[13px] cursor-pointer hover:bg-[#EFF6FF]"
+                    className={`px-4 py-3 text-[13px] cursor-pointer ${
+                      isDarkMode ? "hover:bg-[#1E1E1E]" : "hover:bg-[#EFF6FF]"
+                    }`}
                   >
                     {term}
                   </div>
