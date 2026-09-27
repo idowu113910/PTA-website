@@ -91,6 +91,7 @@ function App() {
           >
             <Route path="/parent/signup" element={<Parent.SignUp />} />
             <Route path="/parent/login" element={<Parent.Login />} />
+            <Route path="/parent/verify" element={<Parent.Verify />} />
             <Route path="/parent/home" element={<Parent.HomePage />} />
             <Route path="/parent/report" element={<Parent.Report />} />
             <Route path="/parent/message" element={<Parent.Message />} />

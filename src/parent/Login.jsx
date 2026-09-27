@@ -10,6 +10,8 @@ import app from "../assets/Apple.svg";
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [formData, setFormData] = useState({
     workEmail: "",
     password: "",
@@ -27,15 +29,53 @@ const Login = () => {
     return formData.workEmail.trim() !== "" && formData.password.trim() !== "";
   };
 
-  const handleNext = (e) => {
+  const handleNext = async (e) => {
     e.preventDefault();
-    if (isFormValid()) {
-      navigate("/homee");
+    if (!isFormValid()) return;
+
+    setIsLoading(true);
+    setErrorMsg("");
+
+    try {
+      const response = await fetch(
+        "https://pta-wdln.onrender.com/api/auth/parent/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.workEmail,
+            password: formData.password,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed. Please try again.");
+      }
+
+      // Save session details locally, same convention as the signup flow
+      if (data.fullName) {
+        localStorage.setItem("fullName", data.fullName);
+      }
+      localStorage.setItem("userEmail", formData.workEmail);
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      navigate("/parent/home");
+    } catch (err) {
+      setErrorMsg(err.message || "An error occurred during login.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-6 max-w-107.5 mx-auto flex flex-col justify-between">
+    <div className="min-h-screen bg-white px-6 py-6 w-full mx-auto flex flex-col justify-between">
       <div>
         {/* Header Navigation */}
         <div className="relative flex items-center justify-center pt-2 mt-4">
@@ -69,7 +109,8 @@ const Login = () => {
               name="workEmail"
               value={formData.workEmail}
               onChange={handleInputChange}
-              className="w-full h-12 border-[#C3C6C9] border bg-[#F8F8F8] rounded-[10px] px-4 text-[14px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+              className="w-full h-12 border-[#C3C6C9] border bg-[#F8F8F8] rounded-[10px] px-4 text-[14px]
+               text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
               placeholder="Example@gmail.com"
             />
           </div>
@@ -85,7 +126,8 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full h-12 border-[#C3C6C9] border bg-[#F8F8F8] rounded-[10px] pl-4 pr-12 text-[14px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+                className="w-full h-12 border-[#C3C6C9] border bg-[#F8F8F8] rounded-[10px] pl-4 pr-12 text-[14px]
+                 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
                 placeholder="Enter your Password"
               />
               <button
@@ -109,21 +151,23 @@ const Login = () => {
             </button>
           </div>
 
+          {/* Error message */}
+          {errorMsg && (
+            <p className="text-[13px] text-red-500 text-center">{errorMsg}</p>
+          )}
+
           {/* Submit Button */}
           <div className="pt-6">
             <button
-              onClick={() => {
-                navigate("/homee");
-              }}
               type="submit"
-              disabled={!isFormValid()}
+              disabled={!isFormValid() || isLoading}
               className={`w-full h-12.5 rounded-xl text-[16px] font-medium transition-colors ${
-                isFormValid()
+                isFormValid() && !isLoading
                   ? "bg-[#FF7B17] text-white cursor-pointer hover:bg-[#e06910]"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }`}
             >
-              Log In
+              {isLoading ? "Logging In..." : "Log In"}
             </button>
           </div>
         </form>
@@ -148,7 +192,8 @@ const Login = () => {
           <button
             type="button"
             aria-label="Continue with Google"
-            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] 
+            border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <img src={goo} alt="" />
           </button>
@@ -156,7 +201,8 @@ const Login = () => {
           <button
             type="button"
             aria-label="Continue with Apple"
-            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] 
+            border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <img src={app} alt="" />
           </button>
