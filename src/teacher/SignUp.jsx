@@ -25,6 +25,19 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  // Characters an email address can legally contain
+  const EMAIL_ALLOWED_CHARS = /[^a-zA-Z0-9@._%+-]/g;
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const isValidEmail = (value) => EMAIL_REGEX.test(value);
+
+  // // Phone validation: allows digits, spaces, hyphens, parens, and leading plus (7 to 15 digits total)
+  // const isValidPhone = (value) => {
+  //   const digitsOnly = value.replace(/\D/g, "");
+  //   return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+  // };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -201,28 +214,33 @@ const SignUp = () => {
 
           {/* Work Email */}
           <div>
-            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
-              Work Email
+            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
+              Email Address
             </label>
             <input
               type="email"
               name="workEmail"
+              autoComplete="email"
               value={formData.workEmail}
-              onChange={(e) => {
-                // Keep only A-Z, a-z, @, ., _, and -
-                const lettersOnlyValue = e.target.value.replace(
-                  /[^a-zA-Z@._-]/g,
-                  "",
-                );
-                setFormData((prev) => ({
-                  ...prev,
-                  workEmail: lettersOnlyValue,
-                }));
-              }}
-              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] font-normal
-               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+              onChange={handleEmailChange}
+              onBlur={() => setEmailTouched(true)}
+              className={`w-full h-12.5 bg-[#F8F8F8] border rounded-[10px] px-4 text-[14px]
+               text-gray-900 placeholder:text-[#969696] focus:outline-none ${
+                 emailTouched &&
+                 formData.workEmail &&
+                 !isValidEmail(formData.workEmail)
+                   ? "border-red-400"
+                   : "border-[#C3C6C9]"
+               }`}
               placeholder="Example@gmail.com"
             />
+            {emailTouched &&
+              formData.workEmail &&
+              !isValidEmail(formData.workEmail) && (
+                <p className="text-[12px] text-red-500 mt-1">
+                  Enter a valid email address
+                </p>
+              )}
           </div>
 
           {/* Phone Number */}
