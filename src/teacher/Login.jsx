@@ -2,14 +2,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import back from "../assets/back2.svg";
 import ED from "../assets/ED role.svg";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
 import app from "../assets/Apple.svg";
 
+const LOGIN_ENDPOINT = "https://pta-wdln.onrender.com/api/auth/teacher/login";
+
 const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const [formData, setFormData] = useState({
     workEmail: "",
     password: "",
@@ -27,15 +31,72 @@ const Login = () => {
     return formData.workEmail.trim() !== "" && formData.password.trim() !== "";
   };
 
-  const handleNext = (e) => {
+  // Wraps fetch with a single retry after a short delay — a rejected fetch
+  // (e.g. "Load failed") most often means a Render free-tier cold start
+  // dropped the connection, and retrying once gives it a chance to finish
+  // waking up. Does nothing for a genuine CORS block, which fails the same
+  // way every time.
+  const fetchWithRetry = async (url, options, retries = 1, delayMs = 4000) => {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (retries > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        return fetchWithRetry(url, options, retries - 1, delayMs);
+      }
+      throw err;
+    }
+  };
+
+  const handleNext = async (e) => {
     e.preventDefault();
-    if (isFormValid()) {
-      navigate("/homee");
+    if (!isFormValid()) return;
+
+    setIsLoading(true);
+    setErrorMsg("");
+
+    try {
+      const response = await fetchWithRetry(LOGIN_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.workEmail,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed. Please try again.");
+      }
+
+      if (data.fullName) {
+        localStorage.setItem("fullName", data.fullName);
+      }
+      localStorage.setItem("userEmail", formData.workEmail);
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      navigate("/teacher/home");
+    } catch (err) {
+      if (err instanceof TypeError) {
+        setErrorMsg(
+          "Couldn't reach the server. Please check your connection and try again in a moment.",
+        );
+      } else {
+        setErrorMsg(err.message || "An error occurred during login.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-6 max-w-107.5 mx-auto flex flex-col justify-between">
+    <div className="min-h-screen bg-white px-6 py-6 w-full mx-auto flex flex-col justify-between">
       <div>
         {/* Header Navigation */}
         <div className="relative flex items-center justify-center pt-2 mt-4">
@@ -109,21 +170,30 @@ const Login = () => {
             </button>
           </div>
 
+          {/* Error message */}
+          {errorMsg && (
+            <p className="text-[13px] text-red-500 text-center">{errorMsg}</p>
+          )}
+
           {/* Submit Button */}
           <div className="pt-6">
             <button
-              onClick={() => {
-                navigate("/home");
-              }}
               type="submit"
-              disabled={!isFormValid()}
-              className={`w-full h-12.5 rounded-xl text-[16px] font-medium transition-colors ${
-                isFormValid()
+              disabled={!isFormValid() || isLoading}
+              className={`w-full h-12.5 rounded-xl text-[16px] font-medium transition-colors flex items-center justify-center gap-2 ${
+                isFormValid() && !isLoading
                   ? "bg-[#FF7B17] text-white cursor-pointer hover:bg-[#e06910]"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }`}
             >
-              Log In
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin w-5 h-5" />
+                  Logging In...
+                </>
+              ) : (
+                "Log In"
+              )}
             </button>
           </div>
         </form>

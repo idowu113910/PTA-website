@@ -79,6 +79,7 @@ function App() {
             <Route path="/teacher/message" element={<Teacher.Message />} />
             <Route path="/teacher/calendar" element={<Teacher.Calendar />} />
             <Route path="/teacher/profile" element={<Teacher.Profile />} />
+            <Route path="/teacher/verify" element={<Teacher.Verify />} />
           </Route>
 
           {/* Parent Routes — all wrapped in ParentThemeProvider + ParentLayout */}

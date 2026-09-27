@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import ED from "../assets/ED role.svg";
 import back from "../assets/back2.svg";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
 import app from "../assets/Apple.svg";
+
+const REGISTER_ENDPOINT =
+  "https://pta-wdln.onrender.com/api/auth/teacher/register";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -13,12 +16,15 @@ const SignUp = () => {
     fullName: "",
     workEmail: "",
     schoolName: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,11 +34,32 @@ const SignUp = () => {
     }));
   };
 
+  // Phone validation: allows digits, spaces, hyphens, parens, and a leading
+  // plus (7 to 15 digits total) — same rule as the parent signup form
+  const isValidPhone = (value) => {
+    const digitsOnly = value.replace(/\D/g, "");
+    return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+  };
+
+  // Restricts phone input to ONLY numbers and phone formatting characters (+, -, (), space)
+  const handlePhoneChange = (e) => {
+    let input = e.target.value;
+    let cleaned = input.replace(/[^\d\s()+-]/g, "");
+
+    // Ensure '+' can only appear at the very beginning
+    if (cleaned.indexOf("+") > 0) {
+      cleaned = cleaned.replace(/\+/g, "");
+    }
+
+    setFormData((prev) => ({ ...prev, phone: cleaned }));
+  };
+
   const isFormValid = () => {
     return (
       formData.fullName.trim() !== "" &&
       formData.workEmail.trim() !== "" &&
       formData.schoolName.trim() !== "" &&
+      isValidPhone(formData.phone) &&
       formData.password.trim() !== "" &&
       formData.confirmPassword.trim() !== "" &&
       formData.password === formData.confirmPassword &&
@@ -40,20 +67,95 @@ const SignUp = () => {
     );
   };
 
-  const handleNext = () => {
-    if (isFormValid()) {
-      navigate("/teacher/home");
+  // Wraps fetch with a single retry after a short delay — a rejected fetch
+  // (e.g. "Load failed") most often means a Render free-tier cold start
+  // dropped the connection, and retrying once gives it a chance to finish
+  // waking up. Does nothing for a genuine CORS block, which fails the same
+  // way every time.
+  const fetchWithRetry = async (url, options, retries = 1, delayMs = 4000) => {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (retries > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        return fetchWithRetry(url, options, retries - 1, delayMs);
+      }
+      throw err;
+    }
+  };
+
+  const handleNext = async (e) => {
+    e.preventDefault();
+    if (!isFormValid()) return;
+
+    setIsLoading(true);
+    setErrorMsg("");
+
+    try {
+      const response = await fetchWithRetry(REGISTER_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          role: "teacher",
+          fullName: formData.fullName,
+          // The endpoint's schema lists both `workEmail` and `email` as
+          // required, holding the same address in its example payload —
+          // sending both here so registration succeeds regardless of which
+          // key the backend actually reads.
+          workEmail: formData.workEmail,
+          email: formData.workEmail,
+          schoolName: formData.schoolName,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          termsAccepted: agreedToTerms,
+          phone: formData.phone,
+          // Required by the endpoint but not part of this screen's design —
+          // sent as an empty string so the request still succeeds without
+          // adding a field the form doesn't visually ask for.
+          subjectSpecialization: "",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Registration failed. Please try again.",
+        );
+      }
+
+      localStorage.setItem("fullName", formData.fullName);
+      localStorage.setItem("userEmail", formData.workEmail);
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      // Redirect to teacher verification route, carrying the email forward
+      navigate("/teacher/verify", { state: { email: formData.workEmail } });
+    } catch (err) {
+      if (err instanceof TypeError) {
+        setErrorMsg(
+          "Couldn't reach the server. Please check your connection and try again in a moment.",
+        );
+      } else {
+        setErrorMsg(err.message || "An error occurred during registration.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     // Explicit white background — this screen intentionally does NOT use ThemeContext/useTheme
     // and should never be affected by light/dark mode.
-    <div className="min-h-screen bg-[#ffffff] px-6 py-6 max-w-107.5 mx-auto flex flex-col justify-between">
+    <div className="min-h-screen bg-[#ffffff] px-6 py-6 w-full mx-auto flex flex-col justify-between">
       <div>
         {/* Header Navigation */}
         <div className="relative flex items-center justify-center pt-2 ">
           <button
+            type="button"
             onClick={() => navigate("/role")}
             className="absolute left-0 p-2  flex items-center justify-center"
           >
@@ -72,8 +174,15 @@ const SignUp = () => {
           </p>
         </div>
 
+        {/* Display Error Message */}
+        {errorMsg && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-[10px] text-center">
+            {errorMsg}
+          </div>
+        )}
+
         {/* Form Inputs */}
-        <div className="space-y-4">
+        <form onSubmit={handleNext} className="space-y-4">
           {/* Full Name */}
           <div className="mt-8">
             <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
@@ -113,6 +222,22 @@ const SignUp = () => {
               className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] font-normal
                text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
               placeholder="Example@gmail.com"
+            />
+          </div>
+
+          {/* Phone Number */}
+          <div>
+            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handlePhoneChange}
+              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] font-normal
+               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+              placeholder="+1 234 567 8900"
             />
           </div>
 
@@ -191,49 +316,56 @@ const SignUp = () => {
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Checkbox */}
-        <div
-          className="flex items-center gap-2.5 mt-5 cursor-pointer"
-          onClick={() => setAgreedToTerms(!agreedToTerms)}
-        >
+          {/* Checkbox */}
           <div
-            className={`w-4.5 h-4.5 border border-gray-400 rounded flex items-center justify-center transition-colors ${
-              agreedToTerms ? "bg-[#FF7B17] border-[#FF7B17]" : "bg-white"
-            }`}
+            className="flex items-center gap-2.5 mt-5 cursor-pointer"
+            onClick={() => setAgreedToTerms(!agreedToTerms)}
           >
-            {agreedToTerms && (
-              <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                <path
-                  d="M1 4L3.5 6.5L9 1"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
+            <div
+              className={`w-4.5 h-4.5 border border-gray-400 rounded flex items-center justify-center transition-colors ${
+                agreedToTerms ? "bg-[#FF7B17] border-[#FF7B17]" : "bg-white"
+              }`}
+            >
+              {agreedToTerms && (
+                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                  <path
+                    d="M1 4L3.5 6.5L9 1"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </div>
+            <span className="text-[13px] text-gray-800 font-normal">
+              I agree with the Terms and Conditions
+            </span>
           </div>
-          <span className="text-[13px] text-gray-800 font-normal">
-            I agree with the Terms and Conditions
-          </span>
-        </div>
-      </div>
 
-      {/* Submit Button */}
-      <div className="mt-8 mb-4">
-        <button
-          onClick={handleNext}
-          disabled={!isFormValid()}
-          className={`w-full h-13 rounded-xl text-[16px] font-medium transition-colors ${
-            isFormValid()
-              ? "bg-[#FF7B17] text-white cursor-pointer"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          Sign Up
-        </button>
+          {/* Submit Button */}
+          <div className="mt-8 mb-4">
+            <button
+              type="submit"
+              disabled={!isFormValid() || isLoading}
+              className={`w-full h-13 rounded-xl text-[16px] font-medium transition-colors flex items-center justify-center gap-2 ${
+                isFormValid() && !isLoading
+                  ? "bg-[#FF7B17] text-white cursor-pointer"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin w-5 h-5" />
+                  Creating Account...
+                </>
+              ) : (
+                "Sign Up"
+              )}
+            </button>
+          </div>
+        </form>
       </div>
 
       <div className="flex items-center gap-4 w-full mt-6">
