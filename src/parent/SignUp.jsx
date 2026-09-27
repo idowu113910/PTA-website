@@ -18,9 +18,9 @@ const SignUp = () => {
     workEmail: "",
     schoolName: "",
     studentCode: "",
+    phone: "",
     password: "",
     confirmPassword: "",
-    phone: "",
   });
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -38,10 +38,31 @@ const SignUp = () => {
 
   const isValidEmail = (value) => EMAIL_REGEX.test(value);
 
+  // Phone validation: allows digits, spaces, hyphens, parens, and leading plus (7 to 15 digits total)
+  const isValidPhone = (value) => {
+    const digitsOnly = value.replace(/\D/g, "");
+    return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+  };
+
   const handleEmailChange = (e) => {
     // Strip invalid characters as user types
     const cleaned = e.target.value.replace(EMAIL_ALLOWED_CHARS, "");
     setFormData((prev) => ({ ...prev, workEmail: cleaned }));
+  };
+
+  // Restricts phone input to ONLY numbers and phone formatting characters (+, -, (), space)
+  const handlePhoneChange = (e) => {
+    let input = e.target.value;
+
+    // Remove any character that is NOT a digit, space, plus, hyphen, or parenthesis
+    let cleaned = input.replace(/[^\d\s()+-]/g, "");
+
+    // Ensure '+' can only appear at the very beginning
+    if (cleaned.indexOf("+") > 0) {
+      cleaned = cleaned.replace(/\+/g, "");
+    }
+
+    setFormData((prev) => ({ ...prev, phone: cleaned }));
   };
 
   const handleInputChange = (e) => {
@@ -69,6 +90,7 @@ const SignUp = () => {
       isValidEmail(formData.workEmail) &&
       formData.schoolName.trim() !== "" &&
       isValidStudentCode(formData.studentCode) &&
+      isValidPhone(formData.phone) && // Validates phone number strictly
       formData.password.trim() !== "" &&
       formData.confirmPassword.trim() !== "" &&
       formData.password === formData.confirmPassword &&
@@ -93,15 +115,15 @@ const SignUp = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            role: "parent", // Explicitly set role as parent
+            role: "parent", // Explicitly set role as parent[cite: 1]
             fullName: formData.fullName,
-            email: formData.workEmail, // Maps local workEmail -> backend email
+            email: formData.workEmail, // Maps local workEmail -> backend email[cite: 1]
             schoolName: formData.schoolName,
             studentCode: formData.studentCode,
+            phone: formData.phone, // Cleaned phone input value included in payload[cite: 1]
             password: formData.password,
             confirmPassword: formData.confirmPassword,
-            termsAccepted: agreedToTerms, // Maps local agreedToTerms -> backend termsAccepted
-            phone: formData.phone || "",
+            termsAccepted: agreedToTerms, // Maps local agreedToTerms -> backend termsAccepted[cite: 1]
           }),
         },
       );
@@ -175,7 +197,7 @@ const SignUp = () => {
               value={formData.fullName}
               onChange={handleInputChange}
               className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] px-4 text-[14px]
-           text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
               placeholder="Enter your full name"
             />
           </div>
@@ -193,13 +215,13 @@ const SignUp = () => {
               onChange={handleEmailChange}
               onBlur={() => setEmailTouched(true)}
               className={`w-full h-12.5 bg-[#F8F8F8] border rounded-[10px] px-4 text-[14px]
-           text-gray-900 placeholder:text-[#969696] focus:outline-none ${
-             emailTouched &&
-             formData.workEmail &&
-             !isValidEmail(formData.workEmail)
-               ? "border-red-400"
-               : "border-[#C3C6C9]"
-           }`}
+               text-gray-900 placeholder:text-[#969696] focus:outline-none ${
+                 emailTouched &&
+                 formData.workEmail &&
+                 !isValidEmail(formData.workEmail)
+                   ? "border-red-400"
+                   : "border-[#C3C6C9]"
+               }`}
               placeholder="Example@gmail.com"
             />
             {emailTouched &&
@@ -209,6 +231,23 @@ const SignUp = () => {
                   Enter a valid email address
                 </p>
               )}
+          </div>
+
+          {/* Strictly Filtered Phone Number Field */}
+          <div>
+            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              autoComplete="tel"
+              value={formData.phone}
+              onChange={handlePhoneChange}
+              className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] px-4 text-[14px]
+               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+              placeholder="+1 234 567 8900"
+            />
           </div>
 
           {/* School Name */}
@@ -222,7 +261,7 @@ const SignUp = () => {
               value={formData.schoolName}
               onChange={handleInputChange}
               className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] px-4 text-[14px]
-           text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
               placeholder="E.g afrotech"
             />
           </div>
@@ -238,7 +277,7 @@ const SignUp = () => {
               value={formData.studentCode}
               onChange={handleStudentCodeChange}
               className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] px-4 text-[14px]
-           text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
               placeholder="STU-98432"
               maxLength={9}
             />
@@ -257,7 +296,7 @@ const SignUp = () => {
                 value={formData.password}
                 onChange={handleInputChange}
                 className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] pl-4 pr-12 text-[14px]
-             text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+                 text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
                 placeholder="Enter your Password"
               />
               <button
@@ -283,7 +322,7 @@ const SignUp = () => {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] pl-4 pr-12 text-[14px]
-             text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+                 text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
                 placeholder="Confirm Password"
               />
               <button
