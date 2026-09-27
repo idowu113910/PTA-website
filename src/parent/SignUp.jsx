@@ -7,6 +7,9 @@ import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
 import app from "../assets/Apple.svg";
 
+const REGISTER_ENDPOINT =
+  "https://pta-wdln.onrender.com/api/auth/parent/register";
+
 const SignUp = () => {
   const navigate = useNavigate();
 
@@ -98,6 +101,25 @@ const SignUp = () => {
     );
   };
 
+  // Wraps fetch with a single retry after a short delay. A `fetch()` that
+  // rejects outright (TypeError, e.g. "Load failed"/"Failed to fetch") means
+  // the request never reached the server — most commonly a CORS block or,
+  // on a free Render instance, the backend still waking up from a cold
+  // start. Retrying once after a pause gives a cold start a chance to
+  // finish waking before we give up. It does nothing for a genuine CORS
+  // misconfiguration — that always fails the same way and needs a backend fix.
+  const fetchWithRetry = async (url, options, retries = 1, delayMs = 4000) => {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (retries > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        return fetchWithRetry(url, options, retries - 1, delayMs);
+      }
+      throw err;
+    }
+  };
+
   const handleNext = async (e) => {
     e.preventDefault();
     if (!isFormValid()) return;
@@ -106,27 +128,23 @@ const SignUp = () => {
     setErrorMsg("");
 
     try {
-      // Parent registration endpoint
-      const response = await fetch(
-        "https://pta-wdln.onrender.com/api/auth/parent/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            role: "parent", // Explicitly set role as parent[cite: 1]
-            fullName: formData.fullName,
-            email: formData.workEmail, // Maps local workEmail -> backend email[cite: 1]
-            schoolName: formData.schoolName,
-            studentCode: formData.studentCode,
-            phone: formData.phone, // Cleaned phone input value included in payload[cite: 1]
-            password: formData.password,
-            confirmPassword: formData.confirmPassword,
-            termsAccepted: agreedToTerms, // Maps local agreedToTerms -> backend termsAccepted[cite: 1]
-          }),
+      const response = await fetchWithRetry(REGISTER_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          role: "parent",
+          fullName: formData.fullName,
+          email: formData.workEmail,
+          schoolName: formData.schoolName,
+          studentCode: formData.studentCode,
+          phone: formData.phone,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          termsAccepted: agreedToTerms,
+        }),
+      });
 
       const data = await response.json();
 
@@ -143,10 +161,20 @@ const SignUp = () => {
         localStorage.setItem("token", data.token);
       }
 
-      // Redirect to parent verification route
-      navigate("/parent/verify");
+      // Redirect to parent verification route, carrying the email forward
+      // so Verify.jsx knows who the code belongs to
+      navigate("/parent/verify", { state: { email: formData.workEmail } });
     } catch (err) {
-      setErrorMsg(err.message || "An error occurred during registration.");
+      // A TypeError here (as opposed to the Error thrown above from a real
+      // API response) means the request never completed — most likely a
+      // CORS block on the backend, or the server being briefly unreachable.
+      if (err instanceof TypeError) {
+        setErrorMsg(
+          "Couldn't reach the server. Please check your connection and try again in a moment.",
+        );
+      } else {
+        setErrorMsg(err.message || "An error occurred during registration.");
+      }
     } finally {
       setIsLoading(false);
     }

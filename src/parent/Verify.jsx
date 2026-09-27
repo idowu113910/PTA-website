@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import back from "../assets/back2.svg";
 import ED from "../assets/ED role.svg";
@@ -11,17 +11,45 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Signup/login screens can pass the email forward via navigate("/verify", { state: { email } })
-  const email = location.state?.email || "your email";
+  // Signup/login screens must pass the email forward via navigate("/parent/verify", { state: { email } })
+  const email = location.state?.email || "";
 
   const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [resendMsg, setResendMsg] = useState("");
   const inputRefs = useRef([]);
 
   const code = digits.join("");
   const isCodeComplete = code.length === CODE_LENGTH;
+
+  // If this screen is reached without an email (direct link, refresh, back
+  // navigation after the state was lost), there's nothing to verify against —
+  // send the person back to sign up rather than let them submit a code tied
+  // to no address at all.
+  useEffect(() => {
+    if (!email) {
+      navigate("/parent/signup", { replace: true });
+    }
+  }, [email, navigate]);
+
+  // Wraps fetch with a single retry after a short delay, for the same reason
+  // as in SignUp.jsx: a rejected fetch (e.g. "Load failed") most often means
+  // a Render free-tier cold start dropped the connection, and retrying once
+  // gives it a chance to finish waking up. It does nothing for a genuine
+  // CORS block, which fails identically every time.
+  const fetchWithRetry = async (url, options, retries = 1, delayMs = 4000) => {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (retries > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        return fetchWithRetry(url, options, retries - 1, delayMs);
+      }
+      throw err;
+    }
+  };
 
   const handleDigitChange = (index, value) => {
     // Only allow a single numeric character per box
@@ -57,13 +85,13 @@ const VerifyEmail = () => {
 
   const handleVerify = async (e) => {
     e.preventDefault();
-    if (!isCodeComplete) return;
+    if (!isCodeComplete || !email) return;
 
     setIsLoading(true);
     setErrorMsg("");
 
     try {
-      const response = await fetch(VERIFY_ENDPOINT, {
+      const response = await fetchWithRetry(VERIFY_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -83,19 +111,29 @@ const VerifyEmail = () => {
         localStorage.setItem("token", data.token);
       }
 
-      navigate("/teacher/home");
+      navigate("/parent/home");
     } catch (err) {
-      setErrorMsg(err.message || "An error occurred during verification.");
+      if (err instanceof TypeError) {
+        setErrorMsg(
+          "Couldn't reach the server. Please check your connection and try again in a moment.",
+        );
+      } else {
+        setErrorMsg(err.message || "An error occurred during verification.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleResend = async () => {
+    if (isResending || !email) return;
+
     setResendMsg("");
     setErrorMsg("");
+    setIsResending(true);
+
     try {
-      const response = await fetch(RESEND_ENDPOINT, {
+      const response = await fetchWithRetry(RESEND_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,9 +149,25 @@ const VerifyEmail = () => {
 
       setResendMsg("A new code has been sent to your email.");
     } catch (err) {
-      setErrorMsg(err.message || "An error occurred while resending the code.");
+      if (err instanceof TypeError) {
+        setErrorMsg(
+          "Couldn't reach the server. Please check your connection and try again in a moment.",
+        );
+      } else {
+        setErrorMsg(
+          err.message || "An error occurred while resending the code.",
+        );
+      }
+    } finally {
+      setIsResending(false);
     }
   };
+
+  // While the redirect effect above is deciding what to do, render nothing
+  // rather than flashing the form with an empty email.
+  if (!email) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-white px-6 py-6 w-full mx-auto flex flex-col justify-between">
@@ -122,7 +176,7 @@ const VerifyEmail = () => {
         <div className="relative flex items-center justify-center pt-2 mt-4">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/parent/signup")}
             className="absolute left-0 p-2 flex items-center justify-center cursor-pointer"
           >
             <img src={back} alt="Back" className="w-5 h-5" />
@@ -199,9 +253,14 @@ const VerifyEmail = () => {
           <button
             type="button"
             onClick={handleResend}
-            className="font-medium text-[14px] text-[#FF7B17] cursor-pointer"
+            disabled={isResending}
+            className={`font-medium text-[14px] cursor-pointer ${
+              isResending
+                ? "text-gray-400 cursor-not-allowed"
+                : "text-[#FF7B17]"
+            }`}
           >
-            Resend
+            {isResending ? "Sending..." : "Resend"}
           </button>
         </div>
       </div>
