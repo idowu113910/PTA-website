@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ED from "../assets/ED role.svg";
 import back from "../assets/back2.svg";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
@@ -9,6 +9,10 @@ import app from "../assets/Apple.svg";
 
 const SignUp = () => {
   const navigate = useNavigate();
+
+  // Explicitly set the role for parent registration
+  const selectedRole = "parent";
+
   const [formData, setFormData] = useState({
     fullName: "",
     workEmail: "",
@@ -16,24 +20,26 @@ const SignUp = () => {
     studentCode: "",
     password: "",
     confirmPassword: "",
+    phone: "",
   });
+
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
+
   const isValidStudentCode = (value) => /^STU-\d{5}$/.test(value);
 
-  // Only letters, numbers, and the characters an email address can legally contain
+  // Characters an email address can legally contain
   const EMAIL_ALLOWED_CHARS = /[^a-zA-Z0-9@._%+-]/g;
   const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const isValidEmail = (value) => EMAIL_REGEX.test(value);
 
   const handleEmailChange = (e) => {
-    // Strip anything that isn't a valid email character as the person types —
-    // blocks spaces, quotes, and other symbols before they ever land in the field
+    // Strip invalid characters as user types
     const cleaned = e.target.value.replace(EMAIL_ALLOWED_CHARS, "");
     setFormData((prev) => ({ ...prev, workEmail: cleaned }));
   };
@@ -47,8 +53,6 @@ const SignUp = () => {
   };
 
   const handleStudentCodeChange = (e) => {
-    // Strip whatever prefix the person may have typed, keep only digits from the rest,
-    // then rebuild as STU-##### so the prefix is always correct and can't be edited away
     const digitsOnly = e.target.value
       .toUpperCase()
       .replace(/^STU-?/, "")
@@ -62,13 +66,13 @@ const SignUp = () => {
   const isFormValid = () => {
     return (
       formData.fullName.trim() !== "" &&
-      formData.workEmail.trim() !== "" &&
+      isValidEmail(formData.workEmail) &&
       formData.schoolName.trim() !== "" &&
-      formData.studentCode.trim() !== "" &&
+      isValidStudentCode(formData.studentCode) &&
       formData.password.trim() !== "" &&
       formData.confirmPassword.trim() !== "" &&
       formData.password === formData.confirmPassword &&
-      agreedToTerms
+      agreedToTerms === true
     );
   };
 
@@ -80,6 +84,7 @@ const SignUp = () => {
     setErrorMsg("");
 
     try {
+      // Parent registration endpoint
       const response = await fetch(
         "https://pta-wdln.onrender.com/api/auth/parent/register",
         {
@@ -88,11 +93,15 @@ const SignUp = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            role: "parent", // Explicitly set role as parent
             fullName: formData.fullName,
-            email: formData.workEmail,
+            email: formData.workEmail, // Maps local workEmail -> backend email
             schoolName: formData.schoolName,
             studentCode: formData.studentCode,
             password: formData.password,
+            confirmPassword: formData.confirmPassword,
+            termsAccepted: agreedToTerms, // Maps local agreedToTerms -> backend termsAccepted
+            phone: formData.phone || "",
           }),
         },
       );
@@ -105,14 +114,14 @@ const SignUp = () => {
         );
       }
 
-      // Save user onboarding details locally if provided by the backend response
+      // Save user onboarding details locally
       localStorage.setItem("fullName", formData.fullName);
       localStorage.setItem("userEmail", formData.workEmail);
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
 
-      // Redirect to target home page
+      // Redirect to parent verification route
       navigate("/parent/verify");
     } catch (err) {
       setErrorMsg(err.message || "An error occurred during registration.");
@@ -120,7 +129,6 @@ const SignUp = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-white px-6 py-6 w-full mx-auto flex flex-col justify-between">
       <div>
@@ -163,10 +171,11 @@ const SignUp = () => {
             <input
               type="text"
               name="fullName"
+              autoComplete="name"
               value={formData.fullName}
               onChange={handleInputChange}
               className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] px-4 text-[14px]
-               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+           text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
               placeholder="Enter your full name"
             />
           </div>
@@ -179,15 +188,18 @@ const SignUp = () => {
             <input
               type="email"
               name="workEmail"
+              autoComplete="email"
               value={formData.workEmail}
               onChange={handleEmailChange}
               onBlur={() => setEmailTouched(true)}
-              className={`w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] px-4 text-[14px]
-     text-gray-900 placeholder:text-[#969696] focus:outline-none  ${
-       emailTouched && formData.workEmail && !isValidEmail(formData.workEmail)
-         ? "border-red-400"
-         : "border-[#C3C6C9]"
-     }`}
+              className={`w-full h-12.5 bg-[#F8F8F8] border rounded-[10px] px-4 text-[14px]
+           text-gray-900 placeholder:text-[#969696] focus:outline-none ${
+             emailTouched &&
+             formData.workEmail &&
+             !isValidEmail(formData.workEmail)
+               ? "border-red-400"
+               : "border-[#C3C6C9]"
+           }`}
               placeholder="Example@gmail.com"
             />
             {emailTouched &&
@@ -210,10 +222,11 @@ const SignUp = () => {
               value={formData.schoolName}
               onChange={handleInputChange}
               className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] px-4 text-[14px]
-               text-gray-900 placeholder:text-[#969696] focus:outline-none"
+           text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
               placeholder="E.g afrotech"
             />
           </div>
+
           {/* Student Code */}
           <div>
             <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
@@ -225,7 +238,7 @@ const SignUp = () => {
               value={formData.studentCode}
               onChange={handleStudentCodeChange}
               className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] px-4 text-[14px]
-     text-gray-900 placeholder:text-[#969696] focus:outline-none"
+           text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
               placeholder="STU-98432"
               maxLength={9}
             />
@@ -240,10 +253,11 @@ const SignUp = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={handleInputChange}
                 className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] pl-4 pr-12 text-[14px]
-                 text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+             text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
                 placeholder="Enter your Password"
               />
               <button
@@ -265,10 +279,11 @@ const SignUp = () => {
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
+                autoComplete="new-password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 className="w-full h-12.5 bg-[#F8F8F8] border border-[#C3C6C9] rounded-[10px] pl-4 pr-12 text-[14px]
-                 text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+             text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
                 placeholder="Confirm Password"
               />
               <button
@@ -281,14 +296,19 @@ const SignUp = () => {
             </div>
           </div>
 
-          {/* Checkbox */}
-          <div
-            className="flex items-center gap-2.5 mt-5 cursor-pointer"
-            onClick={() => setAgreedToTerms(!agreedToTerms)}
-          >
+          {/* Accessible Checkbox */}
+          <label className="flex items-center gap-2.5 mt-5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="sr-only"
+            />
             <div
-              className={`w-4.5 h-4.5 border border-gray-400 rounded flex items-center justify-center transition-colors ${
-                agreedToTerms ? "bg-[#FF7B17] border-[#FF7B17]" : "bg-white"
+              className={`w-4.5 h-4.5 border rounded flex items-center justify-center transition-colors ${
+                agreedToTerms
+                  ? "bg-[#FF7B17] border-[#FF7B17]"
+                  : "bg-white border-gray-400"
               }`}
             >
               {agreedToTerms && (
@@ -306,7 +326,7 @@ const SignUp = () => {
             <span className="text-[13px] text-gray-800 font-normal">
               I agree with the Terms and Conditions
             </span>
-          </div>
+          </label>
 
           {/* Submit Button */}
           <div className="mt-6">
@@ -366,16 +386,17 @@ const SignUp = () => {
         </button>
       </div>
 
-      <div
-        onClick={() => {
-          navigate("/parent/login");
-        }}
-        className="flex gap-3 items-center justify-center mt-10 cursor-pointer"
-      >
-        <p className="flex justify-center text-center font-normal text-[#001216] text-[16px]">
+      <div className="flex gap-2 items-center justify-center mt-10">
+        <span className="font-normal text-[#001216] text-[16px]">
           Already an existing user?
-        </p>
-        <p className="font-medium text-[16px] text-[#FF7B17]">Log In</p>
+        </span>
+        <button
+          type="button"
+          onClick={() => navigate("/parent/login")}
+          className="font-medium text-[16px] text-[#FF7B17] hover:underline focus:outline-none"
+        >
+          Log In
+        </button>
       </div>
     </div>
   );
