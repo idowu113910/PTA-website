@@ -114,8 +114,8 @@ const TeacherVerifyEmail = () => {
         localStorage.setItem("token", data.token);
       }
 
-      // Navigate to teacher home page upon successful verification
-      navigate("/teacher/home");
+      // Verification succeeded — send the teacher to the login page
+      navigate("/teacher/login");
     } catch (err) {
       if (err instanceof TypeError) {
         setErrorMsg(
