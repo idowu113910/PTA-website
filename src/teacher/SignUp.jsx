@@ -10,6 +10,12 @@ import app from "../assets/Apple.svg";
 const REGISTER_ENDPOINT =
   "https://pta-wdln.onrender.com/api/auth/teacher/register";
 
+// The endpoint requires `subjectSpecialization`, but this screen has no
+// input for it. A required field is likely to reject an empty string, so a
+// non-empty default is sent instead. Change this value if you'd like a
+// different placeholder, or replace it with a real input later.
+const DEFAULT_SUBJECT_SPECIALIZATION = "General";
+
 const SignUp = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -26,18 +32,6 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
-
-  // Characters an email address can legally contain
-  const EMAIL_ALLOWED_CHARS = /[^a-zA-Z0-9@._%+-]/g;
-  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-  const isValidEmail = (value) => EMAIL_REGEX.test(value);
-
-  // // Phone validation: allows digits, spaces, hyphens, parens, and leading plus (7 to 15 digits total)
-  // const isValidPhone = (value) => {
-  //   const digitsOnly = value.replace(/\D/g, "");
-  //   return digitsOnly.length >= 7 && digitsOnly.length <= 15;
-  // };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -67,10 +61,29 @@ const SignUp = () => {
     setFormData((prev) => ({ ...prev, phone: cleaned }));
   };
 
+  // Characters an email address can legally contain: letters, numbers,
+  // and . _ % + - @ (digits were previously being stripped out)
+  const EMAIL_ALLOWED_CHARS = /[^a-zA-Z0-9@._%+-]/g;
+  // Must be shaped like name@domain.tld
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const isValidEmail = (value) => EMAIL_REGEX.test(value);
+
+  const handleEmailChange = (e) => {
+    // Strip anything that isn't a valid email character as the person types
+    const cleaned = e.target.value.replace(EMAIL_ALLOWED_CHARS, "");
+    setFormData((prev) => ({ ...prev, workEmail: cleaned }));
+  };
+
+  const showEmailError =
+    emailTouched &&
+    formData.workEmail !== "" &&
+    !isValidEmail(formData.workEmail);
+
   const isFormValid = () => {
     return (
       formData.fullName.trim() !== "" &&
-      formData.workEmail.trim() !== "" &&
+      isValidEmail(formData.workEmail) &&
       formData.schoolName.trim() !== "" &&
       isValidPhone(formData.phone) &&
       formData.password.trim() !== "" &&
@@ -125,9 +138,9 @@ const SignUp = () => {
           termsAccepted: agreedToTerms,
           phone: formData.phone,
           // Required by the endpoint but not part of this screen's design —
-          // sent as an empty string so the request still succeeds without
-          // adding a field the form doesn't visually ask for.
-          subjectSpecialization: "",
+          // sent as a non-empty default so validation passes without adding
+          // a field the form doesn't visually ask for.
+          subjectSpecialization: DEFAULT_SUBJECT_SPECIALIZATION,
         }),
       });
 
@@ -214,8 +227,8 @@ const SignUp = () => {
 
           {/* Work Email */}
           <div>
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
-              Email Address
+            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
+              Work Email
             </label>
             <input
               type="email"
@@ -224,23 +237,19 @@ const SignUp = () => {
               value={formData.workEmail}
               onChange={handleEmailChange}
               onBlur={() => setEmailTouched(true)}
-              className={`w-full h-12.5 bg-[#F8F8F8] border rounded-[10px] px-4 text-[14px]
+              className={`w-full h-12.5 bg-[#FAFAFA] border rounded-[10px] px-4 text-[12px] font-normal
                text-gray-900 placeholder:text-[#969696] focus:outline-none ${
-                 emailTouched &&
-                 formData.workEmail &&
-                 !isValidEmail(formData.workEmail)
-                   ? "border-red-400"
-                   : "border-[#C3C6C9]"
+                 showEmailError
+                   ? "border-red-400 focus:border-red-400"
+                   : "border-gray-200 focus:border-gray-400"
                }`}
               placeholder="Example@gmail.com"
             />
-            {emailTouched &&
-              formData.workEmail &&
-              !isValidEmail(formData.workEmail) && (
-                <p className="text-[12px] text-red-500 mt-1">
-                  Enter a valid email address
-                </p>
-              )}
+            {showEmailError && (
+              <p className="text-[12px] text-red-500 mt-1">
+                Enter a valid email address (e.g. name@gmail.com)
+              </p>
+            )}
           </div>
 
           {/* Phone Number */}
