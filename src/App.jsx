@@ -1,6 +1,6 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 // Public pages
 import SplashScreen from "./pages/SplashScreen";
@@ -13,14 +13,45 @@ import * as Parent from "./parent";
 
 // Context Providers
 import { UserProvider } from "./teacher/UserContext";
-import {
-  TeacherThemeProvider,
-  useTheme as useTeacherTheme,
-} from "./teacher/TeacherContext";
 
-// Layout for every /teacher/* route — applies the teacher's theme context state
+// Follows the device's light/dark mode and reacts live when it changes
+function useSystemDarkMode() {
+  const [isSystemDark, setIsSystemDark] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsSystemDark(e.matches);
+
+    setIsSystemDark(mediaQuery.matches);
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  return isSystemDark;
+}
+
+// Layout for every /teacher/* route — follows the device's light/dark mode
 const TeacherLayout = () => {
-  const { isDarkMode } = useTeacherTheme();
+  const isDarkMode = useSystemDarkMode();
 
   return (
     <div
@@ -52,14 +83,8 @@ function App() {
           <Route path="/onboarding" element={<OnBoarding />} />
           <Route path="/role" element={<RoleSelect />} />
 
-          {/* Teacher Routes — wrapped in TeacherThemeProvider + TeacherLayout */}
-          <Route
-            element={
-              <TeacherThemeProvider>
-                <TeacherLayout />
-              </TeacherThemeProvider>
-            }
-          >
+          {/* Teacher Routes — wrapped in TeacherLayout (system dark mode) */}
+          <Route element={<TeacherLayout />}>
             <Route path="/teacher/signup" element={<Teacher.SignUp />} />
             <Route path="/teacher/login" element={<Teacher.Login />} />
             <Route path="/teacher/home" element={<Teacher.HomePage />} />
