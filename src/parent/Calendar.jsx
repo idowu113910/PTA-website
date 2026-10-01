@@ -144,47 +144,55 @@ const Calendar = () => {
     };
   }, [showScreen]);
 
-  // ── FIX: Sync html/body background, color-scheme and status bar color ──
-  // Without this, only the Calendar wrapper changes color, so the top of the
-  // screen (status bar / overscroll / outside the wrapper) keeps the old color.
+  // ── FIX (part 1): remember the original theme-color tags and restore
+  // them only when leaving this page.
+  const originalMetasRef = useRef([]);
   useEffect(() => {
-    const bg = isDarkMode ? "#000000" : "#FFFFFF";
+    originalMetasRef.current = Array.from(
+      document.querySelectorAll('meta[name="theme-color"]'),
+    ).map((m) => m.cloneNode(true));
+
+    return () => {
+      document
+        .querySelectorAll('meta[name="theme-color"]')
+        .forEach((m) => m.remove());
+      originalMetasRef.current.forEach((m) => document.head.appendChild(m));
+    };
+  }, []);
+
+  // ── FIX (part 2): keep html/body background and the top bar (status bar)
+  // color in sync with dark/light mode AND with the reminder sheet backdrop.
+  useEffect(() => {
+    const pageBg = isDarkMode ? "#000000" : "#FFFFFF";
+    // When the sheet is open the backdrop dims the page (40% black),
+    // so the top bar should match that dimmed color.
+    const barColor = showScreen ? (isDarkMode ? "#000000" : "#999999") : pageBg;
+
     const root = document.documentElement;
-    const body = document.body;
-
-    // Remember previous values so we can restore them on unmount
-    const prevRootBg = root.style.backgroundColor;
-    const prevBodyBg = body.style.backgroundColor;
-    const prevScheme = root.style.colorScheme;
-
-    root.style.backgroundColor = bg;
-    body.style.backgroundColor = bg;
+    root.style.backgroundColor = pageBg;
+    document.body.style.backgroundColor = pageBg;
     root.style.colorScheme = isDarkMode ? "dark" : "light";
     root.classList.toggle("dark", isDarkMode);
 
-    // Mobile browser status bar / top bar color
-    let meta = document.querySelector('meta[name="theme-color"]');
-    let createdMeta = false;
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "theme-color");
-      document.head.appendChild(meta);
-      createdMeta = true;
-    }
-    const prevMetaContent = meta.getAttribute("content");
-    meta.setAttribute("content", bg);
+    // Remove ALL existing theme-color tags (including ones with a
+    // prefers-color-scheme media attribute that would override ours),
+    // then add a brand new one so iOS Safari re-reads it.
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((m) => m.remove());
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    meta.setAttribute("content", barColor);
+    document.head.appendChild(meta);
 
-    return () => {
-      root.style.backgroundColor = prevRootBg;
-      body.style.backgroundColor = prevBodyBg;
-      root.style.colorScheme = prevScheme;
-      if (createdMeta) {
-        meta.remove();
-      } else if (prevMetaContent !== null) {
-        meta.setAttribute("content", prevMetaContent);
-      }
-    };
-  }, [isDarkMode]);
+    // iOS home-screen (PWA) status bar style, only if the app defines it
+    const appleMeta = document.querySelector(
+      'meta[name="apple-mobile-web-app-status-bar-style"]',
+    );
+    if (appleMeta) {
+      appleMeta.setAttribute("content", isDarkMode ? "black" : "default");
+    }
+  }, [isDarkMode, showScreen]);
 
   // ── Reusable Event Card ────────────────────────────────────────
   const EventCard = ({ icon, title, date, time: t, location, rightImg }) => (
