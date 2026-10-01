@@ -16,11 +16,9 @@ import gr from "../assets/green parent.svg";
 import canc from "../assets/canc parent.svg";
 import { CgBookmark } from "react-icons/cg";
 import { useUser } from "../teacher/UserContext";
-// Adjust this path to wherever your hook file lives.
 import { useSystemTheme } from "../components/UserTheme";
 
-// Shared surface styles. Light by default; the device's dark mode switches
-// them via Tailwind `dark:` classes (no ParentThemeContext needed).
+// Shared surface styles. Uses Tailwind `dark:` classes driven by the device system setting.
 const PAGE =
   "min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto pb-24 transition-colors duration-200 " +
   "bg-white text-black dark:bg-[#000000] dark:text-white";
@@ -30,8 +28,7 @@ const TEXT_PRIMARY = "text-black dark:text-white";
 const TEXT_MUTED = "text-black dark:text-gray-300";
 
 const HomePage = () => {
-  // Follows the device's light/dark setting and keeps the <html> "dark"
-  // class in sync.
+  // Syncs the html element with the device's light/dark mode system setting
   useSystemTheme();
 
   const [screen, setScreen] = useState("home");
@@ -41,9 +38,7 @@ const HomePage = () => {
   );
   const [isTermDropdownOpen, setIsTermDropdownOpen] = useState(false);
 
-  const { fullName, grade, room, teacherName } = useUser();
-
-  const { profileImage } = useUser();
+  const { fullName, grade, room, teacherName, profileImage } = useUser();
 
   const termYears = [
     "Term 1 2024/2025 Academic Year",
@@ -236,7 +231,7 @@ const HomePage = () => {
             />
           </div>
 
-          {/* Student Card — always orange with white text, same in both themes */}
+          {/* Student Card */}
           <div className="w-full rounded-[9px] py-4 px-4 bg-[#FF7B17]">
             <div className="flex justify-between items-start">
               <img
@@ -311,7 +306,7 @@ const HomePage = () => {
               <div
                 key={i}
                 className="flex items-center justify-between rounded-[10px] px-4 py-3 shadow-sm transition-colors duration-200
-                 bg-[#F8F8F8] border border-[#0000001F] dark:bg-[#141414] dark:border-[#2E2E2E] dark:shadow-none"
+                   bg-[#F8F8F8] border border-[#0000001F] dark:bg-[#141414] dark:border-[#2E2E2E] dark:shadow-none"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <CgBookmark className="w-4.5 h-4.5 shrink-0 text-[#444] dark:text-gray-300" />
@@ -484,7 +479,7 @@ const HomePage = () => {
             )}
           </div>
 
-          {/* Stats Row — tinted surfaces darken in dark mode, text stays colored */}
+          {/* Stats Row */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             <div className="rounded-[9px] py-3 px-2 flex flex-col items-center text-center transition-colors duration-200 bg-[#F0FDF4] dark:bg-[#0f2a1c]">
               <p className="font-normal text-[14px] text-[#10B981]">43</p>
