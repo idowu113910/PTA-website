@@ -37,13 +37,48 @@ import { useUser } from "./UserContext";
 import parentImg1 from "../assets/divine.svg";
 import parentImg2 from "../assets/Shayla.svg";
 import parentImg3 from "../assets/Tamara.svg";
-import { useTheme } from "./TeacherContext";
 
 registerLocale("en-GB", enGB);
 
+// ── Follows the device's light/dark mode and reacts live when it changes ──
+function useSystemDarkMode() {
+  const [isSystemDark, setIsSystemDark] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsSystemDark(e.matches);
+
+    // Make sure state is correct on mount
+    setIsSystemDark(mediaQuery.matches);
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  return isSystemDark;
+}
+
 const HomePage = () => {
-  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
-  const { isDarkMode } = useTheme();
+  // Theme comes straight from the device's light/dark setting
+  const isDarkMode = useSystemDarkMode();
 
   const [percentage, setPercentage] = useState(0);
   const [percentage89, setPercentage89] = useState(0);
@@ -101,6 +136,43 @@ const HomePage = () => {
     const path = location.pathname.substring(1) || "home";
     setActiveTab(path);
   }, [location]);
+
+  // Keep html/body background, color-scheme and the browser top bar
+  // (status bar) in sync with the device's light/dark mode.
+  useEffect(() => {
+    const bg = isDarkMode ? "#121212" : "#FFFFFF";
+    const root = document.documentElement;
+
+    const prevRootBg = root.style.backgroundColor;
+    const prevBodyBg = document.body.style.backgroundColor;
+    const prevScheme = root.style.colorScheme;
+    const originalMetas = Array.from(
+      document.querySelectorAll('meta[name="theme-color"]'),
+    ).map((m) => m.cloneNode(true));
+
+    root.style.backgroundColor = bg;
+    document.body.style.backgroundColor = bg;
+    root.style.colorScheme = isDarkMode ? "dark" : "light";
+
+    // Replace any existing theme-color tags so iOS/Android re-read the color
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((m) => m.remove());
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    meta.setAttribute("content", bg);
+    document.head.appendChild(meta);
+
+    return () => {
+      root.style.backgroundColor = prevRootBg;
+      document.body.style.backgroundColor = prevBodyBg;
+      root.style.colorScheme = prevScheme;
+      document
+        .querySelectorAll('meta[name="theme-color"]')
+        .forEach((m) => m.remove());
+      originalMetas.forEach((m) => document.head.appendChild(m));
+    };
+  }, [isDarkMode]);
 
   const handleFileClick = () => {
     fileInputRef.current.click();
