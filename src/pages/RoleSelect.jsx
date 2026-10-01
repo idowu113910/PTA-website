@@ -43,7 +43,7 @@ const RoleSelect = () => {
   return (
     <div
       className={`min-h-screen w-full pt-12 pb-12 transition-colors duration-200 ${
-        isDarkMode ? "bg-[#121212]" : "bg-white"
+        isDarkMode ? "bg-[#000000]" : "bg-white"
       }`}
     >
       <div className="flex flex-col items-center justify-center">
