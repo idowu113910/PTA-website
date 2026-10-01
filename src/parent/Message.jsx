@@ -8,7 +8,40 @@ import arr from "../assets/arr back.svg";
 import delivered from "../assets/delivered image.svg";
 import typ from "../assets/type pareny.svg";
 import send from "../assets/send parent.svg";
-import { useTheme } from "./ParentThemeContext";
+
+// Custom hook to track the user's system/device theme setting
+const useSystemTheme = () => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsDarkMode(e.matches);
+
+    // Safari & modern browser listener support
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  return isDarkMode;
+};
 
 const initialMessages = [
   { id: 1, sender: "sent", text: "Hello", time: "10:55 AM", delivered: true },
@@ -45,8 +78,7 @@ const conversations = [
 ];
 
 const Message = () => {
-  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
-  const { isDarkMode } = useTheme();
+  const isDarkMode = useSystemTheme();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
@@ -100,15 +132,15 @@ const Message = () => {
   if (activeChat) {
     return (
       <div
-        className={`flex flex-col h-screen w-full max-w-107.5 min-w-[320px] mx-auto transition-colors duration-200 dark:bg-[#121212] dark:text-white ${
-          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+        className={`flex flex-col h-screen w-full max-w-[430px] min-w-[320px] mx-auto transition-colors duration-200 ${
+          isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
         }`}
       >
         {/* Header */}
         <div
           className={`flex items-center gap-3 px-4 py-3 border-b shrink-0 transition-colors duration-200 ${
             isDarkMode
-              ? "bg-[#121212] border-gray-800"
+              ? "bg-[#000000] border-gray-800"
               : "bg-white border-[#E0DCDC]"
           }`}
         >
@@ -157,14 +189,14 @@ const Message = () => {
         {/* Messages */}
         <div
           className={`flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 transition-colors duration-200 ${
-            isDarkMode ? "bg-[#121212]" : "bg-white"
+            isDarkMode ? "bg-[#000000]" : "bg-white"
           }`}
         >
           {/* Date divider */}
           <p
             className={`text-center text-[12px] font-medium rounded-[10px] py-[3px] px-3 mx-auto ${
               isDarkMode
-                ? "bg-[#1c1c1c] text-white"
+                ? "bg-[#000000] text-white border border-gray-800"
                 : "bg-[#EFEFEF] text-[#424242]"
             }`}
           >
@@ -174,7 +206,9 @@ const Message = () => {
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex flex-col gap-[2px] ${msg.sender === "sent" ? "items-end" : "items-start"}`}
+              className={`flex flex-col gap-[2px] ${
+                msg.sender === "sent" ? "items-end" : "items-start"
+              }`}
             >
               {msg.sender === "sent" ? (
                 <div className="inline-flex items-end gap-1 max-w-[80%] bg-[#F97316] text-white px-4 py-2.5 rounded-[18px] rounded-br-sm text-[15px] leading-relaxed">
@@ -189,9 +223,9 @@ const Message = () => {
                 </div>
               ) : (
                 <div
-                  className={`max-w-[75%] px-4 py-2.5 rounded-[18px] rounded-bl-sm text-[15px] leading-relaxed dark:bg-[#1c1c1c] dark:text-white ${
+                  className={`max-w-[75%] px-4 py-2.5 rounded-[18px] rounded-bl-sm text-[15px] leading-relaxed ${
                     isDarkMode
-                      ? "bg-[#1c1c1c] text-white"
+                      ? "bg-[#000000] text-white border border-gray-800"
                       : "bg-[#F5F5F5] text-[#1C1C1C]"
                   }`}
                 >
@@ -215,7 +249,7 @@ const Message = () => {
         <div
           className={`flex items-center gap-2 px-4 py-3 border-t shrink-0 transition-colors duration-200 ${
             isDarkMode
-              ? "bg-[#121212] border-gray-800"
+              ? "bg-[#000000] border-gray-800"
               : "bg-white border-[#F0F0F0]"
           }`}
         >
@@ -240,7 +274,7 @@ const Message = () => {
             placeholder="Type message"
             className={`flex-1 min-w-0 h-9.5 rounded-md border px-3 outline-none text-[14px] font-medium placeholder:text-[12px] ${
               isDarkMode
-                ? "border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                ? "border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
                 : "border-[#E0DCDC] text-[#1C1C1C] placeholder:text-[#A3A2A2]"
             }`}
           />
@@ -260,8 +294,8 @@ const Message = () => {
   /* ── MESSAGE LIST SCREEN ──────────────────────────────────────── */
   return (
     <div
-      className={`min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto pb-24 transition-colors duration-200 dark:bg-[#121212] dark:text-white ${
-        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+      className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
       }`}
     >
       <div className="px-5 pt-6">
@@ -278,7 +312,7 @@ const Message = () => {
         <div
           className={`w-full h-12 rounded-[7px] flex items-center gap-3 px-3 mb-4 ${
             isDarkMode
-              ? "border border-gray-700 bg-[#1c1c1c]"
+              ? "border border-gray-700 bg-[#000000]"
               : "border border-[#D9D9D9] bg-[#FCFCFC]"
           }`}
         >
@@ -300,7 +334,7 @@ const Message = () => {
           />
         </div>
 
-        {/* Filter Tabs — full width, equal columns */}
+        {/* Filter Tabs */}
         <div className="flex gap-2 mb-6">
           {filters.map((f) => (
             <button
@@ -310,7 +344,7 @@ const Message = () => {
                 activeFilter === f
                   ? "bg-[#FF7B17] text-white"
                   : isDarkMode
-                    ? "bg-[#1c1c1c] text-white"
+                    ? "bg-[#000000] text-white border border-gray-800"
                     : "bg-[#EFEFEF] text-black"
               }`}
             >
@@ -334,7 +368,7 @@ const Message = () => {
               <div
                 key={conv.id}
                 className={`flex items-center gap-3 cursor-pointer rounded-lg py-3 px-1 ${
-                  isDarkMode ? "active:bg-[#1c1c1c]" : "active:bg-gray-50"
+                  isDarkMode ? "active:bg-gray-900" : "active:bg-gray-50"
                 }`}
                 onClick={() => setActiveChat(conv)}
               >
