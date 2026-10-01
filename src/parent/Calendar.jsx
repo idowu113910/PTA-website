@@ -61,7 +61,6 @@ function useSystemDarkMode() {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e) => setIsSystemDark(e.matches);
 
-    // Support both modern and legacy addListener syntax
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener("change", handleChange);
     } else {
@@ -81,11 +80,9 @@ function useSystemDarkMode() {
 }
 
 const Calendar = () => {
-  // Theme context override (if available)
   const themeContext = useTheme ? useTheme() : {};
   const isSystemDark = useSystemDarkMode();
 
-  // Primary dark mode value: priority given to explicit context setting, otherwise fallback to device preference
   const isDarkMode =
     themeContext && typeof themeContext.isDarkMode === "boolean"
       ? themeContext.isDarkMode
@@ -146,6 +143,48 @@ const Calendar = () => {
       document.body.style.overflow = "";
     };
   }, [showScreen]);
+
+  // ── FIX: Sync html/body background, color-scheme and status bar color ──
+  // Without this, only the Calendar wrapper changes color, so the top of the
+  // screen (status bar / overscroll / outside the wrapper) keeps the old color.
+  useEffect(() => {
+    const bg = isDarkMode ? "#000000" : "#FFFFFF";
+    const root = document.documentElement;
+    const body = document.body;
+
+    // Remember previous values so we can restore them on unmount
+    const prevRootBg = root.style.backgroundColor;
+    const prevBodyBg = body.style.backgroundColor;
+    const prevScheme = root.style.colorScheme;
+
+    root.style.backgroundColor = bg;
+    body.style.backgroundColor = bg;
+    root.style.colorScheme = isDarkMode ? "dark" : "light";
+    root.classList.toggle("dark", isDarkMode);
+
+    // Mobile browser status bar / top bar color
+    let meta = document.querySelector('meta[name="theme-color"]');
+    let createdMeta = false;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "theme-color");
+      document.head.appendChild(meta);
+      createdMeta = true;
+    }
+    const prevMetaContent = meta.getAttribute("content");
+    meta.setAttribute("content", bg);
+
+    return () => {
+      root.style.backgroundColor = prevRootBg;
+      body.style.backgroundColor = prevBodyBg;
+      root.style.colorScheme = prevScheme;
+      if (createdMeta) {
+        meta.remove();
+      } else if (prevMetaContent !== null) {
+        meta.setAttribute("content", prevMetaContent);
+      }
+    };
+  }, [isDarkMode]);
 
   // ── Reusable Event Card ────────────────────────────────────────
   const EventCard = ({ icon, title, date, time: t, location, rightImg }) => (
