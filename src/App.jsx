@@ -14,16 +14,11 @@ import * as Parent from "./parent";
 // Context Providers
 import { UserProvider } from "./teacher/UserContext";
 import {
-  ParentThemeProvider,
-  useTheme as useParentTheme,
-} from "./parent/ParentThemeContext";
-import {
   TeacherThemeProvider,
   useTheme as useTeacherTheme,
 } from "./teacher/TeacherContext";
 
-// Layout for every /teacher/* route — applies the teacher's own dark-mode background
-// and renders whichever teacher page matched, via <Outlet />
+// Layout for every /teacher/* route — applies the teacher's theme context state
 const TeacherLayout = () => {
   const { isDarkMode } = useTeacherTheme();
 
@@ -38,17 +33,10 @@ const TeacherLayout = () => {
   );
 };
 
-// Layout for every /parent/* route — applies the parent's own dark-mode background
-// and renders whichever parent page matched, via <Outlet />
+// Layout for every /parent/* route — relies strictly on system dark/light mode via Tailwind's `dark:` strategy
 const ParentLayout = () => {
-  const { isDarkMode } = useParentTheme();
-
   return (
-    <div
-      className={`min-h-screen transition-colors duration-200 ${
-        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
-      }`}
-    >
+    <div className="min-h-screen transition-colors duration-200 bg-white text-black dark:bg-[#000000] dark:text-white">
       <Outlet />
     </div>
   );
@@ -59,12 +47,12 @@ function App() {
     <BrowserRouter>
       <UserProvider>
         <Routes>
-          {/* Public Routes — pre-login, not tied to either role's theme */}
+          {/* Public Routes — pre-login */}
           <Route path="/" element={<SplashScreen />} />
           <Route path="/onboarding" element={<OnBoarding />} />
           <Route path="/role" element={<RoleSelect />} />
 
-          {/* Teacher Routes — all wrapped in TeacherThemeProvider + TeacherLayout */}
+          {/* Teacher Routes — wrapped in TeacherThemeProvider + TeacherLayout */}
           <Route
             element={
               <TeacherThemeProvider>
@@ -82,14 +70,8 @@ function App() {
             <Route path="/teacher/verify" element={<Teacher.Verify />} />
           </Route>
 
-          {/* Parent Routes — all wrapped in ParentThemeProvider + ParentLayout */}
-          <Route
-            element={
-              <ParentThemeProvider>
-                <ParentLayout />
-              </ParentThemeProvider>
-            }
-          >
+          {/* Parent Routes — using ParentLayout with system-driven dark mode support */}
+          <Route element={<ParentLayout />}>
             <Route path="/parent/signup" element={<Parent.SignUp />} />
             <Route path="/parent/login" element={<Parent.Login />} />
             <Route path="/parent/verify" element={<Parent.Verify />} />
