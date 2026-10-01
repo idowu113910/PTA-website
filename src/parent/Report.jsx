@@ -66,7 +66,7 @@ const Report = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 bg-white text-black dark:bg-[#121212] dark:text-white">
+    <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 bg-white text-black dark:bg-[#000000] dark:text-white">
       <div className="px-5 pt-6">
         {/* Page Title */}
         <h1 className="font-bold text-[20px] mb-5 text-black dark:text-white">
@@ -79,7 +79,7 @@ const Report = () => {
           <button
             onClick={() => setActiveTab("academic")}
             className={`flex-1 flex items-center justify-center gap-2 h-[46px] rounded-[7px] cursor-pointer transition-all ${
-              activeTab === "academic" ? "bg-[#F3F4F6] dark:bg-[#262626]" : ""
+              activeTab === "academic" ? "bg-[#F3F4F6] dark:bg-[#000000]" : ""
             }`}
           >
             <img
@@ -104,7 +104,7 @@ const Report = () => {
           <button
             onClick={() => setActiveTab("behavior")}
             className={`flex-1 flex items-center justify-center gap-2 h-[46px] rounded-[7px] cursor-pointer transition-all ${
-              activeTab === "behavior" ? "bg-[#F3F4F6] dark:bg-[#262626]" : ""
+              activeTab === "behavior" ? "bg-[#F3F4F6] dark:bg-[#000000]" : ""
             }`}
           >
             <img
@@ -129,7 +129,7 @@ const Report = () => {
         {/* Term Dropdown */}
         <div className="relative mt-5">
           <div
-            className="w-full h-[42px] rounded-[9px] px-4 flex items-center justify-between cursor-pointer bg-[#F3F4F6] dark:bg-[#1c1c1c]"
+            className="w-full h-[42px] rounded-[9px] px-4 flex items-center justify-between cursor-pointer bg-[#F3F4F6] dark:bg-[#000000]"
             onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
           >
             <p className="font-medium text-[13px] truncate flex-1 pr-2 text-black dark:text-white">
@@ -145,7 +145,7 @@ const Report = () => {
           </div>
 
           {isTermDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full rounded-[8px] shadow-md bg-white border border-[#E5E7EB] dark:bg-[#1c1c1c] dark:border-gray-700">
+            <div className="absolute z-10 mt-1 w-full rounded-[8px] shadow-md bg-white border border-[#E5E7EB] dark:bg-[#000000] dark:border-gray-700">
               {termYears.map((term) => (
                 <div
                   key={term}
@@ -153,7 +153,7 @@ const Report = () => {
                     setSelectedTermYear(term);
                     setIsTermDropdownOpen(false);
                   }}
-                  className="px-4 py-3 text-[14px] font-normal cursor-pointer text-black hover:bg-[#EFF6FF] dark:text-white dark:hover:bg-[#262626]"
+                  className="px-4 py-3 text-[14px] font-normal cursor-pointer text-black hover:bg-[#EFF6FF] dark:text-white dark:hover:bg-[#000000]"
                 >
                   {term}
                 </div>
@@ -176,7 +176,7 @@ const Report = () => {
             </div>
 
             {/* Attendance Card */}
-            <div className="w-full rounded-[9px] py-4 px-3 bg-[#F3F4F6] dark:bg-[#1c1c1c]">
+            <div className="w-full rounded-[9px] py-4 px-3 bg-[#F3F4F6] dark:bg-[#000000]">
               <img src={circ} alt="" className="mx-auto block max-w-full" />
               {/* Stats Row — equal thirds */}
               <div className="grid grid-cols-3 gap-3 mt-3">
@@ -288,7 +288,7 @@ const Report = () => {
       {/* Subject Detail Modal */}
       {selectedSubject && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-5">
-          <div className="w-full max-w-[370px] rounded-[16px] p-6 relative bg-white dark:bg-[#1c1c1c]">
+          <div className="w-full max-w-[370px] rounded-[16px] p-6 relative bg-white dark:bg-[#000000]">
             <button
               onClick={() => setSelectedSubject(null)}
               className="absolute top-4 right-4 w-7 h-7 rounded-full border flex items-center justify-center font-bold text-sm border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-300"
