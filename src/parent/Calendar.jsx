@@ -47,9 +47,49 @@ function getFirstDayOfMonth(year, month) {
   return day === 0 ? 6 : day - 1;
 }
 
+// Custom Hook to sync with device system light/dark mode preference
+function useSystemDarkMode() {
+  const [isSystemDark, setIsSystemDark] = useState(
+    () =>
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsSystemDark(e.matches);
+
+    // Support both modern and legacy addListener syntax
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  return isSystemDark;
+}
+
 const Calendar = () => {
-  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
-  const { isDarkMode } = useTheme();
+  // Theme context override (if available)
+  const themeContext = useTheme ? useTheme() : {};
+  const isSystemDark = useSystemDarkMode();
+
+  // Primary dark mode value: priority given to explicit context setting, otherwise fallback to device preference
+  const isDarkMode =
+    themeContext && typeof themeContext.isDarkMode === "boolean"
+      ? themeContext.isDarkMode
+      : isSystemDark;
 
   const [isSwitched1, setIsSwitched1] = useState(false);
   const [isSwitched2, setIsSwitched2] = useState(false);
@@ -125,14 +165,14 @@ const Calendar = () => {
         </p>
         <p
           className={`font-normal text-[12px] mt-0.5 ${
-            isDarkMode ? "text-white" : "text-black"
+            isDarkMode ? "text-gray-300" : "text-black"
           }`}
         >
           {date} <span className="font-bold text-base">·</span> {t}
         </p>
         <p
           className={`font-medium text-[12px] mt-1.5 ${
-            isDarkMode ? "text-white" : "text-black"
+            isDarkMode ? "text-gray-300" : "text-black"
           }`}
         >
           {location}
@@ -251,7 +291,7 @@ const Calendar = () => {
             <div
               key={d}
               className={`text-center text-[13px] font-normal py-1 ${
-                isDarkMode ? "text-white" : "text-black"
+                isDarkMode ? "text-gray-300" : "text-black"
               }`}
             >
               {d}
@@ -386,7 +426,7 @@ const Calendar = () => {
         </div>
 
         {/* Sheet Body */}
-        <div className="flex-1 overflow-hidden px-5">
+        <div className="flex-1 overflow-y-auto px-5 pb-10">
           {/* Task Title */}
           <div className="mt-4">
             <h1
@@ -532,7 +572,7 @@ const Calendar = () => {
           </div>
 
           {/* Repeat */}
-          <div className="mt-4 mb-90">
+          <div className="mt-4">
             <h1
               className={`font-medium text-[16px] mb-2 ${
                 isDarkMode ? "text-white" : "text-black"
@@ -562,9 +602,6 @@ const Calendar = () => {
             </div>
           </div>
         </div>
-
-        {/* Bottom spacer */}
-        <div className="h-10 shrink-0" />
       </div>
     </div>
   );
