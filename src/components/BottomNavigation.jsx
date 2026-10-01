@@ -10,7 +10,6 @@ import rpp from "../assets/report2.svg";
 import caa from "../assets/callender 2.svg";
 import prr from "../assets/pro2.svg";
 import mss from "../assets/message2.svg";
-import { useTheme as useParentTheme } from "../parent/ParentThemeContext";
 import { useTheme as useTeacherTheme } from "../teacher/TeacherContext";
 
 const BottomNavigation = () => {
@@ -21,15 +20,9 @@ const BottomNavigation = () => {
   const isTeacher = location.pathname.startsWith("/teacher");
   const rolePrefix = isTeacher ? "/teacher" : "/parent";
 
-  // This component is shared between both role trees, so it can't statically
-  // pick one context. Both hooks are always called (no conditional hook calls —
-  // that would break the rules of hooks); whichever provider isn't an ancestor
-  // for the current route simply returns undefined, and we use the URL-derived
-  // role to pick the one that's actually live.
-  const parentTheme = useParentTheme();
+  // Teacher routes use context; parent routes rely on Tailwind dark: classes (system theme)
   const teacherTheme = useTeacherTheme();
-  const isDarkMode =
-    (isTeacher ? teacherTheme : parentTheme)?.isDarkMode ?? false;
+  const isTeacherDarkMode = isTeacher ? teacherTheme?.isDarkMode : false;
 
   const tabs = [
     { key: "home", label: "Home", icon: hmm, activeIcon: home },
@@ -41,12 +34,12 @@ const BottomNavigation = () => {
 
   return (
     <div
-      // Solid background here (not transparent) so page content behind it never shows through,
-      // in either light or dark mode.
       className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t z-50 transition-colors duration-200 ${
-        isDarkMode
-          ? "bg-[#121212] border-gray-800"
-          : "bg-white border-[#C1C1C1]"
+        isTeacher
+          ? isTeacherDarkMode
+            ? "bg-[#121212] border-gray-800"
+            : "bg-white border-[#C1C1C1]"
+          : "bg-white border-[#C1C1C1] dark:bg-[#000000] dark:border-[#2E2E2E]"
       }`}
     >
       <div className="flex items-center justify-around w-full py-3 px-2">
@@ -64,12 +57,22 @@ const BottomNavigation = () => {
                 src={isActive ? activeIcon : icon}
                 alt={label}
                 className={`w-6 h-6 flex-shrink-0 ${
-                  !isActive && isDarkMode ? "invert" : ""
+                  isTeacher
+                    ? !isActive && isTeacherDarkMode
+                      ? "invert"
+                      : ""
+                    : !isActive
+                      ? "dark:invert"
+                      : ""
                 }`}
               />
               <p
                 className={`text-[11px] font-normal leading-tight truncate ${
-                  isDarkMode ? "text-white" : "text-black"
+                  isTeacher
+                    ? isTeacherDarkMode
+                      ? "text-white"
+                      : "text-black"
+                    : "text-black dark:text-white"
                 }`}
               >
                 {label}
