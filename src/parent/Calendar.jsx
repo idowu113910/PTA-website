@@ -151,28 +151,28 @@ const Calendar = () => {
   const EventCard = ({ icon, title, date, time: t, location, rightImg }) => (
     <div
       className={`flex w-full rounded-[10px] py-4 px-3 mt-4 items-center gap-3 transition-colors duration-200 ${
-        isDarkMode ? "bg-[#1c1c1c]" : "bg-[#F1F0F0]"
+        isDarkMode ? "bg-[#000000]" : "bg-[#F1F0F0]"
       }`}
     >
       <img src={icon} alt="" className="w-8 h-8 shrink-0" />
       <div className="flex-1 min-w-0">
         <p
           className={`font-normal text-[16px] truncate ${
-            isDarkMode ? "text-white" : "text-black"
+            isDarkMode ? "text-white" : "text-[#000000]"
           }`}
         >
           {title}
         </p>
         <p
           className={`font-normal text-[12px] mt-0.5 ${
-            isDarkMode ? "text-gray-300" : "text-black"
+            isDarkMode ? "text-gray-300" : "text-[#000000]"
           }`}
         >
           {date} <span className="font-bold text-base">·</span> {t}
         </p>
         <p
           className={`font-medium text-[12px] mt-1.5 ${
-            isDarkMode ? "text-gray-300" : "text-black"
+            isDarkMode ? "text-gray-300" : "text-[#000000]"
           }`}
         >
           {location}
@@ -193,7 +193,7 @@ const Calendar = () => {
     return (
       <div
         className={`min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto pb-6 transition-colors duration-200 ${
-          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+          isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#000000]"
         }`}
       >
         <div
@@ -257,7 +257,7 @@ const Calendar = () => {
   return (
     <div
       className={`relative min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
-        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+        isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#000000]"
       }`}
     >
       {/* Title */}
@@ -291,7 +291,7 @@ const Calendar = () => {
             <div
               key={d}
               className={`text-center text-[13px] font-normal py-1 ${
-                isDarkMode ? "text-gray-300" : "text-black"
+                isDarkMode ? "text-gray-300" : "text-[#000000]"
               }`}
             >
               {d}
@@ -314,7 +314,7 @@ const Calendar = () => {
                       ? "bg-[#FF7B17] text-white"
                       : isDarkMode
                         ? "bg-transparent text-white"
-                        : "bg-transparent text-black"
+                        : "bg-transparent text-[#000000]"
                 }`}
               >
                 {day}
@@ -327,7 +327,7 @@ const Calendar = () => {
       {/* Today's Events */}
       <h2
         className={`text-[18px] font-bold px-5 mt-4 ${
-          isDarkMode ? "text-white" : "text-black"
+          isDarkMode ? "text-white" : "text-[#000000]"
         }`}
       >
         Todays Events
@@ -347,7 +347,7 @@ const Calendar = () => {
       <div className="flex items-center justify-between px-5 mt-5">
         <p
           className={`text-[18px] font-bold ${
-            isDarkMode ? "text-white" : "text-black"
+            isDarkMode ? "text-white" : "text-[#000000]"
           }`}
         >
           Upcoming Events
@@ -392,7 +392,7 @@ const Calendar = () => {
       {/* ── Backdrop ───────────────────────────────────────────── */}
       <div
         onClick={() => setShowScreen(false)}
-        className={`fixed inset-0 bg-black/40 transition-opacity duration-300 z-20 ${
+        className={`fixed inset-0 bg-[#000000]/40 transition-opacity duration-300 z-20 ${
           showScreen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -403,7 +403,7 @@ const Calendar = () => {
       <div
         className={`fixed left-0 bottom-0 w-full max-w-107.5 rounded-t-3xl shadow-xl z-30
     transition-transform duration-300 ease-in-out flex flex-col ${
-      isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+      isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#000000]"
     }`}
         style={{
           height: "min(730px, 90vh)",
@@ -431,7 +431,7 @@ const Calendar = () => {
           <div className="mt-4">
             <h1
               className={`font-medium text-[16px] mb-2 ${
-                isDarkMode ? "text-white" : "text-black"
+                isDarkMode ? "text-white" : "text-[#000000]"
               }`}
             >
               Task Title
@@ -443,8 +443,8 @@ const Calendar = () => {
               onChange={(e) => setTaskTitle(e.target.value)}
               className={`w-full h-13.75 rounded-[10px] px-4 outline-none text-[14px] ${
                 isDarkMode
-                  ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
-                  : "border border-[#D9D9D9] bg-white text-black"
+                  ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
+                  : "border border-[#D9D9D9] bg-white text-[#000000]"
               }`}
             />
           </div>
@@ -453,7 +453,7 @@ const Calendar = () => {
           <div className="mt-4">
             <h1
               className={`font-medium text-[16px] mb-2 ${
-                isDarkMode ? "text-white" : "text-black"
+                isDarkMode ? "text-white" : "text-[#000000]"
               }`}
             >
               Note (optional)
@@ -465,8 +465,8 @@ const Calendar = () => {
               onChange={(e) => setTaskNote(e.target.value)}
               className={`w-full h-13.75 rounded-[10px] px-4 outline-none text-[14px] ${
                 isDarkMode
-                  ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
-                  : "border border-[#D9D9D9] bg-white text-black"
+                  ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
+                  : "border border-[#D9D9D9] bg-white text-[#000000]"
               }`}
             />
           </div>
@@ -474,7 +474,7 @@ const Calendar = () => {
           {/* Reminder Date */}
           <h4
             className={`font-medium text-[16px] mt-4 mb-2 ${
-              isDarkMode ? "text-white" : "text-black"
+              isDarkMode ? "text-white" : "text-[#000000]"
             }`}
           >
             Reminder Date
@@ -482,7 +482,7 @@ const Calendar = () => {
           <div
             className={`w-full h-16.25 rounded-md px-3 flex items-center justify-between ${
               isDarkMode
-                ? "border border-gray-700 bg-[#1c1c1c]"
+                ? "border border-gray-700 bg-[#000000]"
                 : "border border-[#D9D9D9] bg-white"
             }`}
           >
@@ -495,14 +495,14 @@ const Calendar = () => {
               <div>
                 <p
                   className={`font-medium text-[14px] leading-tight ${
-                    isDarkMode ? "text-white" : "text-black"
+                    isDarkMode ? "text-white" : "text-[#000000]"
                   }`}
                 >
                   Date
                 </p>
                 <p
                   className={`font-normal text-[12px] ${
-                    isDarkMode ? "text-gray-300" : "text-black"
+                    isDarkMode ? "text-gray-300" : "text-[#000000]"
                   }`}
                 >
                   Monday, June 30, 2025
@@ -524,7 +524,7 @@ const Calendar = () => {
           {/* Reminder Time */}
           <h4
             className={`font-medium text-[16px] mt-4 mb-2 ${
-              isDarkMode ? "text-white" : "text-black"
+              isDarkMode ? "text-white" : "text-[#000000]"
             }`}
           >
             Reminder Time
@@ -532,7 +532,7 @@ const Calendar = () => {
           <div
             className={`w-full h-16.25 rounded-md px-3 flex items-center justify-between ${
               isDarkMode
-                ? "border border-gray-700 bg-[#1c1c1c]"
+                ? "border border-gray-700 bg-[#000000]"
                 : "border border-[#D9D9D9] bg-white"
             }`}
           >
@@ -545,14 +545,14 @@ const Calendar = () => {
               <div>
                 <p
                   className={`font-medium text-[14px] leading-tight ${
-                    isDarkMode ? "text-white" : "text-black"
+                    isDarkMode ? "text-white" : "text-[#000000]"
                   }`}
                 >
                   Time
                 </p>
                 <p
                   className={`font-normal text-[12px] ${
-                    isDarkMode ? "text-gray-300" : "text-black"
+                    isDarkMode ? "text-gray-300" : "text-[#000000]"
                   }`}
                 >
                   11:00 AM
@@ -575,7 +575,7 @@ const Calendar = () => {
           <div className="mt-4">
             <h1
               className={`font-medium text-[16px] mb-2 ${
-                isDarkMode ? "text-white" : "text-black"
+                isDarkMode ? "text-white" : "text-[#000000]"
               }`}
             >
               Repeat
@@ -588,8 +588,8 @@ const Calendar = () => {
                 onChange={(e) => setRepeatValue(e.target.value)}
                 className={`w-full h-13.75 rounded-[10px] px-4 pr-12 outline-none text-[14px] ${
                   isDarkMode
-                    ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
-                    : "border border-[#D9D9D9] bg-white text-black"
+                    ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
+                    : "border border-[#D9D9D9] bg-white text-[#000000]"
                 }`}
               />
               <img
