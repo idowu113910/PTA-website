@@ -3,8 +3,13 @@ import { useNavigate } from "react-router-dom";
 import role from "../assets/ED role.svg";
 import tea from "../assets/teacher.svg";
 import pare from "../assets/rolee.jpg";
+import { useSystemTheme } from "../useSystemTheme";
 
 const RoleSelect = () => {
+  // No provider wraps this page (it's a public route), so the system
+  // color scheme is read directly here instead of via useTheme().
+  const isDarkMode = useSystemTheme();
+
   const [selectedRole, setSelectedRole] = useState(null);
   const navigate = useNavigate();
 
@@ -36,12 +41,26 @@ const RoleSelect = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white w-full pt-12 pb-12">
+    <div
+      className={`min-h-screen w-full pt-12 pb-12 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#121212]" : "bg-white"
+      }`}
+    >
       <div className="flex flex-col items-center justify-center">
         <img src={role} alt="ED role" />
         <div className="flex flex-col items-center justify-center mt-10">
-          <h4 className="font-bold text-[20px] text-black">Choose a Role</h4>
-          <p className="text-[14px] font-normal text-black">
+          <h4
+            className={`font-bold text-[20px] ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
+            Choose a Role
+          </h4>
+          <p
+            className={`text-[14px] font-normal ${
+              isDarkMode ? "text-gray-300" : "text-black"
+            }`}
+          >
             What do you want to register as?
           </p>
         </div>
@@ -49,14 +68,22 @@ const RoleSelect = () => {
 
       <div
         onClick={() => setSelectedRole("teacher")}
-        className={`border rounded-[10px] w-83.75 h-36 mt-14 bg-white mx-auto relative cursor-pointer ${
+        className={`border rounded-[10px] w-83.75 h-36 mt-14 mx-auto relative cursor-pointer transition-colors duration-200 ${
+          isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+        } ${
           selectedRole === "teacher"
             ? "border-[3px] border-[#FF7B17]"
-            : "border border-[#D2DBD6]"
+            : isDarkMode
+              ? "border border-gray-700"
+              : "border border-[#D2DBD6]"
         }`}
       >
         <div className="flex justify-between">
-          <p className="mt-14 pl-4 font-medium text-[18px] text-[#111214]">
+          <p
+            className={`mt-14 pl-4 font-medium text-[18px] ${
+              isDarkMode ? "text-white" : "text-[#111214]"
+            }`}
+          >
             Teacher
           </p>
           <img src={tea} alt="Teacher" />
@@ -65,13 +92,21 @@ const RoleSelect = () => {
 
       <div
         onClick={() => setSelectedRole("parent")}
-        className={`relative w-83.75 h-36 mt-8 mx-auto rounded-[10px] bg-white overflow-hidden cursor-pointer shadow-[0_2px_2px_0_#0000001A] ${
+        className={`relative w-83.75 h-36 mt-8 mx-auto rounded-[10px] overflow-hidden cursor-pointer shadow-[0_2px_2px_0_#0000001A] transition-colors duration-200 ${
+          isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+        } ${
           selectedRole === "parent"
             ? "border-[3px] border-[#FF7B17]"
-            : "border border-[#D2DBD6]"
+            : isDarkMode
+              ? "border border-gray-700"
+              : "border border-[#D2DBD6]"
         }`}
       >
-        <p className="mt-14 pl-4 font-medium text-[18px] text-[#111214]">
+        <p
+          className={`mt-14 pl-4 font-medium text-[18px] ${
+            isDarkMode ? "text-white" : "text-[#111214]"
+          }`}
+        >
           Parent
         </p>
         <img
@@ -89,7 +124,9 @@ const RoleSelect = () => {
           className={`w-83.75 h-12.5 rounded-[10px] text-[18px] font-bold ${
             selectedRole
               ? "bg-[#FF7B17] text-white cursor-pointer"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : isDarkMode
+                ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
           Next
