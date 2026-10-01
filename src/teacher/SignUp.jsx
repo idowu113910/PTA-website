@@ -6,6 +6,8 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
 import app from "../assets/Apple.svg";
+// Adjust this path to wherever your hook file lives.
+import { useSystemTheme } from "../components/UserTheme";
 
 const REGISTER_ENDPOINT =
   "https://pta-wdln.onrender.com/api/auth/teacher/register";
@@ -16,8 +18,24 @@ const REGISTER_ENDPOINT =
 // different placeholder, or replace it with a real input later.
 const DEFAULT_SUBJECT_SPECIALIZATION = "General";
 
+// Shared input styling: light by default, dark when the device is in dark mode.
+const INPUT_BASE =
+  "w-full h-12.5 rounded-[10px] text-[12px] font-normal focus:outline-none " +
+  "bg-[#FAFAFA] text-gray-900 placeholder:text-[#969696] " +
+  "dark:bg-[#141414] dark:text-white dark:placeholder:text-[#7A7A7A]";
+const INPUT_BORDER =
+  "border border-gray-200 focus:border-gray-400 " +
+  "dark:border-[#3A3A3A] dark:focus:border-[#6B6B6B]";
+const LABEL =
+  "block text-[14px] font-medium text-[#303030] dark:text-gray-100 mb-1.5";
+
 const SignUp = () => {
   const navigate = useNavigate();
+
+  // Follows the device's light/dark setting and keeps the <html> "dark"
+  // class in sync.
+  useSystemTheme();
+
   const [formData, setFormData] = useState({
     fullName: "",
     workEmail: "",
@@ -174,9 +192,7 @@ const SignUp = () => {
   };
 
   return (
-    // Explicit white background — this screen intentionally does NOT use ThemeContext/useTheme
-    // and should never be affected by light/dark mode.
-    <div className="min-h-screen bg-[#ffffff] px-6 py-6 w-full mx-auto flex flex-col justify-between">
+    <div className="min-h-screen bg-[#ffffff] dark:bg-[#000000] px-6 py-6 w-full mx-auto flex flex-col justify-between">
       <div>
         {/* Header Navigation */}
         <div className="relative flex items-center justify-center pt-2 ">
@@ -185,24 +201,29 @@ const SignUp = () => {
             onClick={() => navigate("/role")}
             className="absolute left-0 p-2  flex items-center justify-center"
           >
-            <img src={back} alt="Back" className="w-5 h-5 -mt-8" />
+            {/* dark:invert flips a dark arrow to white on a black page */}
+            <img src={back} alt="Back" className="w-5 h-5 -mt-8 dark:invert" />
           </button>
           <img src={ED} alt="Logo" className="h-16 object-contain mt-5" />
         </div>
 
         {/* Title */}
         <div className="text-center mt-6 mb-6">
-          <h1 className="text-[22px] font-bold text-[#001216]">
+          <h1 className="text-[22px] font-bold text-[#001216] dark:text-white">
             Create Your Account
           </h1>
-          <p className="text-[14px] text-[#001216] mt-1">
+          <p className="text-[14px] text-[#001216] dark:text-gray-400 mt-1">
             We’re Excited To Have You!
           </p>
         </div>
 
         {/* Display Error Message */}
         {errorMsg && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-[10px] text-center">
+          <div
+            role="alert"
+            className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-[10px] text-center
+             dark:bg-red-950/50 dark:border-red-900 dark:text-red-300"
+          >
             {errorMsg}
           </div>
         )}
@@ -211,25 +232,21 @@ const SignUp = () => {
         <form onSubmit={handleNext} className="space-y-4">
           {/* Full Name */}
           <div className="mt-8">
-            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
-              Full Name
-            </label>
+            <label className={LABEL}>Full Name</label>
             <input
               type="text"
               name="fullName"
+              autoComplete="name"
               value={formData.fullName}
               onChange={handleInputChange}
-              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] text-gray-900 
-              placeholder:text-[#969696] focus:outline-none focus:border-gray-400 font-normal"
+              className={`${INPUT_BASE} ${INPUT_BORDER} px-4`}
               placeholder="Enter your full name"
             />
           </div>
 
           {/* Work Email */}
           <div>
-            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
-              Work Email
-            </label>
+            <label className={LABEL}>Work Email</label>
             <input
               type="email"
               name="workEmail"
@@ -237,16 +254,15 @@ const SignUp = () => {
               value={formData.workEmail}
               onChange={handleEmailChange}
               onBlur={() => setEmailTouched(true)}
-              className={`w-full h-12.5 bg-[#FAFAFA] border rounded-[10px] px-4 text-[12px] font-normal
-               text-gray-900 placeholder:text-[#969696] focus:outline-none ${
-                 showEmailError
-                   ? "border-red-400 focus:border-red-400"
-                   : "border-gray-200 focus:border-gray-400"
-               }`}
+              className={`${INPUT_BASE} border px-4 ${
+                showEmailError
+                  ? "border-red-400 focus:border-red-400 dark:border-red-500"
+                  : "border-gray-200 focus:border-gray-400 dark:border-[#3A3A3A] dark:focus:border-[#6B6B6B]"
+              }`}
               placeholder="Example@gmail.com"
             />
             {showEmailError && (
-              <p className="text-[12px] text-red-500 mt-1">
+              <p className="text-[12px] text-red-500 dark:text-red-400 mt-1">
                 Enter a valid email address (e.g. name@gmail.com)
               </p>
             )}
@@ -254,25 +270,21 @@ const SignUp = () => {
 
           {/* Phone Number */}
           <div>
-            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
-              Phone Number
-            </label>
+            <label className={LABEL}>Phone Number</label>
             <input
               type="tel"
               name="phone"
+              autoComplete="tel"
               value={formData.phone}
               onChange={handlePhoneChange}
-              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] font-normal
-               text-gray-900 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+              className={`${INPUT_BASE} ${INPUT_BORDER} px-4`}
               placeholder="+1 234 567 8900"
             />
           </div>
 
           {/* Name of school */}
           <div>
-            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
-              Name of school
-            </label>
+            <label className={LABEL}>Name of school</label>
             <input
               type="text"
               name="schoolName"
@@ -289,30 +301,29 @@ const SignUp = () => {
                   },
                 });
               }}
-              className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] px-4 text-[12px] text-gray-900 placeholder:text-[#969696] font-normal focus:outline-none focus:border-gray-400"
+              className={`${INPUT_BASE} ${INPUT_BORDER} px-4`}
               placeholder="E.g. Afrotech Academy"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-[14px] font-medium text-[#303030] mb-1.5">
-              Password
-            </label>
+            <label className={LABEL}>Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] pl-4 pr-12 text-[12px] font-normal text-gray-900
-                 placeholder:text-[#969696] focus:outline-none focus:border-gray-400"
+                className={`${INPUT_BASE} ${INPUT_BORDER} pl-4 pr-12`}
                 placeholder="Enter your Password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -321,38 +332,46 @@ const SignUp = () => {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
-              Confirm Password
-            </label>
+            <label className={LABEL}>Confirm Password</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
+                autoComplete="new-password"
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                className="w-full h-12.5 bg-[#FAFAFA] border border-gray-200 rounded-[10px] pl-4 pr-12 text-[12px] text-gray-900
-                 placeholder:text-[#969696] font-normal focus:outline-none focus:border-gray-400"
+                className={`${INPUT_BASE} ${INPUT_BORDER} pl-4 pr-12`}
                 placeholder="Confirm Password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
               >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
 
-          {/* Checkbox */}
-          <div
-            className="flex items-center gap-2.5 mt-5 cursor-pointer"
-            onClick={() => setAgreedToTerms(!agreedToTerms)}
-          >
+          {/* Accessible Checkbox */}
+          <label className="flex items-center gap-2.5 mt-5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="sr-only peer"
+            />
             <div
-              className={`w-4.5 h-4.5 border border-gray-400 rounded flex items-center justify-center transition-colors ${
-                agreedToTerms ? "bg-[#FF7B17] border-[#FF7B17]" : "bg-white"
-              }`}
+              className={`w-4.5 h-4.5 border rounded flex items-center justify-center transition-colors
+               peer-focus-visible:ring-2 peer-focus-visible:ring-[#FF7B17] peer-focus-visible:ring-offset-2
+               peer-focus-visible:ring-offset-white dark:peer-focus-visible:ring-offset-black ${
+                 agreedToTerms
+                   ? "bg-[#FF7B17] border-[#FF7B17]"
+                   : "bg-white border-gray-400 dark:bg-transparent dark:border-gray-500"
+               }`}
             >
               {agreedToTerms && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -366,10 +385,10 @@ const SignUp = () => {
                 </svg>
               )}
             </div>
-            <span className="text-[13px] text-gray-800 font-normal">
+            <span className="text-[13px] text-gray-800 dark:text-gray-200 font-normal">
               I agree with the Terms and Conditions
             </span>
-          </div>
+          </label>
 
           {/* Submit Button */}
           <div className="mt-8 mb-4">
@@ -379,7 +398,7 @@ const SignUp = () => {
               className={`w-full h-13 rounded-xl text-[16px] font-medium transition-colors flex items-center justify-center gap-2 ${
                 isFormValid() && !isLoading
                   ? "bg-[#FF7B17] text-white cursor-pointer"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-[#1F1F1F] dark:text-gray-600"
               }`}
             >
               {isLoading ? (
@@ -396,13 +415,15 @@ const SignUp = () => {
       </div>
 
       <div className="flex items-center gap-4 w-full mt-6">
-        <hr className="flex-1 border-t border-gray-300" />
-        <span className="font-normal text-[14px] text-[#333333] whitespace-nowrap">
+        <hr className="flex-1 border-t border-gray-300 dark:border-[#2E2E2E]" />
+        <span className="font-normal text-[14px] text-[#333333] dark:text-gray-300 whitespace-nowrap">
           Or Continue With
         </span>
-        <hr className="flex-1 border-t border-gray-300" />
+        <hr className="flex-1 border-t border-gray-300 dark:border-[#2E2E2E]" />
       </div>
 
+      {/* Social buttons keep a light tile in dark mode so the brand icons
+          (e.g. the black Apple logo) stay visible. */}
       <div className="flex items-center justify-center gap-10 w-full mt-8">
         <button
           type="button"
@@ -415,7 +436,7 @@ const SignUp = () => {
         <button
           type="button"
           aria-label="Continue with Google"
-          className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+          className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] border border-gray-200 dark:border-transparent shadow-sm hover:shadow-md transition-shadow"
         >
           <img src={goo} alt="" />
         </button>
@@ -423,7 +444,7 @@ const SignUp = () => {
         <button
           type="button"
           aria-label="Continue with Apple"
-          className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+          className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] border border-gray-200 dark:border-transparent shadow-sm hover:shadow-md transition-shadow"
         >
           <img src={app} alt="" />
         </button>
@@ -433,10 +454,10 @@ const SignUp = () => {
         onClick={() => {
           navigate("/teacher/login");
         }}
-        className="flex gap-3 items-center justify-center mt-10"
+        className="flex gap-3 items-center justify-center mt-10 cursor-pointer"
       >
-        <p className="flex justify-center text-center font-normal text-[#001216] text-[16px]">
-          Already an exisiting user?
+        <p className="flex justify-center text-center font-normal text-[#001216] dark:text-gray-200 text-[16px]">
+          Already an existing user?
         </p>
 
         <p className="font-medium text-[16px] text-[#FF7B17]">Log In</p>
