@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import role from "../assets/ED role.svg";
 import tea from "../assets/teacher.svg";
 import pare from "../assets/rolee.jpg";
-import { useSystemTheme } from "../useSystemTheme";
+import { useSystemTheme } from "../components/UserTheme";
 
 const RoleSelect = () => {
   // No provider wraps this page (it's a public route), so the system
