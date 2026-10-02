@@ -469,7 +469,7 @@ const HomePage = () => {
           />
           <div
             className={`fixed inset-0 z-50 overflow-y-auto max-w-[430px] mx-auto transition-colors duration-200 ${
-              isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+              isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
             }`}
           >
             <div className="p-5">
