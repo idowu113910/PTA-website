@@ -21,7 +21,6 @@ import swi from "../assets/switch.svg";
 import swi2 from "../assets/swi2.svg";
 import time from "../assets/time.svg";
 import arrr from "../assets/arr dwn parent.svg";
-import { useTheme } from "./ParentThemeContext";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = [
@@ -47,11 +46,12 @@ function getFirstDayOfMonth(year, month) {
   return day === 0 ? 6 : day - 1;
 }
 
-// Custom Hook to sync with device system light/dark mode preference
+// Follows the device's light/dark mode and reacts live when it changes
 function useSystemDarkMode() {
   const [isSystemDark, setIsSystemDark] = useState(
     () =>
-      window.matchMedia &&
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
 
@@ -60,6 +60,9 @@ function useSystemDarkMode() {
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e) => setIsSystemDark(e.matches);
+
+    // Make sure state is correct on mount
+    setIsSystemDark(mediaQuery.matches);
 
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener("change", handleChange);
@@ -80,13 +83,8 @@ function useSystemDarkMode() {
 }
 
 const Calendar = () => {
-  const themeContext = useTheme ? useTheme() : {};
-  const isSystemDark = useSystemDarkMode();
-
-  const isDarkMode =
-    themeContext && typeof themeContext.isDarkMode === "boolean"
-      ? themeContext.isDarkMode
-      : isSystemDark;
+  // Theme comes straight from the device's light/dark setting
+  const isDarkMode = useSystemDarkMode();
 
   const [isSwitched1, setIsSwitched1] = useState(false);
   const [isSwitched2, setIsSwitched2] = useState(false);
@@ -144,8 +142,8 @@ const Calendar = () => {
     };
   }, [showScreen]);
 
-  // ── FIX (part 1): remember the original theme-color tags and restore
-  // them only when leaving this page.
+  // Remember the original theme-color tags and restore them only when
+  // leaving this page.
   const originalMetasRef = useRef([]);
   useEffect(() => {
     originalMetasRef.current = Array.from(
@@ -160,8 +158,8 @@ const Calendar = () => {
     };
   }, []);
 
-  // ── FIX (part 2): keep html/body background and the top bar (status bar)
-  // color in sync with dark/light mode AND with the reminder sheet backdrop.
+  // Keep html/body background and the top bar (status bar) color in sync
+  // with the device's light/dark mode AND with the reminder sheet backdrop.
   useEffect(() => {
     const pageBg = isDarkMode ? "#000000" : "#FFFFFF";
     // When the sheet is open the backdrop dims the page (40% black),
