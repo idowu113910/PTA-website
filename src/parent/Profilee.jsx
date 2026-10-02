@@ -1,70 +1,73 @@
 import React, { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import ed from "../assets/edithh.svg";
 import btn from "../assets/Right btn.svg";
 import tpi from "../assets/TPI.svg";
 import ap from "../assets/app pre.svg";
 import hs from "../assets/H & S.svg";
+import iaf from "../assets/invite.svg";
 import back from "../assets/back2.svg";
 import pn from "../assets/pencil.svg";
 import sth from "../assets/switchh.svg";
 import sthOn from "../assets/ON.svg";
-import { useUser } from "../teacher/UserContext";
-import lkd from "../assets/linkedstd.svg";
-import bk from "../assets/back parent.svg";
-import add from "../assets/add student.svg";
-import div from "../assets/deku.svg";
-import cir from "../assets/round.svg";
-import cnc from "../assets/cancel back btn.svg";
-import { useNavigate } from "react-router-dom";
-import BottomNavigate from "../components/BottomNavigation";
+import { useUser } from "./UserContext";
+import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
 
-const Grade = () => {
-  // ── useUser MUST come first ──────────────────────────────────────
+const Profile = () => {
+  // System Theme Detector Hook
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+  });
+
+  // Listen for device theme preference changes automatically
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsDarkMode(e.matches);
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  // Manual toggle handler for App Preference option
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => !prev);
+  };
+
   const {
     fullName,
-    email,
     updateFullName,
+    email,
     updateEmail,
-    updateGrade,
-    updateRoom,
-    updateTeacherName,
+    profileImage,
+    updateProfileImage,
   } = useUser();
-
-  // Theme now comes purely from Tailwind's `dark:` variant, which follows
-  // the device's system color scheme automatically — no isDarkMode state,
-  // no ParentThemeContext import, no manual toggle needed for this screen.
 
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const codeRef = useRef(null);
 
-  // ── Screen state ─────────────────────────────────────────────────
   const [showTeacherProfile, setShowTeacherProfile] = useState(false);
   const [showAppPreference, setShowAppPreference] = useState(false);
-  const [linkedStudent, setLinkedStudents] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [showScreen, setShowScreen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [hideBackdrop, setHideBackdrop] = useState(false);
 
-  // ── Profile image ────────────────────────────────────────────────
-
-  // ── Edit-profile temp state — initialised from context ──────────
   const [tempFullName, setTempFullName] = useState("");
   const [tempEmail, setTempEmail] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Sync temp fields when context values load
   useEffect(() => {
     setTempFullName(fullName || "");
     setTempEmail(email || "");
   }, [fullName, email]);
 
-  // ── Inline-edit fields ───────────────────────────────────────────
   const [genderValue, setGenderValue] = useState("Female");
   const [tempGender, setTempGender] = useState("Female");
   const [isEditingGender, setIsEditingGender] = useState(false);
-  const [hideBackdrop, setHideBackdrop] = useState(false);
 
   const [classValue, setClassValue] = useState("Grade 6, Room 201");
   const [tempClass, setTempClass] = useState("Grade 6, Room 201");
@@ -74,11 +77,9 @@ const Grade = () => {
   const [tempAge, setTempAge] = useState("12");
   const [isEditingAge, setIsEditingAge] = useState(false);
 
-  // ── App preference toggles ───────────────────────────────────────
   const [isSwitchOn, setIsSwitchOn] = useState(false);
   const [SwitchAuto, setSwitchAuto] = useState(false);
 
-  // ── Mobile number ────────────────────────────────────────────────
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [savedCode, setSavedCode] = useState("+234");
   const [savedNumber, setSavedNumber] = useState("703 543 2234");
@@ -86,30 +87,21 @@ const Grade = () => {
   const [phoneNum, setPhoneNum] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [phoneToast, setPhoneToast] = useState("");
-  const { profileImage, updateProfileImage } = useUser();
-
-  // Lock body scroll when sheet is open
-  useEffect(() => {
-    document.body.style.overflow = showScreen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [showScreen]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        updateProfileImage(reader.result); // base64 string — survives logout
+        updateProfileImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleClose = () => {
-    setHideBackdrop(true); // backdrop gone instantly
-    setIsClosing(true); // sheet starts sliding down
+    setHideBackdrop(true);
+    setIsClosing(true);
     setTimeout(() => {
       setIsClosing(false);
       setHideBackdrop(false);
@@ -129,13 +121,11 @@ const Grade = () => {
     setIsEditingPhone(false);
     setPhoneError("");
   }
-
   function handleAreaCodeChange(e) {
     let val = e.target.value;
     if (!val.startsWith("+")) val = "+" + val.replace(/\+/g, "");
     setAreaCode(val);
   }
-
   function validate() {
     if (!areaCode.startsWith("+") || areaCode.length < 2) {
       setPhoneError("Area code must start with + (e.g. +234)");
@@ -148,7 +138,6 @@ const Grade = () => {
     setPhoneError("");
     return true;
   }
-
   function handlePhoneSave() {
     if (!validate()) return;
     setSavedCode(areaCode.trim());
@@ -157,42 +146,64 @@ const Grade = () => {
     setPhoneToast("Number saved successfully");
     setTimeout(() => setPhoneToast(""), 3000);
   }
-
-  function handlePhoneKeyDown(e) {
+  function handleKeyDown(e) {
     if (e.key === "Enter") handlePhoneSave();
     if (e.key === "Escape") closeEdit();
   }
 
-  // ── Reusable components ───────────────────────────────────────────
   const MenuRow = ({ icon, label, onClick }) => (
     <div
       onClick={onClick}
-      className="flex w-full h-[57px] rounded-[10px] py-4 px-3 gap-4 mt-5 items-center cursor-pointer transition-colors duration-200 border border-[#9F9D9D] dark:border-gray-700"
+      className={`flex w-full h-[57px] rounded-[10px] py-4 px-3 gap-4 mt-5 items-center cursor-pointer transition-colors duration-200 ${
+        isDarkMode
+          ? "border border-gray-800 active:bg-gray-900"
+          : "border border-[#9F9D9D] active:bg-gray-50"
+      }`}
     >
-      <img src={icon} alt="" className="w-6 h-6 flex-shrink-0 dark:invert" />
-      <p className="font-medium text-[18px] flex-1 truncate text-[#1A1818] dark:text-white">
+      <img
+        src={icon}
+        alt=""
+        className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
+      />
+      <p
+        className={`font-medium text-[18px] flex-1 truncate ${
+          isDarkMode ? "text-white" : "text-[#1A1818]"
+        }`}
+      >
         {label}
       </p>
       <img
         src={btn}
         alt=""
-        className="w-[12px] h-[8px] flex-shrink-0 dark:invert"
+        className={`w-[12px] h-[8px] flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
       />
     </div>
   );
 
-  const FieldRow = ({ label, value, onEdit }) => (
-    <div className="w-full h-[57px] rounded-[8px] py-2 px-3 flex items-center justify-between border border-black/10 bg-white dark:border-gray-700 dark:bg-[#1c1c1c]">
-      <span className="text-[14px] truncate flex-1 text-[#303030] dark:text-white">
+  const FieldRow = ({ value, onEdit }) => (
+    <div
+      className={`w-full h-[57px] rounded-[8px] py-2 px-3 mt-2 flex items-center justify-between ${
+        isDarkMode ? "border border-gray-800" : "border border-black/10"
+      }`}
+    >
+      <span
+        className={`text-[14px] flex-1 truncate ${
+          isDarkMode ? "text-white" : "text-[#303030]"
+        }`}
+      >
         {value}
       </span>
       <button onClick={onEdit} className="p-1 flex-shrink-0">
-        <img src={pn} alt="edit" className="w-[18px] h-[18px] dark:invert" />
+        <img
+          src={pn}
+          alt="edit"
+          className={`w-[18px] h-[18px] ${isDarkMode ? "invert" : ""}`}
+        />
       </button>
     </div>
   );
 
-  const SaveCancelRow = ({ onSave, onCancel }) => (
+  const SaveCancel = ({ onSave, onCancel }) => (
     <div className="flex gap-2 mt-1">
       <button
         onClick={onSave}
@@ -202,46 +213,60 @@ const Grade = () => {
       </button>
       <button
         onClick={onCancel}
-        className="flex-1 h-[42px] rounded-[8px] text-[13px] border border-black/10 text-[#303030] dark:border-gray-700 dark:text-gray-200 dark:bg-[#1c1c1c]"
+        className={`flex-1 h-[42px] rounded-[8px] text-[13px] ${
+          isDarkMode
+            ? "border border-gray-800 text-white"
+            : "border border-black/10 text-[#303030]"
+        }`}
       >
         Cancel
       </button>
     </div>
   );
 
-  // ────────────────────────────────────────────────────────────────
-  // App Preference Screen
-  // ────────────────────────────────────────────────────────────────
+  // ── App Preference Screen ────────────────────────────────────────
   if (showAppPreference) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 bg-white text-black dark:bg-[#121212] dark:text-white">
+      <div
+        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#000000] text-white" : "bg-white text-gray-900"
+        }`}
+      >
         <div className="flex items-center gap-4 px-5 pt-6 pb-4">
           <button onClick={() => setShowAppPreference(false)}>
-            <img src={back} alt="back" className="w-6 h-6 dark:invert" />
+            <img
+              src={back}
+              alt="back"
+              className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
           <h2 className="text-[20px] font-medium">App Preference</h2>
         </div>
+
         <div className="px-5 flex flex-col gap-4">
           {[
             {
               label: "Notification",
               val: isSwitchOn,
-              onToggle: () => setIsSwitchOn((v) => !v),
+              set: () => setIsSwitchOn(!isSwitchOn),
             },
+            { label: "Theme Appearance", val: isDarkMode, set: toggleTheme },
             {
               label: "Auto-Login",
               val: SwitchAuto,
-              onToggle: () => setSwitchAuto((v) => !v),
+              set: () => setSwitchAuto(!SwitchAuto),
             },
-          ].map(({ label, val, onToggle }) => (
+          ].map(({ label, val, set }) => (
             <div
               key={label}
-              className="flex justify-between items-center w-full h-[61px] rounded-[10px] py-4 px-3 border border-[#9F9D9D] dark:border-gray-700"
+              className={`flex items-center justify-between w-full h-[61px] rounded-[10px] py-4 px-3 ${
+                isDarkMode
+                  ? "border border-gray-800 bg-[#121212]"
+                  : "border border-gray-200 bg-white"
+              }`}
             >
-              <p className="font-medium text-[18px] text-[#1A1818] dark:text-white">
-                {label}
-              </p>
-              <button onClick={onToggle} aria-label={`Toggle ${label}`}>
+              <p className="font-medium text-[18px]">{label}</p>
+              <button onClick={set}>
                 <img
                   src={val ? sthOn : sth}
                   alt="toggle"
@@ -251,121 +276,27 @@ const Grade = () => {
             </div>
           ))}
         </div>
+
+        <BottomNavigation />
       </div>
     );
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // Linked Students Screen
-  // ────────────────────────────────────────────────────────────────
-  if (linkedStudent) {
-    return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto flex flex-col pb-6 transition-colors duration-200 bg-white text-black dark:bg-[#121212] dark:text-white">
-        <div className="px-5 pt-6 flex-1">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <button onClick={() => setLinkedStudents(false)}>
-              <img src={bk} alt="back" className="w-6 h-6 dark:invert" />
-            </button>
-            <p className="font-medium text-[20px] flex-1 ml-3 text-black dark:text-white">
-              Linked Profile
-            </p>
-            <button onClick={() => setShowScreen(true)}>
-              <img src={add} alt="add" className="w-6 h-6 dark:invert" />
-            </button>
-          </div>
-
-          {/* Student cards */}
-          {["Divine Ekubor", "Immaculate Ekubor"].map((name) => (
-            <div
-              key={name}
-              className="w-full rounded-[8px] py-3 px-3 mt-4 flex items-center justify-between border border-[#D9D9D9] bg-[#FBFBFB] dark:border-gray-700 dark:bg-[#1c1c1c]"
-            >
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <img
-                  src={div}
-                  alt=""
-                  className="w-[55px] h-[55px] flex-shrink-0"
-                />
-                <div className="min-w-0">
-                  <p className="font-bold text-[16px] truncate text-black dark:text-white">
-                    {name}
-                  </p>
-                  <p className="font-normal text-[14px] truncate text-black dark:text-gray-300">
-                    Grade 6. Room 201. Mr Robinson
-                  </p>
-                </div>
-              </div>
-              <img
-                src={cir}
-                alt=""
-                className="w-[28px] h-[28px] flex-shrink-0 ml-3 dark:invert"
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Save button */}
-        <div className="px-5 pb-6 pt-4 border-t border-[#EAEAEA] dark:border-gray-800">
-          <button className="h-[50px] w-full bg-[#FF7B17] text-white text-[18px] font-bold rounded-[10px]">
-            Save changes
-          </button>
-        </div>
-
-        {/* Backdrop */}
-        <div
-          onClick={() => setShowScreen(false)}
-          className={`fixed inset-0 bg-black/40 transition-opacity duration-300 z-20 ${
-            showScreen
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          }`}
-        />
-
-        {/* Add Child Bottom Sheet */}
-        <div
-          className={`fixed bottom-0 left-0 right-0 rounded-t-[20px] shadow-xl z-30 transition-transform duration-300 bg-white text-black dark:bg-[#121212] dark:text-white ${
-            showScreen ? "translate-y-0" : "translate-y-full"
-          }`}
-          style={{ maxHeight: "90vh" }}
-        >
-          <div className="flex items-center justify-between px-5 pt-6 pb-3">
-            <h1 className="text-[20px] font-medium">Add a New Child</h1>
-            <button onClick={() => setShowScreen(false)}>
-              <img src={cnc} alt="close" className="w-8 h-8 dark:invert" />
-            </button>
-          </div>
-          <div className="px-5 pb-8 overflow-y-auto flex flex-col gap-4">
-            {["Full Name", "Class", "Student Code"].map((label) => (
-              <div key={label}>
-                <h1 className="font-medium text-[16px] mb-2 text-[#303030] dark:text-white">
-                  {label}
-                </h1>
-                <input
-                  type="text"
-                  placeholder={`Enter ${label.toLowerCase()}`}
-                  className="w-full h-[48px] rounded-[10px] px-3 outline-none placeholder:text-[14px] border border-[#0000001F] bg-[#F8F8F8] text-[#303030] dark:border-gray-700 dark:bg-[#1c1c1c] dark:text-white dark:placeholder:text-gray-500"
-                />
-              </div>
-            ))}
-            <button className="h-[50px] w-full bg-[#FF7B17] text-white text-[18px] font-bold rounded-[10px] mt-2">
-              Proceed
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ────────────────────────────────────────────────────────────────
-  // Edit Profile Screen
-  // ────────────────────────────────────────────────────────────────
+  // ── Edit Profile Screen ──────────────────────────────────────────
   if (showTeacherProfile) {
     return (
-      <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-32 transition-colors duration-200 bg-white text-black dark:bg-[#121212] dark:text-white">
+      <div
+        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-32 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#000000] text-white" : "bg-white text-gray-900"
+        }`}
+      >
         <div className="flex items-center gap-4 px-5 pt-6 pb-2">
           <button onClick={() => setShowTeacherProfile(false)}>
-            <img src={back} alt="back" className="w-6 h-6 dark:invert" />
+            <img
+              src={back}
+              alt="back"
+              className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
           <h2 className="text-[20px] font-medium">Edit Profile</h2>
         </div>
@@ -380,26 +311,34 @@ const Grade = () => {
             className="hidden"
           />
           <img
-            src={profileImage}
+            src={profileImage || ed}
             alt="profile"
             className="w-[75px] h-[75px] object-cover rounded-full"
           />
           <button
             onClick={() => fileInputRef.current.click()}
-            className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-md flex items-center justify-center bg-[#D9D9D9] border border-[#D9D9D9] dark:bg-[#262626] dark:border-gray-700"
+            className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-md bg-[#D9D9D9] border border-[#D9D9D9] flex items-center justify-center"
           >
-            <img src={pn} alt="edit" className="w-4 h-4 dark:invert" />
+            <img
+              src={pn}
+              alt="edit"
+              className={`w-4 h-4 ${isDarkMode ? "invert" : ""}`}
+            />
           </button>
         </div>
 
-        <p className="font-bold text-[18px] text-center mt-3 text-black dark:text-white">
+        <p className="font-bold text-[18px] text-center mt-3 px-5 truncate">
           {fullName}
         </p>
 
-        <div className="px-5 flex flex-col gap-4 mt-4">
+        <div className="px-5 mt-4 flex flex-col gap-4">
           {/* Full Name */}
           <div>
-            <h2 className="font-medium text-[16px] mb-2 text-[#303030] dark:text-white">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Full Name
             </h2>
             <input
@@ -409,13 +348,21 @@ const Grade = () => {
                 setTempFullName(e.target.value);
                 setHasChanges(true);
               }}
-              className="w-full h-[57px] rounded-[8px] py-2 px-3 outline-none text-[14px] border border-black/10 text-[#303030] dark:border-gray-700 dark:bg-[#1c1c1c] dark:text-white"
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+                isDarkMode
+                  ? "border border-gray-800 bg-[#121212] text-white"
+                  : "border border-black/10 text-[#303030]"
+              }`}
             />
           </div>
 
           {/* Email */}
           <div>
-            <h2 className="font-medium text-[16px] mb-2 text-[#303030] dark:text-white">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Email
             </h2>
             <input
@@ -425,13 +372,21 @@ const Grade = () => {
                 setTempEmail(e.target.value);
                 setHasChanges(true);
               }}
-              className="w-full h-[57px] rounded-[8px] py-2 px-3 outline-none text-[14px] border border-black/10 text-[#303030] dark:border-gray-700 dark:bg-[#1c1c1c] dark:text-white"
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+                isDarkMode
+                  ? "border border-gray-800 bg-[#121212] text-white"
+                  : "border border-black/10 text-[#303030]"
+              }`}
             />
           </div>
 
           {/* Mobile Number */}
           <div>
-            <h2 className="font-medium text-[16px] mb-2 text-[#303030] dark:text-white">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Mobile Number
             </h2>
             {!isEditingPhone ? (
@@ -440,7 +395,7 @@ const Grade = () => {
                 onEdit={openEdit}
               />
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 mt-2">
                 <div className="flex gap-2">
                   <div className="flex flex-col gap-1">
                     <label className="text-[11px] text-gray-400">
@@ -451,10 +406,12 @@ const Grade = () => {
                       type="text"
                       value={areaCode}
                       onChange={handleAreaCodeChange}
-                      onKeyDown={handlePhoneKeyDown}
+                      onKeyDown={handleKeyDown}
                       maxLength={6}
                       placeholder="+234"
-                      className="w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-center text-[14px] outline-none bg-white text-black dark:bg-[#1c1c1c] dark:text-white"
+                      className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[14px] outline-none ${
+                        isDarkMode ? "bg-[#121212] text-white" : ""
+                      }`}
                     />
                   </div>
                   <div className="flex flex-col gap-1 flex-1">
@@ -463,17 +420,19 @@ const Grade = () => {
                       type="text"
                       value={phoneNum}
                       onChange={(e) => setPhoneNum(e.target.value)}
-                      onKeyDown={handlePhoneKeyDown}
+                      onKeyDown={handleKeyDown}
                       maxLength={15}
                       placeholder="703 543 2234"
-                      className="w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none bg-white text-black dark:bg-[#1c1c1c] dark:text-white"
+                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none ${
+                        isDarkMode ? "bg-[#121212] text-white" : ""
+                      }`}
                     />
                   </div>
                 </div>
                 {phoneError && (
                   <p className="text-[12px] text-red-500">{phoneError}</p>
                 )}
-                <SaveCancelRow onSave={handlePhoneSave} onCancel={closeEdit} />
+                <SaveCancel onSave={handlePhoneSave} onCancel={closeEdit} />
               </div>
             )}
             {phoneToast && (
@@ -485,7 +444,11 @@ const Grade = () => {
 
           {/* Gender */}
           <div>
-            <h2 className="font-medium text-[16px] mb-2 text-[#303030] dark:text-white">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Gender
             </h2>
             <FieldRow
@@ -503,13 +466,15 @@ const Grade = () => {
                     setTempGender(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] bg-white text-black dark:bg-[#1c1c1c] dark:text-white"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] ${
+                    isDarkMode ? "bg-[#121212] text-white" : "bg-white"
+                  }`}
                 >
                   <option>Female</option>
                   <option>Male</option>
                   <option>Prefer not to say</option>
                 </select>
-                <SaveCancelRow
+                <SaveCancel
                   onSave={() => {
                     setGenderValue(tempGender);
                     setIsEditingGender(false);
@@ -522,7 +487,11 @@ const Grade = () => {
 
           {/* Class */}
           <div>
-            <h2 className="font-medium text-[16px] mb-2 text-[#303030] dark:text-white">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Class
             </h2>
             <FieldRow
@@ -541,9 +510,11 @@ const Grade = () => {
                     setTempClass(e.target.value);
                     setHasChanges(true);
                   }}
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] outline-none bg-white text-black dark:bg-[#1c1c1c] dark:text-white"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                    isDarkMode ? "bg-[#121212] text-white" : ""
+                  }`}
                 />
-                <SaveCancelRow
+                <SaveCancel
                   onSave={() => {
                     setClassValue(tempClass);
                     setIsEditingClass(false);
@@ -556,7 +527,11 @@ const Grade = () => {
 
           {/* Age */}
           <div>
-            <h2 className="font-medium text-[16px] mb-2 text-[#303030] dark:text-white">
+            <h2
+              className={`font-medium text-[16px] mb-1 ${
+                isDarkMode ? "text-white" : "text-[#303030]"
+              }`}
+            >
               Age
             </h2>
             <FieldRow
@@ -571,15 +546,17 @@ const Grade = () => {
                 <input
                   type="number"
                   value={tempAge}
+                  min="1"
+                  max="100"
                   onChange={(e) => {
                     setTempAge(e.target.value);
                     setHasChanges(true);
                   }}
-                  min="1"
-                  max="100"
-                  className="w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] outline-none bg-white text-black dark:bg-[#1c1c1c] dark:text-white"
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                    isDarkMode ? "bg-[#121212] text-white" : ""
+                  }`}
                 />
-                <SaveCancelRow
+                <SaveCancel
                   onSave={() => {
                     setAgeValue(tempAge);
                     setIsEditingAge(false);
@@ -591,8 +568,14 @@ const Grade = () => {
           </div>
         </div>
 
-        {/* Save Changes — pinned bottom */}
-        <div className="fixed bottom-0 left-0 right-0 px-5 pb-6 pt-4 z-10 bg-white border-t border-gray-200 dark:bg-[#121212] dark:border-gray-800">
+        {/* Save Changes */}
+        <div
+          className={`fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4 z-10 ${
+            isDarkMode
+              ? "bg-[#000000] border-gray-900"
+              : "bg-white border-gray-200"
+          }`}
+        >
           <button
             disabled={!hasChanges}
             onClick={() => {
@@ -602,9 +585,7 @@ const Grade = () => {
               setHasChanges(false);
             }}
             className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-colors ${
-              hasChanges
-                ? "bg-[#FF7B17]"
-                : "bg-[#D3D3D3] dark:bg-gray-700 cursor-not-allowed"
+              hasChanges ? "bg-[#FF7B17]" : "bg-[#D3D3D3] cursor-not-allowed"
             }`}
           >
             Save Changes
@@ -614,17 +595,22 @@ const Grade = () => {
     );
   }
 
-  // ────────────────────────────────────────────────────────────────
-  // Main Profile Screen
-  // ────────────────────────────────────────────────────────────────
+  // ── Main Profile Screen ──────────────────────────────────────────
   return (
-    <div className="min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 bg-white text-black dark:bg-[#121212] dark:text-white">
+    <div
+      className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#000000] text-white" : "bg-white text-gray-900"
+      }`}
+    >
       <div className="px-5 pt-6">
-        <h1 className="font-bold text-[20px] mb-6 text-black dark:text-white">
+        <h1
+          className={`font-bold text-[20px] mb-6 ${
+            isDarkMode ? "text-white" : "text-black"
+          }`}
+        >
           Profile
         </h1>
 
-        {/* Avatar + name row */}
         <div className="flex items-center gap-4 mb-6">
           <img
             src={profileImage || ed}
@@ -632,25 +618,27 @@ const Grade = () => {
             className="w-[55px] h-[55px] rounded-full object-cover flex-shrink-0"
           />
           <div className="min-w-0">
-            <p className="font-medium text-[18px] truncate text-black dark:text-white">
+            <p
+              className={`font-medium text-[18px] truncate ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
               {fullName}
             </p>
-            <p className="font-normal text-[14px] truncate text-[#424242] dark:text-gray-300">
+            <p
+              className={`font-normal text-[14px] truncate ${
+                isDarkMode ? "text-white" : "text-[#424242]"
+              }`}
+            >
               {email}
             </p>
           </div>
         </div>
 
-        {/* Menu rows */}
         <MenuRow
           icon={tpi}
-          label="Parent Profile Information"
+          label="Teacher Profile Information"
           onClick={() => setShowTeacherProfile(true)}
-        />
-        <MenuRow
-          icon={lkd}
-          label="Linked Students"
-          onClick={() => setLinkedStudents(true)}
         />
         <MenuRow
           icon={ap}
@@ -658,57 +646,77 @@ const Grade = () => {
           onClick={() => setShowAppPreference(true)}
         />
         <MenuRow icon={hs} label="Help and Support" onClick={() => {}} />
+        <MenuRow icon={iaf} label="Invite a Friend" onClick={() => {}} />
 
-        {/* Logout row */}
         <div
           onClick={() => setShowLogoutModal(true)}
-          className="flex items-center gap-4 mt-5 cursor-pointer py-2"
+          className="flex items-center gap-4 mt-5 py-2 cursor-pointer"
         >
           <img src={logout} alt="" className="w-6 h-6 flex-shrink-0" />
-          <p className="font-medium text-[18px] text-[#FF0000]">Log out</p>
+          <p
+            className={`font-medium text-[18px] ${
+              isDarkMode ? "text-red-500" : "text-[#FF0000]"
+            }`}
+          >
+            Log out
+          </p>
         </div>
       </div>
 
       {/* Logout Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 flex items-end justify-center z-20">
-          {/* Backdrop — hidden instantly on close */}
           {!hideBackdrop && (
             <div
-              className="absolute inset-0 bg-black/40"
+              className={`absolute inset-0 ${
+                isDarkMode ? "bg-black/80" : "bg-black/40"
+              }`}
               onClick={handleClose}
             />
           )}
-
-          {/* Sheet — pushed above bottom nav */}
           <div
-            className={`relative w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-6 shadow-2xl overflow-y-auto max-h-[85vh] mb-[65px] bg-white dark:bg-[#1c1c1c] ${
-              isClosing ? "animate-slide-down" : "animate-slide-up"
-            }`}
+            className={`relative w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-8 shadow-2xl overflow-y-auto max-h-[90vh] mb-[65px] transition-colors duration-200 ${
+              isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
+            } ${isClosing ? "animate-slide-down" : "animate-slide-up"}`}
           >
-            {/* Drag handle */}
-            <div className="w-10 h-1 rounded-full mx-auto mb-5 bg-gray-200 dark:bg-gray-600" />
-
-            <h2 className="text-[20px] font-bold text-[#E8341A] text-center mb-4 pb-4 border-b border-[#EEEEEE] dark:border-gray-700">
+            <div
+              className={`w-10 h-1 rounded-full mx-auto mb-5 ${
+                isDarkMode ? "bg-gray-800" : "bg-gray-200"
+              }`}
+            />
+            <h2
+              className={`text-[20px] font-bold text-center mb-4 border-b pb-4 ${
+                isDarkMode
+                  ? "text-red-400 border-gray-800"
+                  : "text-[#E8341A] border-[#EEEEEE]"
+              }`}
+            >
               Logout
             </h2>
-            <p className="text-[16px] font-medium text-center mb-6 text-[#616161] dark:text-gray-300">
+            <p
+              className={`text-[16px] font-medium text-center mb-6 ${
+                isDarkMode ? "text-white" : "text-[#616161]"
+              }`}
+            >
               Are you sure you want to logout?
             </p>
-
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => {
                   setShowLogoutModal(false);
                   navigate("/role");
                 }}
-                className="w-full h-[52px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold active:opacity-80"
+                className="w-full h-[52px] bg-[#FF7B17] rounded-[10px] text-white text-[16px] font-bold active:opacity-80 cursor-pointer"
               >
                 Yes, Logout
               </button>
               <button
                 onClick={handleClose}
-                className="w-full h-[52px] rounded-[10px] text-[18px] font-medium active:opacity-80 border border-[#FFDDDD] bg-[#FFF8F8] text-[#E8341A] dark:border-red-900/50 dark:bg-[#2a1616] dark:text-[#FF6B5C]"
+                className={`w-full h-[52px] border rounded-[10px] text-[18px] font-medium active:opacity-80 cursor-pointer ${
+                  isDarkMode
+                    ? "border-red-900/40 text-red-400 bg-red-950/20"
+                    : "border-[#FFDDDD] text-[#E8341A] bg-[#FFF8F8]"
+                }`}
               >
                 Cancel
               </button>
@@ -718,20 +726,21 @@ const Grade = () => {
       )}
 
       <style>{`
-  @keyframes slide-up {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
-  @keyframes slide-down {
-    from { transform: translateY(0); }
-    to   { transform: translateY(100%); }
-  }
-  .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
-  .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
-`}</style>
-      <BottomNavigate />
+        @keyframes slide-up {
+          from { transform: translateY(100%); }
+          to   { transform: translateY(0); }
+        }
+        @keyframes slide-down {
+          from { transform: translateY(0); }
+          to   { transform: translateY(100%); }
+        }
+        .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
+        .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
+      `}</style>
+
+      <BottomNavigation />
     </div>
   );
 };
 
-export default Grade;
+export default Profile;
