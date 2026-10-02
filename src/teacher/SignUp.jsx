@@ -157,7 +157,7 @@ const SignUp = () => {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Registration failed. Please try again."
+          data.message || "Registration failed. Please try again.",
         );
       }
 
@@ -171,12 +171,12 @@ const SignUp = () => {
     } catch (err) {
       if (err instanceof TypeError) {
         setErrorMsg(
-          "Couldn't reach the server. Please check your connection and try again in a moment."
+          "Couldn't reach the server. Please check your connection and try again in a moment.",
         );
       } else {
         setErrorMsg(err.message || "An error occurred during registration.");
       }
-    } font-normal {
+    } finally {
       setIsLoading(false);
     }
   };
@@ -338,11 +338,7 @@ const SignUp = () => {
                 }
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
               >
-                {showConfirmPassword ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
