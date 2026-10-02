@@ -527,7 +527,7 @@ const HomePage = () => {
       {screen === "home" && (
         <div
           className={`pb-24 transition-colors duration-200 ${
-            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+            isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
           }`}
         >
           {/* Header */}
@@ -831,7 +831,7 @@ const HomePage = () => {
       {screen === "mark-attendance" && (
         <div
           className={`pb-28 transition-colors duration-200 ${
-            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+            isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
           }`}
         >
           <div
@@ -1114,7 +1114,7 @@ const HomePage = () => {
           <div
             className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
               isDarkMode
-                ? "bg-[#121212] border-gray-800"
+                ? "bg-[#000000] border-gray-800"
                 : "bg-white border-[#E3E3E3]"
             }`}
           >
@@ -1129,7 +1129,7 @@ const HomePage = () => {
       {screen === "add-grade" && (
         <div
           className={`relative min-h-screen transition-colors duration-200 ${
-            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"
+            isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"
           }`}
         >
           <div className="pb-28 overflow-y-auto">
@@ -1441,7 +1441,7 @@ const HomePage = () => {
           <div
             className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
               isDarkMode
-                ? "bg-[#121212] border-[#2A2A2A]"
+                ? "bg-[#000000] border-[#2A2A2A]"
                 : "bg-white border-[#E3E3E3]"
             }`}
           >
@@ -1537,7 +1537,7 @@ const HomePage = () => {
       {screen === "add-students" && (
         <div
           className={`relative min-h-screen transition-colors duration-200 ${
-            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+            isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
           }`}
         >
           <div className="pb-28 overflow-y-auto">
@@ -1881,7 +1881,7 @@ const HomePage = () => {
           <div
             className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
               isDarkMode
-                ? "bg-[#121212] border-gray-800"
+                ? "bg-[#000000] border-gray-800"
                 : "bg-white border-[#E3E3E3]"
             }`}
           >
