@@ -10,7 +10,7 @@ import back from "../assets/back2.svg";
 import pn from "../assets/pencil.svg";
 import sth from "../assets/switchh.svg";
 import sthOn from "../assets/ON.svg";
-import { useUser } from "./UserContext";
+import { useUser } from "../teacher/UserContext";
 import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
 
