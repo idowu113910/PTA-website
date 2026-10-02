@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import hmm from "../assets/home.svg";
 import rp from "../assets/report.svg";
@@ -10,7 +10,42 @@ import rpp from "../assets/report2.svg";
 import caa from "../assets/callender 2.svg";
 import prr from "../assets/pro2.svg";
 import mss from "../assets/message2.svg";
-import { useTheme as useTeacherTheme } from "../teacher/TeacherContext";
+
+// Follows the device's light/dark mode and reacts live when it changes
+function useSystemDarkMode() {
+  const [isSystemDark, setIsSystemDark] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsSystemDark(e.matches);
+
+    // Make sure state is correct on mount
+    setIsSystemDark(mediaQuery.matches);
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  return isSystemDark;
+}
 
 const BottomNavigation = () => {
   const navigate = useNavigate();
@@ -20,9 +55,8 @@ const BottomNavigation = () => {
   const isTeacher = location.pathname.startsWith("/teacher");
   const rolePrefix = isTeacher ? "/teacher" : "/parent";
 
-  // Teacher routes use context; parent routes rely on Tailwind dark: classes (system theme)
-  const teacherTheme = useTeacherTheme();
-  const isTeacherDarkMode = isTeacher ? teacherTheme?.isDarkMode : false;
+  // Both roles follow the device's light/dark setting
+  const isDarkMode = useSystemDarkMode();
 
   const tabs = [
     { key: "home", label: "Home", icon: hmm, activeIcon: home },
@@ -35,11 +69,11 @@ const BottomNavigation = () => {
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t z-50 transition-colors duration-200 ${
-        isTeacher
-          ? isTeacherDarkMode
+        isDarkMode
+          ? isTeacher
             ? "bg-[#121212] border-gray-800"
-            : "bg-white border-[#C1C1C1]"
-          : "bg-white border-[#C1C1C1] dark:bg-[#000000] dark:border-[#2E2E2E]"
+            : "bg-[#000000] border-[#2E2E2E]"
+          : "bg-white border-[#C1C1C1]"
       }`}
     >
       <div className="flex items-center justify-around w-full py-3 px-2">
@@ -57,22 +91,12 @@ const BottomNavigation = () => {
                 src={isActive ? activeIcon : icon}
                 alt={label}
                 className={`w-6 h-6 flex-shrink-0 ${
-                  isTeacher
-                    ? !isActive && isTeacherDarkMode
-                      ? "invert"
-                      : ""
-                    : !isActive
-                      ? "dark:invert"
-                      : ""
+                  !isActive && isDarkMode ? "invert" : ""
                 }`}
               />
               <p
                 className={`text-[11px] font-normal leading-tight truncate ${
-                  isTeacher
-                    ? isTeacherDarkMode
-                      ? "text-white"
-                      : "text-black"
-                    : "text-black dark:text-white"
+                  isDarkMode ? "text-white" : "text-black"
                 }`}
               >
                 {label}
