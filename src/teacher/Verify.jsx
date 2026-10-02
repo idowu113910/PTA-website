@@ -11,10 +11,27 @@ const TeacherVerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Only trust the email passed forward via navigation state. A localStorage
-  // fallback here would be unsafe: "userEmail" is the same key the parent
-  // flow writes to, so falling back to it could silently pull in a parent's
-  // email on a shared device instead of correctly redirecting to signup.
+  // Dynamic system theme listener
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleThemeChange = (e) => {
+      if (e.matches) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    };
+
+    // Initial check on mount
+    handleThemeChange(mediaQuery);
+
+    // Listen for real-time device theme changes
+    mediaQuery.addEventListener("change", handleThemeChange);
+
+    return () => mediaQuery.removeEventListener("change", handleThemeChange);
+  }, []);
+
   const email = location.state?.email || "";
 
   const [digits, setDigits] = useState(Array(CODE_LENGTH).fill(""));
@@ -114,7 +131,6 @@ const TeacherVerifyEmail = () => {
         localStorage.setItem("token", data.token);
       }
 
-      // Verification succeeded — send the teacher to the login page
       navigate("/teacher/login");
     } catch (err) {
       if (err instanceof TypeError) {
@@ -172,7 +188,7 @@ const TeacherVerifyEmail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white px-6 py-6 w-full mx-auto flex flex-col justify-between">
+    <div className="min-h-screen bg-white dark:bg-[#000000] px-6 py-6 w-full mx-auto flex flex-col justify-between transition-colors duration-200">
       <div>
         {/* Header Navigation */}
         <div className="relative flex items-center justify-center pt-2 mt-4">
@@ -181,19 +197,21 @@ const TeacherVerifyEmail = () => {
             onClick={() => navigate("/teacher/signup")}
             className="absolute left-0 p-2 flex items-center justify-center cursor-pointer"
           >
-            <img src={back} alt="Back" className="w-5 h-5" />
+            <img src={back} alt="Back" className="w-5 h-5 dark:invert" />
           </button>
           <img src={ED} alt="Logo" className="h-16 object-contain" />
         </div>
 
         {/* Title */}
         <div className="text-center mt-6 mb-6">
-          <h1 className="text-[22px] font-bold text-gray-900">
+          <h1 className="text-[22px] font-bold text-gray-900 dark:text-white">
             Verify Your Email
           </h1>
-          <p className="text-[14px] text-gray-600 mt-1 px-4">
+          <p className="text-[14px] text-gray-600 dark:text-gray-400 mt-1 px-4">
             Enter the {CODE_LENGTH}-digit code we sent to{" "}
-            <span className="font-medium text-gray-800">{email}</span>
+            <span className="font-medium text-gray-800 dark:text-gray-200">
+              {email}
+            </span>
           </p>
         </div>
 
@@ -213,20 +231,20 @@ const TeacherVerifyEmail = () => {
                 value={digit}
                 onChange={(e) => handleDigitChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-11 h-13 border border-[#C3C6C9] bg-[#F8F8F8] rounded-[10px] text-center text-[18px]
-                 font-semibold text-gray-900 focus:outline-none focus:border-[#FF7B17] focus:bg-white transition-colors"
+                className="w-11 h-13 border border-[#C3C6C9] dark:border-[#3A3A3A] bg-[#F8F8F8] dark:bg-[#141414] rounded-[10px] text-center text-[18px]
+                 font-semibold text-gray-900 dark:text-white focus:outline-none focus:border-[#FF7B17] dark:focus:border-[#FF7B17] focus:bg-white dark:focus:bg-[#1A1A1A] transition-colors"
               />
             ))}
           </div>
 
           {/* Error / resend feedback */}
           {errorMsg && (
-            <p className="text-[13px] text-red-500 text-center mt-4">
+            <p className="text-[13px] text-red-500 dark:text-red-400 text-center mt-4">
               {errorMsg}
             </p>
           )}
           {resendMsg && !errorMsg && (
-            <p className="text-[13px] text-[#1D9E75] text-center mt-4">
+            <p className="text-[13px] text-[#1D9E75] dark:text-[#26D09B] text-center mt-4">
               {resendMsg}
             </p>
           )}
@@ -239,7 +257,7 @@ const TeacherVerifyEmail = () => {
               className={`w-full h-12.5 rounded-xl text-[16px] font-medium transition-colors ${
                 isCodeComplete && !isLoading
                   ? "bg-[#FF7B17] text-white cursor-pointer hover:bg-[#e06910]"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-400 dark:bg-[#1F1F1F] dark:text-gray-600 cursor-not-allowed"
               }`}
             >
               {isLoading ? "Verifying..." : "Verify"}
@@ -249,7 +267,7 @@ const TeacherVerifyEmail = () => {
 
         {/* Resend */}
         <div className="flex gap-2 items-center justify-center mt-8">
-          <p className="font-normal text-[#001216] text-[14px]">
+          <p className="font-normal text-[#001216] dark:text-gray-300 text-[14px]">
             Didn't receive a code?
           </p>
           <button
@@ -258,7 +276,7 @@ const TeacherVerifyEmail = () => {
             disabled={isResending}
             className={`font-medium text-[14px] cursor-pointer ${
               isResending
-                ? "text-gray-400 cursor-not-allowed"
+                ? "text-gray-400 dark:text-gray-600 cursor-not-allowed"
                 : "text-[#FF7B17]"
             }`}
           >

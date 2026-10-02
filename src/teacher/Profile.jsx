@@ -13,11 +13,29 @@ import sthOn from "../assets/ON.svg";
 import { useUser } from "./UserContext";
 import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
-import { useTheme } from "./TeacherContext";
 
 const Profile = () => {
-  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
-  const { isDarkMode, toggleTheme } = useTheme();
+  // System Theme Detector Hook
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+  });
+
+  // Listen for device theme preference changes automatically
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsDarkMode(e.matches);
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  // Manual toggle handler for App Preference option
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => !prev);
+  };
 
   const {
     fullName,

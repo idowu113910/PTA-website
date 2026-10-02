@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import BottomNavigation from "../components/BottomNavigation";
 import arr from "../assets/arr down.svg";
 import ma from "../assets/Attendance.svg";
@@ -36,12 +36,85 @@ import on from "../assets/switch.svg";
 import off from "../assets/off.svg";
 import ana from "../assets/report rewww.svg";
 import rr from "../assets/report review.svg";
-import { useTheme } from "./TeacherContext";
 
 registerLocale("en-GB", enGB);
 
+// ── Follows the device's light/dark mode and reacts live when it changes ──
+function useSystemDarkMode() {
+  const [isSystemDark, setIsSystemDark] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsSystemDark(e.matches);
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  return isSystemDark;
+}
+
 const Report = () => {
-  const { isDarkMode } = useTheme();
+  // Theme comes straight from the device's light/dark setting — no context,
+  // no provider, no manual toggle.
+  const isDarkMode = useSystemDarkMode();
+
+  // Keep html/body background, color-scheme, and the browser's theme-color
+  // meta tag in sync with the device's light/dark mode, same as the other
+  // teacher screens — this is what makes the Safari status-bar/safe-area
+  // strip repaint immediately instead of lagging behind.
+  useEffect(() => {
+    const bg = isDarkMode ? "#121212" : "#FFFFFF";
+    const root = document.documentElement;
+
+    const prevRootBg = root.style.backgroundColor;
+    const prevBodyBg = document.body.style.backgroundColor;
+    const prevScheme = root.style.colorScheme;
+    const originalMetas = Array.from(
+      document.querySelectorAll('meta[name="theme-color"]'),
+    ).map((m) => m.cloneNode(true));
+
+    root.style.backgroundColor = bg;
+    document.body.style.backgroundColor = bg;
+    root.style.colorScheme = isDarkMode ? "dark" : "light";
+
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((m) => m.remove());
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    meta.setAttribute("content", bg);
+    document.head.appendChild(meta);
+
+    return () => {
+      root.style.backgroundColor = prevRootBg;
+      document.body.style.backgroundColor = prevBodyBg;
+      root.style.colorScheme = prevScheme;
+      document
+        .querySelectorAll('meta[name="theme-color"]')
+        .forEach((m) => m.remove());
+      originalMetas.forEach((m) => document.head.appendChild(m));
+    };
+  }, [isDarkMode]);
+
   const [screen, setScreen] = useState("report");
   const mainScreens = ["report"];
   const navigate = useNavigate();
@@ -550,7 +623,6 @@ const Report = () => {
                 </p>
               </div>
               <div
-                c
                 className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
                   isDarkMode
                     ? "border border-gray-700 bg-transparent"

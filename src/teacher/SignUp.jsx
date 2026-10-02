@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ED from "../assets/ED role.svg";
 import back from "../assets/back2.svg";
 import { useNavigate } from "react-router-dom";
@@ -6,19 +6,13 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
 import app from "../assets/Apple.svg";
-// Adjust this path to wherever your hook file lives.
-import { useSystemTheme } from "../components/UserTheme";
 
 const REGISTER_ENDPOINT =
   "https://pta-wdln.onrender.com/api/auth/teacher/register";
 
-// The endpoint requires `subjectSpecialization`, but this screen has no
-// input for it. A required field is likely to reject an empty string, so a
-// non-empty default is sent instead. Change this value if you'd like a
-// different placeholder, or replace it with a real input later.
 const DEFAULT_SUBJECT_SPECIALIZATION = "General";
 
-// Shared input styling: light by default, dark when the device is in dark mode.
+// Shared input styling: adapts automatically via Tailwind dark: modifier
 const INPUT_BASE =
   "w-full h-12.5 rounded-[10px] text-[12px] font-normal focus:outline-none " +
   "bg-[#FAFAFA] text-gray-900 placeholder:text-[#969696] " +
@@ -32,9 +26,26 @@ const LABEL =
 const SignUp = () => {
   const navigate = useNavigate();
 
-  // Follows the device's light/dark setting and keeps the <html> "dark"
-  // class in sync.
-  useSystemTheme();
+  // Dynamic system theme listener
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleThemeChange = (e) => {
+      if (e.matches) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    };
+
+    // Initial check on mount
+    handleThemeChange(mediaQuery);
+
+    // Listen for real-time device settings changes
+    mediaQuery.addEventListener("change", handleThemeChange);
+
+    return () => mediaQuery.removeEventListener("change", handleThemeChange);
+  }, []);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -59,19 +70,15 @@ const SignUp = () => {
     }));
   };
 
-  // Phone validation: allows digits, spaces, hyphens, parens, and a leading
-  // plus (7 to 15 digits total) — same rule as the parent signup form
   const isValidPhone = (value) => {
     const digitsOnly = value.replace(/\D/g, "");
     return digitsOnly.length >= 7 && digitsOnly.length <= 15;
   };
 
-  // Restricts phone input to ONLY numbers and phone formatting characters (+, -, (), space)
   const handlePhoneChange = (e) => {
     let input = e.target.value;
     let cleaned = input.replace(/[^\d\s()+-]/g, "");
 
-    // Ensure '+' can only appear at the very beginning
     if (cleaned.indexOf("+") > 0) {
       cleaned = cleaned.replace(/\+/g, "");
     }
@@ -79,16 +86,12 @@ const SignUp = () => {
     setFormData((prev) => ({ ...prev, phone: cleaned }));
   };
 
-  // Characters an email address can legally contain: letters, numbers,
-  // and . _ % + - @ (digits were previously being stripped out)
   const EMAIL_ALLOWED_CHARS = /[^a-zA-Z0-9@._%+-]/g;
-  // Must be shaped like name@domain.tld
   const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const isValidEmail = (value) => EMAIL_REGEX.test(value);
 
   const handleEmailChange = (e) => {
-    // Strip anything that isn't a valid email character as the person types
     const cleaned = e.target.value.replace(EMAIL_ALLOWED_CHARS, "");
     setFormData((prev) => ({ ...prev, workEmail: cleaned }));
   };
@@ -111,11 +114,6 @@ const SignUp = () => {
     );
   };
 
-  // Wraps fetch with a single retry after a short delay — a rejected fetch
-  // (e.g. "Load failed") most often means a Render free-tier cold start
-  // dropped the connection, and retrying once gives it a chance to finish
-  // waking up. Does nothing for a genuine CORS block, which fails the same
-  // way every time.
   const fetchWithRetry = async (url, options, retries = 1, delayMs = 4000) => {
     try {
       return await fetch(url, options);
@@ -144,10 +142,6 @@ const SignUp = () => {
         body: JSON.stringify({
           role: "teacher",
           fullName: formData.fullName,
-          // The endpoint's schema lists both `workEmail` and `email` as
-          // required, holding the same address in its example payload —
-          // sending both here so registration succeeds regardless of which
-          // key the backend actually reads.
           workEmail: formData.workEmail,
           email: formData.workEmail,
           schoolName: formData.schoolName,
@@ -155,9 +149,6 @@ const SignUp = () => {
           confirmPassword: formData.confirmPassword,
           termsAccepted: agreedToTerms,
           phone: formData.phone,
-          // Required by the endpoint but not part of this screen's design —
-          // sent as a non-empty default so validation passes without adding
-          // a field the form doesn't visually ask for.
           subjectSpecialization: DEFAULT_SUBJECT_SPECIALIZATION,
         }),
       });
@@ -166,7 +157,7 @@ const SignUp = () => {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Registration failed. Please try again.",
+          data.message || "Registration failed. Please try again."
         );
       }
 
@@ -176,32 +167,30 @@ const SignUp = () => {
         localStorage.setItem("token", data.token);
       }
 
-      // Redirect to teacher verification route, carrying the email forward
       navigate("/teacher/verify", { state: { email: formData.workEmail } });
     } catch (err) {
       if (err instanceof TypeError) {
         setErrorMsg(
-          "Couldn't reach the server. Please check your connection and try again in a moment.",
+          "Couldn't reach the server. Please check your connection and try again in a moment."
         );
       } else {
         setErrorMsg(err.message || "An error occurred during registration.");
       }
-    } finally {
+    } font-normal {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#ffffff] dark:bg-[#000000] px-6 py-6 w-full mx-auto flex flex-col justify-between">
+    <div className="min-h-screen bg-white dark:bg-[#000000] px-6 py-6 w-full mx-auto flex flex-col justify-between transition-colors duration-200">
       <div>
         {/* Header Navigation */}
-        <div className="relative flex items-center justify-center pt-2 ">
+        <div className="relative flex items-center justify-center pt-2">
           <button
             type="button"
             onClick={() => navigate("/role")}
-            className="absolute left-0 p-2  flex items-center justify-center"
+            className="absolute left-0 p-2 flex items-center justify-center"
           >
-            {/* dark:invert flips a dark arrow to white on a black page */}
             <img src={back} alt="Back" className="w-5 h-5 -mt-8 dark:invert" />
           </button>
           <img src={ED} alt="Logo" className="h-16 object-contain mt-5" />
@@ -221,8 +210,7 @@ const SignUp = () => {
         {errorMsg && (
           <div
             role="alert"
-            className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-[10px] text-center
-             dark:bg-red-950/50 dark:border-red-900 dark:text-red-300"
+            className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-[13px] rounded-[10px] text-center dark:bg-red-950/50 dark:border-red-900 dark:text-red-300"
           >
             {errorMsg}
           </div>
@@ -290,7 +278,6 @@ const SignUp = () => {
               name="schoolName"
               value={formData.schoolName}
               onChange={(e) => {
-                // Strip out anything that is NOT a letter or space
                 const lettersOnly = e.target.value.replace(/[^a-zA-Z\s]/g, "");
                 handleInputChange({
                   ...e,
@@ -351,12 +338,16 @@ const SignUp = () => {
                 }
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
               >
-                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showConfirmPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
               </button>
             </div>
           </div>
 
-          {/* Accessible Checkbox */}
+          {/* Checkbox */}
           <label className="flex items-center gap-2.5 mt-5 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -422,13 +413,12 @@ const SignUp = () => {
         <hr className="flex-1 border-t border-gray-300 dark:border-[#2E2E2E]" />
       </div>
 
-      {/* Social buttons keep a light tile in dark mode so the brand icons
-          (e.g. the black Apple logo) stay visible. */}
+      {/* Social Buttons */}
       <div className="flex items-center justify-center gap-10 w-full mt-8">
         <button
           type="button"
           aria-label="Continue with Facebook"
-          className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] "
+          className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE]"
         >
           <img src={fb} alt="" />
         </button>

@@ -140,7 +140,7 @@ const HomePage = () => {
   // Keep html/body background, color-scheme and the browser top bar
   // (status bar) in sync with the device's light/dark mode.
   useEffect(() => {
-    const bg = isDarkMode ? "#121212" : "#FFFFFF";
+    const bg = isDarkMode ? "#000000" : "#FFFFFF";
     const root = document.documentElement;
 
     const prevRootBg = root.style.backgroundColor;
