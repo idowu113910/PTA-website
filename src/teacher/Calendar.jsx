@@ -27,7 +27,6 @@ import kids from "../assets/kdd.jpg";
 import re from "../assets/re-time.svg";
 import loc from "../assets/loc.svg";
 import BottomNavigation from "../components/BottomNavigation";
-import { useTheme } from "./TeacherContext";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = [
@@ -53,9 +52,45 @@ function getFirstDayOfMonth(year, month) {
   return day === 0 ? 6 : day - 1;
 }
 
+// Follows the device's light/dark mode and reacts live when it changes
+function useSystemDarkMode() {
+  const [isSystemDark, setIsSystemDark] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsSystemDark(e.matches);
+
+    // Make sure state is correct on mount
+    setIsSystemDark(mediaQuery.matches);
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
+
+  return isSystemDark;
+}
+
 const Notifications = () => {
-  // Single source of truth for theme — comes from ThemeContext (wraps the whole app in main.jsx)
-  const { isDarkMode } = useTheme();
+  // Theme comes straight from the device's light/dark setting
+  const isDarkMode = useSystemDarkMode();
 
   const [studentDOB, setStudentDOB] = useState(null);
   const [isDOBOpen, setIsDOBOpen] = useState(false);
@@ -82,6 +117,61 @@ const Notifications = () => {
     month: today.getMonth(),
   });
   const [selected, setSelected] = useState(null);
+
+  // Remember the original theme-color tags and restore them only when
+  // leaving this page.
+  const originalMetasRef = useRef([]);
+  useEffect(() => {
+    originalMetasRef.current = Array.from(
+      document.querySelectorAll('meta[name="theme-color"]'),
+    ).map((m) => m.cloneNode(true));
+
+    return () => {
+      document
+        .querySelectorAll('meta[name="theme-color"]')
+        .forEach((m) => m.remove());
+      originalMetasRef.current.forEach((m) => document.head.appendChild(m));
+    };
+  }, []);
+
+  // Keep html/body background and the top bar (status bar) color in sync
+  // with the device's light/dark mode AND with the Add Event backdrop.
+  useEffect(() => {
+    const pageBg = isDarkMode ? "#121212" : "#FFFFFF";
+    // When the sheet is open the backdrop dims the page (40% black),
+    // so the top bar should match that dimmed color.
+    const barColor =
+      showScreen && !hideBackdrop
+        ? isDarkMode
+          ? "#0B0B0B"
+          : "#999999"
+        : pageBg;
+
+    const root = document.documentElement;
+    root.style.backgroundColor = pageBg;
+    document.body.style.backgroundColor = pageBg;
+    root.style.colorScheme = isDarkMode ? "dark" : "light";
+    root.classList.toggle("dark", isDarkMode);
+
+    // Remove ALL existing theme-color tags (including ones with a
+    // prefers-color-scheme media attribute that would override ours),
+    // then add a brand new one so iOS Safari re-reads it.
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((m) => m.remove());
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    meta.setAttribute("content", barColor);
+    document.head.appendChild(meta);
+
+    // iOS home-screen (PWA) status bar style, only if the app defines it
+    const appleMeta = document.querySelector(
+      'meta[name="apple-mobile-web-app-status-bar-style"]',
+    );
+    if (appleMeta) {
+      appleMeta.setAttribute("content", isDarkMode ? "black" : "default");
+    }
+  }, [isDarkMode, showScreen, hideBackdrop]);
 
   // Only lock scroll when opening — unlock after animation in handleClose
   useEffect(() => {
