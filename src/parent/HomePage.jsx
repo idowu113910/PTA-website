@@ -20,10 +20,10 @@ import { useSystemTheme } from "../components/UserTheme";
 
 // Shared surface styles. Uses Tailwind `dark:` classes driven by the device system setting.
 const PAGE =
-  "min-h-screen w-full max-w-107.5 min-w-[320px] mx-auto pb-24 transition-colors duration-200 " +
+  "min-h-screen min-h-dvh w-full max-w-107.5 min-w-[320px] mx-auto pb-24 transition-colors duration-200 " +
   "bg-white text-black dark:bg-[#000000] dark:text-white";
 const CARD_BORDERED =
-  "border border-[#D9D9D9] bg-white dark:border-[#2E2E2E] dark:bg-[#141414]";
+  "border border-[#D9D9D9] bg-white dark:border-[#2E2E2E] dark:bg-[#000000]";
 const TEXT_PRIMARY = "text-black dark:text-white";
 const TEXT_MUTED = "text-black dark:text-gray-300";
 
@@ -280,7 +280,7 @@ const HomePage = () => {
               <button
                 key={i}
                 onClick={() => item.screen && setScreen(item.screen)}
-                className={`border ${item.border} rounded-lg p-3 text-left h-23.75 w-full transition-colors duration-200 bg-white dark:bg-[#141414]`}
+                className={`border ${item.border} rounded-lg p-3 text-left h-23.75 w-full transition-colors duration-200 bg-white dark:bg-[#000000]`}
               >
                 <img src={item.icon} alt="" className="w-7 h-7" />
                 <p className={`font-bold text-[13px] mt-1 ${TEXT_PRIMARY}`}>
@@ -306,7 +306,7 @@ const HomePage = () => {
               <div
                 key={i}
                 className="flex items-center justify-between rounded-[10px] px-4 py-3 shadow-sm transition-colors duration-200
-                   bg-[#F8F8F8] border border-[#0000001F] dark:bg-[#141414] dark:border-[#2E2E2E] dark:shadow-none"
+                   bg-[#F8F8F8] border border-[#0000001F] dark:bg-[#000000] dark:border-[#2E2E2E] dark:shadow-none"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <CgBookmark className="w-4.5 h-4.5 shrink-0 text-[#444] dark:text-gray-300" />
@@ -376,7 +376,7 @@ const HomePage = () => {
         {/* Subject Detail Modal */}
         {selectedSubject && (
           <div className="fixed inset-0 bg-black/40 dark:bg-black/70 flex items-center justify-center z-50 px-5">
-            <div className="w-full max-w-92.5 rounded-2xl p-6 relative bg-white dark:bg-[#141414] dark:border dark:border-[#2E2E2E]">
+            <div className="w-full max-w-92.5 rounded-2xl p-6 relative bg-white dark:bg-[#000000] dark:border dark:border-[#2E2E2E]">
               <button
                 onClick={() => setSelectedSubject(null)}
                 aria-label="Close"
@@ -445,7 +445,7 @@ const HomePage = () => {
           {/* Term Dropdown */}
           <div className="relative mb-5">
             <div
-              className="w-full h-10.5 rounded-[9px] px-4 flex items-center justify-between cursor-pointer transition-colors duration-200 bg-[#F3F4F6] dark:bg-[#141414] dark:border dark:border-[#2E2E2E]"
+              className="w-full h-10.5 rounded-[9px] px-4 flex items-center justify-between cursor-pointer transition-colors duration-200 bg-[#F3F4F6] dark:bg-[#000000] dark:border dark:border-[#2E2E2E]"
               onClick={() => setIsTermDropdownOpen(!isTermDropdownOpen)}
             >
               <p
@@ -462,7 +462,7 @@ const HomePage = () => {
               />
             </div>
             {isTermDropdownOpen && (
-              <div className="absolute z-10 mt-1 w-full rounded-lg shadow-md bg-white border border-[#E5E7EB] dark:bg-[#141414] dark:border-[#2E2E2E] dark:shadow-none">
+              <div className="absolute z-10 mt-1 w-full rounded-lg shadow-md bg-white border border-[#E5E7EB] dark:bg-[#000000] dark:border-[#2E2E2E] dark:shadow-none">
                 {termYears.map((term) => (
                   <div
                     key={term}

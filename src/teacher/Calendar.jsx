@@ -137,13 +137,13 @@ const Notifications = () => {
   // Keep html/body background and the top bar (status bar) color in sync
   // with the device's light/dark mode AND with the Add Event backdrop.
   useEffect(() => {
-    const pageBg = isDarkMode ? "#121212" : "#FFFFFF";
+    const pageBg = isDarkMode ? "#000000" : "#FFFFFF";
     // When the sheet is open the backdrop dims the page (40% black),
     // so the top bar should match that dimmed color.
     const barColor =
       showScreen && !hideBackdrop
         ? isDarkMode
-          ? "#0B0B0B"
+          ? "#000000"
           : "#999999"
         : pageBg;
 
@@ -267,7 +267,7 @@ const Notifications = () => {
   const EventCard = ({ icon, title, date, time, location, rightImg }) => (
     <div
       className={`flex w-full rounded-[10px] py-4 px-3 mt-4 items-center gap-3 transition-colors duration-200 ${
-        isDarkMode ? "bg-[#1c1c1c]" : "bg-[#F1F0F0]"
+        isDarkMode ? "bg-[#000000] border border-gray-700" : "bg-[#F1F0F0]"
       }`}
     >
       <img src={icon} alt="" className="w-8 h-8 flex-shrink-0" />
@@ -341,7 +341,7 @@ const Notifications = () => {
         <div
           className={`absolute top-[calc(100%+6px)] left-0 w-full min-w-[160px] rounded-[12px] shadow-lg p-3 z-50 ${
             isDarkMode
-              ? "bg-[#1c1c1c] border border-gray-700"
+              ? "bg-[#000000] border border-gray-700"
               : "bg-white border border-black/10"
           }`}
         >
@@ -353,7 +353,7 @@ const Notifications = () => {
               }
               className={`border rounded-md px-1 py-1 text-sm font-medium w-12 text-center ${
                 isDarkMode
-                  ? "border-gray-600 bg-[#1c1c1c] text-white"
+                  ? "border-gray-600 bg-[#000000] text-white"
                   : "border-black/15 text-[#303030]"
               }`}
             >
@@ -377,7 +377,7 @@ const Notifications = () => {
               }
               className={`border rounded-md px-1 py-1 text-sm font-medium w-12 text-center ${
                 isDarkMode
-                  ? "border-gray-600 bg-[#1c1c1c] text-white"
+                  ? "border-gray-600 bg-[#000000] text-white"
                   : "border-black/15 text-[#303030]"
               }`}
             >
@@ -423,8 +423,8 @@ const Notifications = () => {
   if (showMore) {
     return (
       <div
-        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-6 transition-colors duration-200 ${
-          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+        className={`min-h-screen min-h-dvh w-full max-w-[430px] min-w-[320px] mx-auto pb-6 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
         }`}
       >
         <div
@@ -486,8 +486,8 @@ const Notifications = () => {
 
   return (
     <div
-      className={`relative min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto transition-colors duration-200 ${
-        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+      className={`relative min-h-screen min-h-dvh w-full max-w-[430px] min-w-[320px] mx-auto transition-colors duration-200 ${
+        isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
       }`}
     >
       <h2 className="font-bold text-[20px] px-5 pt-5 pb-2">Calendar</h2>
@@ -642,7 +642,7 @@ const Notifications = () => {
           <div
             className={`fixed inset-x-0 bottom-0 top-[4%] rounded-t-[20px] z-50 flex flex-col transition-transform duration-300 ease-out ${
               isVisible && !isClosing ? "translate-y-0" : "translate-y-full"
-            } ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"}`}
+            } ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"}`}
           >
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto">
@@ -674,7 +674,7 @@ const Notifications = () => {
                   placeholder="enter event title"
                   className={`w-full h-[55px] rounded-[8px] py-2 px-3 placeholder:text-[14px] font-normal outline-none ${
                     isDarkMode
-                      ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                      ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
                       : "border border-[#0000001F]"
                   }`}
                 />
@@ -700,7 +700,7 @@ const Notifications = () => {
                     onClick={() => setIsDOBOpen(true)}
                     className={`w-full h-[57px] rounded-[8px] font-normal pl-3 pr-12 cursor-pointer outline-none ${
                       isDarkMode
-                        ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                        ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
                         : "border border-[#0000001F] text-[#303030]"
                     }`}
                   />
@@ -716,7 +716,7 @@ const Notifications = () => {
                     <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-[60]">
                       <div
                         className={`rounded-xl p-4 shadow-lg ${
-                          isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+                          isDarkMode ? "bg-[#000000]" : "bg-white"
                         }`}
                       >
                         <DatePicker
@@ -756,7 +756,7 @@ const Notifications = () => {
                     onClick={() => setIsGenderOpen(!isGenderOpen)}
                     className={`w-full h-[57px] px-3 rounded-[8px] flex items-center justify-between ${
                       isDarkMode
-                        ? "border border-gray-700 bg-[#1c1c1c]"
+                        ? "border border-gray-700 bg-[#000000]"
                         : "border border-[#0000001F] bg-white"
                     }`}
                   >
@@ -781,7 +781,7 @@ const Notifications = () => {
                     <div
                       className={`absolute z-10 mt-1 w-full rounded-[8px] shadow-md ${
                         isDarkMode
-                          ? "bg-[#1c1c1c] border border-gray-700"
+                          ? "bg-[#000000] border border-gray-700"
                           : "bg-white border border-[#E5E7EB]"
                       }`}
                     >
@@ -835,7 +835,7 @@ const Notifications = () => {
                   placeholder="enter event location"
                   className={`w-full h-[55px] rounded-[8px] py-2 px-3 placeholder:text-[14px] font-normal outline-none ${
                     isDarkMode
-                      ? "border border-gray-700 bg-[#1c1c1c] text-white placeholder:text-gray-500"
+                      ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
                       : "border border-[#0000001F]"
                   }`}
                 />
@@ -856,7 +856,7 @@ const Notifications = () => {
                     onClick={() => setIsEventTypeOpen(!isEventTypeOpen)}
                     className={`w-full h-[57px] px-3 rounded-[8px] flex items-center justify-between ${
                       isDarkMode
-                        ? "border border-gray-700 bg-[#1c1c1c]"
+                        ? "border border-gray-700 bg-[#000000]"
                         : "border border-[#0000001F] bg-white"
                     }`}
                   >
@@ -881,7 +881,7 @@ const Notifications = () => {
                     <div
                       className={`absolute z-10 mt-1 w-full rounded-[8px] shadow-md max-h-[200px] overflow-y-auto ${
                         isDarkMode
-                          ? "bg-[#1c1c1c] border border-gray-700"
+                          ? "bg-[#000000] border border-gray-700"
                           : "bg-white border border-[#E5E7EB]"
                       }`}
                     >
@@ -908,7 +908,7 @@ const Notifications = () => {
             <div
               className={`py-4 px-5 ${
                 isDarkMode
-                  ? "bg-[#121212] border-t border-gray-800"
+                  ? "bg-[#000000] border-t border-gray-800"
                   : "bg-white border-t border-[#E3E3E3]"
               }`}
             >
@@ -930,7 +930,7 @@ const Notifications = () => {
               <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] px-5">
                 <div
                   className={`rounded-[10px] w-full max-w-[370px] overflow-hidden shadow-2xl ${
-                    isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+                    isDarkMode ? "bg-[#000000]" : "bg-white"
                   }`}
                 >
                   <div className="relative">

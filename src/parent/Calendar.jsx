@@ -196,7 +196,9 @@ const Calendar = () => {
   const EventCard = ({ icon, title, date, time: t, location, rightImg }) => (
     <div
       className={`flex w-full rounded-[10px] py-4 px-3 mt-4 items-center gap-3 transition-colors duration-200 ${
-        isDarkMode ? "bg-[#000000]" : "bg-[#F1F0F0]"
+        isDarkMode
+          ? "bg-[#000000] border border-gray-600"
+          : "bg-[#F1F0F0] border border-[#D9D9D9]"
       }`}
     >
       <img src={icon} alt="" className="w-8 h-8 shrink-0" />

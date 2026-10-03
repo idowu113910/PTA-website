@@ -71,7 +71,7 @@ const BottomNavigation = () => {
       className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t z-50 transition-colors duration-200 ${
         isDarkMode
           ? isTeacher
-            ? "bg-[#121212] border-gray-800"
+            ? "bg-[#000000] border-gray-800"
             : "bg-[#000000] border-[#2E2E2E]"
           : "bg-white border-[#C1C1C1]"
       }`}

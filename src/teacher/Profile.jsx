@@ -15,7 +15,7 @@ import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
 
 const Profile = () => {
-  // System Theme Detector Hook
+  // Theme follows the device's light/dark setting only (no manual toggle)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return (
       window.matchMedia &&
@@ -31,11 +31,6 @@ const Profile = () => {
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
-
-  // Manual toggle handler for App Preference option
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
-  };
 
   const {
     fullName,
@@ -56,9 +51,64 @@ const Profile = () => {
   const [isClosing, setIsClosing] = useState(false);
   const [hideBackdrop, setHideBackdrop] = useState(false);
 
+  // Keep html/body background, color-scheme and the browser top bar
+  // (status bar) in sync with dark/light mode so black reaches every edge
+  // of the screen.
+  useEffect(() => {
+    const bg = isDarkMode ? "#000000" : "#FFFFFF";
+    const root = document.documentElement;
+
+    const prevRootBg = root.style.backgroundColor;
+    const prevBodyBg = document.body.style.backgroundColor;
+    const prevScheme = root.style.colorScheme;
+    const originalMetas = Array.from(
+      document.querySelectorAll('meta[name="theme-color"]'),
+    ).map((m) => m.cloneNode(true));
+
+    // When the logout sheet is open in light mode the backdrop dims the page
+    const barColor =
+      showLogoutModal && !hideBackdrop && !isDarkMode ? "#999999" : bg;
+
+    root.style.backgroundColor = bg;
+    document.body.style.backgroundColor = bg;
+    root.style.colorScheme = isDarkMode ? "dark" : "light";
+
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((m) => m.remove());
+    const meta = document.createElement("meta");
+    meta.setAttribute("name", "theme-color");
+    meta.setAttribute("content", barColor);
+    document.head.appendChild(meta);
+
+    return () => {
+      root.style.backgroundColor = prevRootBg;
+      document.body.style.backgroundColor = prevBodyBg;
+      root.style.colorScheme = prevScheme;
+      document
+        .querySelectorAll('meta[name="theme-color"]')
+        .forEach((m) => m.remove());
+      originalMetas.forEach((m) => document.head.appendChild(m));
+    };
+  }, [isDarkMode, showLogoutModal, hideBackdrop]);
+
   const [tempFullName, setTempFullName] = useState("");
   const [tempEmail, setTempEmail] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
+  // New photo chosen but not saved yet (applied when "Save Changes" is clicked)
+  const [tempImage, setTempImage] = useState(null);
+  // Save state: loading spinner on the button + success notification
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSaveToast, setShowSaveToast] = useState(false);
+  const saveTimerRef = useRef(null);
+  const toastTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(saveTimerRef.current);
+      clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     setTempFullName(fullName || "");
@@ -93,7 +143,8 @@ const Profile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        updateProfileImage(reader.result);
+        setTempImage(reader.result);
+        setHasChanges(true);
       };
       reader.readAsDataURL(file);
     }
@@ -108,6 +159,24 @@ const Profile = () => {
       setShowLogoutModal(false);
     }, 1400);
   };
+
+  function handleSaveChanges() {
+    if (!hasChanges || isSaving) return;
+    setIsSaving(true);
+    // Short delay so the loading state is visible, then apply the changes
+    saveTimerRef.current = setTimeout(() => {
+      updateFullName(tempFullName);
+      updateEmail(tempEmail);
+      if (tempImage) {
+        updateProfileImage(tempImage);
+        setTempImage(null);
+      }
+      setHasChanges(false);
+      setIsSaving(false);
+      setShowSaveToast(true);
+      toastTimerRef.current = setTimeout(() => setShowSaveToast(false), 3000);
+    }, 1200);
+  }
 
   function openEdit() {
     setAreaCode(savedCode);
@@ -228,8 +297,8 @@ const Profile = () => {
   if (showAppPreference) {
     return (
       <div
-        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
-          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
+        className={`min-h-screen min-h-dvh w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#000000] text-white" : "bg-white text-gray-900"
         }`}
       >
         <div className="flex items-center gap-4 px-5 pt-6 pb-4">
@@ -250,7 +319,6 @@ const Profile = () => {
               val: isSwitchOn,
               set: () => setIsSwitchOn(!isSwitchOn),
             },
-            { label: "Theme Appearance", val: isDarkMode, set: toggleTheme },
             {
               label: "Auto-Login",
               val: SwitchAuto,
@@ -261,7 +329,7 @@ const Profile = () => {
               key={label}
               className={`flex items-center justify-between w-full h-[61px] rounded-[10px] py-4 px-3 ${
                 isDarkMode
-                  ? "border border-gray-700 bg-[#1c1c1c]"
+                  ? "border border-gray-700 bg-[#000000]"
                   : "border border-gray-200 bg-white"
               }`}
             >
@@ -286,8 +354,8 @@ const Profile = () => {
   if (showTeacherProfile) {
     return (
       <div
-        className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-32 transition-colors duration-200 ${
-          isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
+        className={`min-h-screen min-h-dvh w-full max-w-[430px] min-w-[320px] mx-auto pb-32 transition-colors duration-200 ${
+          isDarkMode ? "bg-[#000000] text-white" : "bg-white text-gray-900"
         }`}
       >
         <div className="flex items-center gap-4 px-5 pt-6 pb-2">
@@ -311,7 +379,7 @@ const Profile = () => {
             className="hidden"
           />
           <img
-            src={profileImage || ed}
+            src={tempImage || profileImage || ed}
             alt="profile"
             className="w-[75px] h-[75px] object-cover rounded-full"
           />
@@ -350,7 +418,7 @@ const Profile = () => {
               }}
               className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
                 isDarkMode
-                  ? "border border-gray-700 bg-[#1c1c1c] text-white"
+                  ? "border border-gray-700 bg-[#000000] text-white"
                   : "border border-black/10 text-[#303030]"
               }`}
             />
@@ -374,7 +442,7 @@ const Profile = () => {
               }}
               className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
                 isDarkMode
-                  ? "border border-gray-700 bg-[#1c1c1c] text-white"
+                  ? "border border-gray-700 bg-[#000000] text-white"
                   : "border border-black/10 text-[#303030]"
               }`}
             />
@@ -410,7 +478,7 @@ const Profile = () => {
                       maxLength={6}
                       placeholder="+234"
                       className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[14px] outline-none ${
-                        isDarkMode ? "bg-[#1c1c1c] text-white" : ""
+                        isDarkMode ? "bg-[#000000] text-white" : ""
                       }`}
                     />
                   </div>
@@ -424,7 +492,7 @@ const Profile = () => {
                       maxLength={15}
                       placeholder="703 543 2234"
                       className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none ${
-                        isDarkMode ? "bg-[#1c1c1c] text-white" : ""
+                        isDarkMode ? "bg-[#000000] text-white" : ""
                       }`}
                     />
                   </div>
@@ -467,7 +535,7 @@ const Profile = () => {
                     setHasChanges(true);
                   }}
                   className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] ${
-                    isDarkMode ? "bg-[#1c1c1c] text-white" : "bg-white"
+                    isDarkMode ? "bg-[#000000] text-white" : "bg-white"
                   }`}
                 >
                   <option>Female</option>
@@ -511,7 +579,7 @@ const Profile = () => {
                     setHasChanges(true);
                   }}
                   className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
-                    isDarkMode ? "bg-[#1c1c1c] text-white" : ""
+                    isDarkMode ? "bg-[#000000] text-white" : ""
                   }`}
                 />
                 <SaveCancel
@@ -553,7 +621,7 @@ const Profile = () => {
                     setHasChanges(true);
                   }}
                   className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
-                    isDarkMode ? "bg-[#1c1c1c] text-white" : ""
+                    isDarkMode ? "bg-[#000000] text-white" : ""
                   }`}
                 />
                 <SaveCancel
@@ -568,27 +636,83 @@ const Profile = () => {
           </div>
         </div>
 
+        {/* Success notification */}
+        {showSaveToast && (
+          <>
+            <style>{`
+            @keyframes toast-in {
+              from { opacity: 0; transform: translate(-50%, -16px); }
+              to   { opacity: 1; transform: translate(-50%, 0); }
+            }
+            .animate-toast { animation: toast-in 0.3s ease-out; }
+          `}</style>
+            <div
+              role="status"
+              className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-40px)] max-w-[390px] px-4 py-3 rounded-[10px] shadow-lg flex items-center gap-3 bg-[#22C55E] text-white text-[14px] font-medium animate-toast"
+            >
+              <svg
+                className="w-5 h-5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              <span>Your changes have been made successfully</span>
+            </div>
+          </>
+        )}
+
         {/* Save Changes */}
         <div
           className={`fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4 z-10 ${
             isDarkMode
-              ? "bg-[#121212] border-gray-800"
+              ? "bg-[#000000] border-gray-800"
               : "bg-white border-gray-200"
           }`}
         >
           <button
-            disabled={!hasChanges}
-            onClick={() => {
-              if (!hasChanges) return;
-              updateFullName(tempFullName);
-              updateEmail(tempEmail);
-              setHasChanges(false);
-            }}
-            className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-colors ${
+            disabled={!hasChanges || isSaving}
+            onClick={handleSaveChanges}
+            className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-colors flex items-center justify-center gap-2 ${
               hasChanges ? "bg-[#FF7B17]" : "bg-[#D3D3D3] cursor-not-allowed"
-            }`}
+            } ${isSaving ? "opacity-80 cursor-wait" : ""}`}
           >
-            Save Changes
+            {isSaving ? (
+              <>
+                <svg
+                  className="animate-spin w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    className="opacity-25"
+                  />
+                  <path
+                    d="M4 12a8 8 0 0 1 8-8"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    className="opacity-90"
+                  />
+                </svg>
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </button>
         </div>
       </div>
@@ -598,8 +722,8 @@ const Profile = () => {
   // ── Main Profile Screen ──────────────────────────────────────────
   return (
     <div
-      className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
-        isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
+      className={`min-h-screen min-h-dvh w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
+        isDarkMode ? "bg-[#000000] text-white" : "bg-white text-gray-900"
       }`}
     >
       <div className="px-5 pt-6">
@@ -676,7 +800,9 @@ const Profile = () => {
           )}
           <div
             className={`relative w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-8 shadow-2xl overflow-y-auto max-h-[90vh] mb-[65px] transition-colors duration-200 ${
-              isDarkMode ? "bg-[#1c1c1c] text-white" : "bg-white text-gray-900"
+              isDarkMode
+                ? "bg-[#000000] text-white border-t border-gray-700"
+                : "bg-white text-gray-900"
             } ${isClosing ? "animate-slide-down" : "animate-slide-up"}`}
           >
             <div
@@ -734,6 +860,11 @@ const Profile = () => {
           from { transform: translateY(0); }
           to   { transform: translateY(100%); }
         }
+        @keyframes toast-in {
+          from { opacity: 0; transform: translate(-50%, -16px); }
+          to   { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .animate-toast      { animation: toast-in 0.3s ease-out; }
         .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
         .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
       `}</style>

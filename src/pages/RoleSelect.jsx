@@ -42,7 +42,7 @@ const RoleSelect = () => {
 
   return (
     <div
-      className={`min-h-screen w-full pt-12 pb-12 transition-colors duration-200 ${
+      className={`min-h-screen min-h-dvh w-full pt-12 pb-12 transition-colors duration-200 ${
         isDarkMode ? "bg-[#000000]" : "bg-white"
       }`}
     >
@@ -69,7 +69,7 @@ const RoleSelect = () => {
       <div
         onClick={() => setSelectedRole("teacher")}
         className={`border rounded-[10px] w-83.75 h-36 mt-14 mx-auto relative cursor-pointer transition-colors duration-200 ${
-          isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+          isDarkMode ? "bg-[#000000]" : "bg-white"
         } ${
           selectedRole === "teacher"
             ? "border-[3px] border-[#FF7B17]"
@@ -93,7 +93,7 @@ const RoleSelect = () => {
       <div
         onClick={() => setSelectedRole("parent")}
         className={`relative w-83.75 h-36 mt-8 mx-auto rounded-[10px] overflow-hidden cursor-pointer shadow-[0_2px_2px_0_#0000001A] transition-colors duration-200 ${
-          isDarkMode ? "bg-[#1c1c1c]" : "bg-white"
+          isDarkMode ? "bg-[#000000]" : "bg-white"
         } ${
           selectedRole === "parent"
             ? "border-[3px] border-[#FF7B17]"

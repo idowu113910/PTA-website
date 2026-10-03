@@ -90,7 +90,7 @@ const Assignment = ({ setScreen }) => {
   // and the Calendar page — this is what makes the Safari status-bar/
   // safe-area strip repaint immediately instead of lagging behind.
   useEffect(() => {
-    const bg = isDarkMode ? "#121212" : "#FFFFFF";
+    const bg = isDarkMode ? "#000000" : "#FFFFFF";
     const root = document.documentElement;
 
     const prevRootBg = root.style.backgroundColor;
@@ -142,8 +142,8 @@ const Assignment = ({ setScreen }) => {
 
   return (
     <div
-      className={`flex flex-col h-screen max-h-200 relative w-full max-w-107.5 min-w-[320px] mx-auto 
-        overflow-hidden ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"}`}
+      className={`flex flex-col h-screen h-dvh relative w-full max-w-107.5 min-w-[320px] mx-auto 
+        overflow-hidden ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-2">
@@ -250,7 +250,7 @@ const Assignment = ({ setScreen }) => {
               key={conv.id}
               className={`flex items-center gap-3 py-3.5 border-b last:border-b-0 cursor-pointer transition-colors ${
                 isDarkMode
-                  ? "border-[#1F1F1F] hover:bg-[#121212]/50"
+                  ? "border-[#1F1F1F] hover:bg-[#1E1E1E]/50"
                   : "border-gray-100 hover:bg-gray-50/50"
               }`}
             >

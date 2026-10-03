@@ -82,7 +82,7 @@ const Report = () => {
   // teacher screens — this is what makes the Safari status-bar/safe-area
   // strip repaint immediately instead of lagging behind.
   useEffect(() => {
-    const bg = isDarkMode ? "#121212" : "#FFFFFF";
+    const bg = isDarkMode ? "#000000" : "#FFFFFF";
     const root = document.documentElement;
 
     const prevRootBg = root.style.backgroundColor;
@@ -367,7 +367,7 @@ const Report = () => {
   return (
     <div
       className={`w-full max-w-[430px] mx-auto min-h-screen min-h-dvh ${
-        isDarkMode ? "bg-[#121212] text-white" : "bg-[#FFFFFF] text-[#303030]"
+        isDarkMode ? "bg-[#000000] text-white" : "bg-[#FFFFFF] text-[#303030]"
       }`}
     >
       {/* ================= REPORT HOME ================= */}
@@ -375,7 +375,7 @@ const Report = () => {
         <div
           className={`pb-24 px-5 pt-6 min-h-screen min-h-dvh ${
             isDarkMode
-              ? "bg-[#121212] text-white"
+              ? "bg-[#000000] text-white"
               : "bg-[#FFFFFF] text-[#303030]"
           }`}
         >
@@ -408,7 +408,7 @@ const Report = () => {
                 alt=""
                 className={`ml-2 flex-shrink-0 transition-transform duration-200 ${
                   isTermDropdownOpen ? "rotate-180" : ""
-                } ${isDarkMode ? "brightness-200" : ""}`}
+                } ${isDarkMode ? "brightness-0 invert" : ""}`}
               />
             </button>
 
@@ -416,7 +416,7 @@ const Report = () => {
               <div
                 className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
                   isDarkMode
-                    ? "bg-[#121212] border-[#2A2A2A] text-white"
+                    ? "bg-[#000000] border-[#2A2A2A] text-white"
                     : "bg-white border-[#E5E7EB] text-gray-900"
                 }`}
               >
@@ -479,7 +479,7 @@ const Report = () => {
       {screen === "mark-attendance" && (
         <div
           className={`pb-28  ${
-            isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"
+            isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
           }`}
         >
           <div
@@ -739,7 +739,7 @@ const Report = () => {
           <div
             className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
               isDarkMode
-                ? "bg-[#121212] border-gray-800"
+                ? "bg-[#000000] border-gray-800"
                 : "bg-white border-[#E3E3E3]"
             }`}
           >
@@ -852,7 +852,7 @@ const Report = () => {
           ) : (
             /* Add Student form */
             <div
-              className={`pb-28 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"}`}
+              className={`pb-28 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
             >
               <div className="flex items-center gap-4 px-5 py-5">
                 <img
@@ -976,7 +976,7 @@ const Report = () => {
                       <img
                         src={arr}
                         alt=""
-                        className={`w-4 h-4 transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""} ${isDarkMode ? "brightness-200" : ""}`}
+                        className={`w-4 h-4 transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""} ${isDarkMode ? "brightness-0 invert" : ""}`}
                       />
                     </button>
 
@@ -984,7 +984,7 @@ const Report = () => {
                       <div
                         className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
                           isDarkMode
-                            ? "bg-[#121212] border-[#2A2A2A] text-white"
+                            ? "bg-[#000000] border-[#2A2A2A] text-white"
                             : "bg-white border-[#E5E7EB] text-gray-900"
                         }`}
                       >
@@ -1135,7 +1135,7 @@ const Report = () => {
                       <img
                         src={arr}
                         alt=""
-                        className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""} ${isDarkMode ? "brightness-200" : ""}`}
+                        className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""} ${isDarkMode ? "brightness-0 invert" : ""}`}
                       />
                     </button>
 
@@ -1143,7 +1143,7 @@ const Report = () => {
                       <div
                         className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
                           isDarkMode
-                            ? "bg-[#121212] border-[#2A2A2A] text-white"
+                            ? "bg-[#000000] border-[#2A2A2A] text-white"
                             : "bg-white border-[#E5E7EB] text-gray-900"
                         }`}
                       >
@@ -1169,7 +1169,7 @@ const Report = () => {
               <div
                 className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
                   isDarkMode
-                    ? "bg-[#121212] border-[#2A2A2A]"
+                    ? "bg-[#000000] border-[#2A2A2A]"
                     : "bg-white border-[#E3E3E3]"
                 }`}
               >
@@ -1235,7 +1235,7 @@ const Report = () => {
       {/* ================= BEHAVIOUR ================= */}
       {screen === "behaviour" && (
         <div
-          className={`pb-28 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"}`}
+          className={`pb-28 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"}`}
           onMouseUp={handleMouseUp}
         >
           <div
@@ -1244,7 +1244,7 @@ const Report = () => {
           >
             <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
             <h2
-              className={`text-[20px] font-medium ${isDarkMode ? "bg-[#121212] text-white" : "bg-white  text-[#000000]"}`}
+              className={`text-[20px] font-medium ${isDarkMode ? "bg-[#000000] text-white" : "bg-white  text-[#000000]"}`}
             >
               Add Behaviour
             </h2>
@@ -1254,7 +1254,7 @@ const Report = () => {
             {/* Student Name */}
             <div>
               <label
-                className={`block text-[15px] font-medium ] mb-2 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"}`}
+                className={`block text-[15px] font-medium ] mb-2 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
               >
                 Student Name
               </label>
@@ -1270,7 +1270,7 @@ const Report = () => {
             {/* Gender */}
             <div>
               <label
-                className={`block text-[15px] font-medium ] mb-2 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"}`}
+                className={`block text-[15px] font-medium ] mb-2 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
               >
                 Gender
               </label>
@@ -1300,7 +1300,7 @@ const Report = () => {
                     alt=""
                     className={`w-4 h-4 transition-transform duration-200 ${
                       isGenderOpen ? "rotate-180" : ""
-                    } ${isDarkMode ? "brightness-200" : ""}`}
+                    } ${isDarkMode ? "brightness-0 invert" : ""}`}
                   />
                 </button>
 
@@ -1308,7 +1308,7 @@ const Report = () => {
                   <div
                     className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
                       isDarkMode
-                        ? "bg-[#121212] border-[#2A2A2A] text-white"
+                        ? "bg-[#000000] border-[#2A2A2A] text-white"
                         : "bg-white border-[#E5E7EB] text-gray-900"
                     }`}
                   >
@@ -1365,7 +1365,7 @@ const Report = () => {
                     alt=""
                     className={`w-4 h-4 transition-transform duration-200 ${
                       isTermOpen ? "rotate-180" : ""
-                    } ${isDarkMode ? "brightness-200" : ""}`}
+                    } ${isDarkMode ? "brightness-0 invert" : ""}`}
                   />
                 </button>
 
@@ -1373,7 +1373,7 @@ const Report = () => {
                   <div
                     className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
                       isDarkMode
-                        ? "bg-[#121212] border-[#2A2A2A] text-white"
+                        ? "bg-[#000000] border-[#2A2A2A] text-white"
                         : "bg-white border-[#E5E7EB] text-gray-900"
                     }`}
                   >
@@ -1397,7 +1397,7 @@ const Report = () => {
             {/* Social Skills */}
             <div>
               <h2
-                className={`font-medium text-[15px] text-black mb-3 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#000000]"}`}
+                className={`font-medium text-[15px] text-black mb-3 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#000000]"}`}
               >
                 Social Skills Assessment
               </h2>
@@ -1406,7 +1406,7 @@ const Report = () => {
                   <div key={skill.id}>
                     <div className="flex justify-between mb-1">
                       <p
-                        className={`font-normal text-[14px] ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#000000]"}`}
+                        className={`font-normal text-[14px] ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#000000]"}`}
                       >
                         {skill.label}
                       </p>
@@ -1439,7 +1439,7 @@ const Report = () => {
             {/* Comments */}
             <div>
               <label
-                className={`block text-[15px] font-medium text-[#303030] mb-2 ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-[#303030]"}`}
+                className={`block text-[15px] font-medium text-[#303030] mb-2 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
               >
                 Add Comments
               </label>
@@ -1455,7 +1455,7 @@ const Report = () => {
             {/* Notify Parents */}
             <div className="flex justify-between items-center pb-2">
               <h6
-                className={`font-medium text-[15px] ${isDarkMode ? "bg-[#121212] text-white" : "bg-white text-black"}`}
+                className={`font-medium text-[15px] ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"}`}
               >
                 Notify Parents
               </h6>
@@ -1552,7 +1552,7 @@ const Report = () => {
                     alt=""
                     className={`w-4 h-4 transition-transform duration-200 ${
                       isTermOpen ? "rotate-180" : ""
-                    } ${isDarkMode ? "brightness-200" : ""}`}
+                    } ${isDarkMode ? "brightness-0 invert" : ""}`}
                   />
                 </button>
 
@@ -1560,7 +1560,7 @@ const Report = () => {
                   <div
                     className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
                       isDarkMode
-                        ? "bg-[#121212] border-[#2A2A2A] text-white"
+                        ? "bg-[#000000] border-[#2A2A2A] text-white"
                         : "bg-white border-[#E5E7EB] text-gray-900"
                     }`}
                   >
@@ -1620,7 +1620,7 @@ const Report = () => {
                     alt=""
                     className={`w-4 h-4 transition-transform duration-200 ${
                       isReportTypeOpen ? "rotate-180" : ""
-                    } ${isDarkMode ? "brightness-200" : ""}`}
+                    } ${isDarkMode ? "brightness-0 invert" : ""}`}
                   />
                 </button>
 
@@ -1628,7 +1628,7 @@ const Report = () => {
                   <div
                     className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md max-h-[220px] overflow-y-auto ${
                       isDarkMode
-                        ? "bg-[#121212] border-[#2A2A2A] text-white"
+                        ? "bg-[#000000] border-[#2A2A2A] text-white"
                         : "bg-white border-[#E5E7EB] text-gray-900"
                     }`}
                   >

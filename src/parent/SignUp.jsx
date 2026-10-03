@@ -13,8 +13,10 @@ const REGISTER_ENDPOINT =
   "https://pta-wdln.onrender.com/api/auth/parent/register";
 
 // Shared input styling: light by default, dark when the device is in dark mode.
+// NOTE: text is 16px on purpose — iOS Safari zooms the page in when you focus
+// an input whose font size is below 16px.
 const INPUT_BASE =
-  "w-full h-12.5 rounded-[10px] text-[14px] focus:outline-none " +
+  "w-full h-12.5 rounded-[10px] text-[16px] focus:outline-none " +
   "bg-[#F8F8F8] text-gray-900 placeholder:text-[#969696] " +
   "dark:bg-[#141414] dark:text-white dark:placeholder:text-[#7A7A7A]";
 const INPUT_BORDER =
@@ -198,7 +200,7 @@ const SignUp = () => {
     emailTouched && formData.workEmail && !isValidEmail(formData.workEmail);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#000000] px-6 py-6 w-full mx-auto flex flex-col justify-between">
+    <div className="min-h-screen min-h-dvh bg-white dark:bg-[#000000] px-6 py-6 w-full mx-auto flex flex-col justify-between">
       <div>
         {/* Header Navigation */}
         <div className="relative flex items-center justify-center pt-2">

@@ -1,11 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ed from "../assets/edithh.svg";
-import btn from "../assets/Right btn.svg";
 import tpi from "../assets/TPI.svg";
 import ap from "../assets/app pre.svg";
 import hs from "../assets/H & S.svg";
-import iaf from "../assets/invite.svg";
 import back from "../assets/back2.svg";
 import pn from "../assets/pencil.svg";
 import sth from "../assets/switchh.svg";
@@ -14,8 +12,45 @@ import { useUser } from "../teacher/UserContext";
 import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
 
+// Right-pointing chevron used on every menu card (matches the design)
+const Chevron = ({ className = "" }) => (
+  <svg
+    viewBox="0 0 8 13"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M1.2 1.2 6.6 6.5 1.2 11.8" />
+  </svg>
+);
+
+// Linked Students icon (two linked paperclips, as in the design)
+const LinkedStudentsIcon = ({ className = "" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <g transform="translate(-3.5 0) scale(0.9)">
+      <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </g>
+    <g transform="translate(4 2.5) scale(0.9)">
+      <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </g>
+  </svg>
+);
+
 const Profile = () => {
-  // System Theme Detector Hook
+  // Theme follows the device's light/dark setting only (no manual toggle)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return (
       window.matchMedia &&
@@ -31,11 +66,6 @@ const Profile = () => {
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
-
-  // Manual toggle handler for App Preference option
-  const toggleTheme = () => {
-    setIsDarkMode((prev) => !prev);
-  };
 
   const {
     fullName,
@@ -59,6 +89,20 @@ const Profile = () => {
   const [tempFullName, setTempFullName] = useState("");
   const [tempEmail, setTempEmail] = useState("");
   const [hasChanges, setHasChanges] = useState(false);
+  // New photo chosen but not saved yet (applied when "Save Changes" is clicked)
+  const [tempImage, setTempImage] = useState(null);
+  // Save state: loading spinner on the button + success notification
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSaveToast, setShowSaveToast] = useState(false);
+  const saveTimerRef = useRef(null);
+  const toastTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(saveTimerRef.current);
+      clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     setTempFullName(fullName || "");
@@ -93,7 +137,8 @@ const Profile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        updateProfileImage(reader.result);
+        setTempImage(reader.result);
+        setHasChanges(true);
       };
       reader.readAsDataURL(file);
     }
@@ -108,6 +153,24 @@ const Profile = () => {
       setShowLogoutModal(false);
     }, 1400);
   };
+
+  function handleSaveChanges() {
+    if (!hasChanges || isSaving) return;
+    setIsSaving(true);
+    // Short delay so the loading state is visible, then apply the changes
+    saveTimerRef.current = setTimeout(() => {
+      updateFullName(tempFullName);
+      updateEmail(tempEmail);
+      if (tempImage) {
+        updateProfileImage(tempImage);
+        setTempImage(null);
+      }
+      setHasChanges(false);
+      setIsSaving(false);
+      setShowSaveToast(true);
+      toastTimerRef.current = setTimeout(() => setShowSaveToast(false), 3000);
+    }, 1200);
+  }
 
   function openEdit() {
     setAreaCode(savedCode);
@@ -151,20 +214,30 @@ const Profile = () => {
     if (e.key === "Escape") closeEdit();
   }
 
-  const MenuRow = ({ icon, label, onClick }) => (
+  // Menu card — matches the design: thin gray border, 10px radius, icon on
+  // the left, label, and a dark chevron on the right.
+  const MenuRow = ({ icon, IconComponent, label, onClick }) => (
     <div
       onClick={onClick}
-      className={`flex w-full h-[57px] rounded-[10px] py-4 px-3 gap-4 mt-5 items-center cursor-pointer transition-colors duration-200 ${
+      className={`flex w-full h-[58px] rounded-[10px] px-3 gap-4 mt-[22px] items-center cursor-pointer transition-colors duration-200 ${
         isDarkMode
           ? "border border-gray-800 active:bg-gray-900"
-          : "border border-[#9F9D9D] active:bg-gray-50"
+          : "border border-[#9F9D9D] bg-white active:bg-gray-50"
       }`}
     >
-      <img
-        src={icon}
-        alt=""
-        className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
-      />
+      {IconComponent ? (
+        <IconComponent
+          className={`w-6 h-6 flex-shrink-0 ${
+            isDarkMode ? "text-white" : "text-[#1A1818]"
+          }`}
+        />
+      ) : (
+        <img
+          src={icon}
+          alt=""
+          className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
+        />
+      )}
       <p
         className={`font-medium text-[18px] flex-1 truncate ${
           isDarkMode ? "text-white" : "text-[#1A1818]"
@@ -172,10 +245,10 @@ const Profile = () => {
       >
         {label}
       </p>
-      <img
-        src={btn}
-        alt=""
-        className={`w-[12px] h-[8px] flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
+      <Chevron
+        className={`w-2 h-[13px] flex-shrink-0 ${
+          isDarkMode ? "text-white" : "text-[#1A1818]"
+        }`}
       />
     </div>
   );
@@ -250,7 +323,6 @@ const Profile = () => {
               val: isSwitchOn,
               set: () => setIsSwitchOn(!isSwitchOn),
             },
-            { label: "Theme Appearance", val: isDarkMode, set: toggleTheme },
             {
               label: "Auto-Login",
               val: SwitchAuto,
@@ -311,7 +383,7 @@ const Profile = () => {
             className="hidden"
           />
           <img
-            src={profileImage || ed}
+            src={tempImage || profileImage || ed}
             alt="profile"
             className="w-[75px] h-[75px] object-cover rounded-full"
           />
@@ -568,6 +640,39 @@ const Profile = () => {
           </div>
         </div>
 
+        {/* Success notification */}
+        {showSaveToast && (
+          <>
+            <style>{`
+            @keyframes toast-in {
+              from { opacity: 0; transform: translate(-50%, -16px); }
+              to   { opacity: 1; transform: translate(-50%, 0); }
+            }
+            .animate-toast { animation: toast-in 0.3s ease-out; }
+          `}</style>
+            <div
+              role="status"
+              className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-40px)] max-w-[390px] px-4 py-3 rounded-[10px] shadow-lg flex items-center gap-3 bg-[#22C55E] text-white text-[14px] font-medium animate-toast"
+            >
+              <svg
+                className="w-5 h-5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.5"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              <span>Your changes have been made successfully</span>
+            </div>
+          </>
+        )}
+
         {/* Save Changes */}
         <div
           className={`fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4 z-10 ${
@@ -577,18 +682,41 @@ const Profile = () => {
           }`}
         >
           <button
-            disabled={!hasChanges}
-            onClick={() => {
-              if (!hasChanges) return;
-              updateFullName(tempFullName);
-              updateEmail(tempEmail);
-              setHasChanges(false);
-            }}
-            className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-colors ${
+            disabled={!hasChanges || isSaving}
+            onClick={handleSaveChanges}
+            className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-colors flex items-center justify-center gap-2 ${
               hasChanges ? "bg-[#FF7B17]" : "bg-[#D3D3D3] cursor-not-allowed"
-            }`}
+            } ${isSaving ? "opacity-80 cursor-wait" : ""}`}
           >
-            Save Changes
+            {isSaving ? (
+              <>
+                <svg
+                  className="animate-spin w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    className="opacity-25"
+                  />
+                  <path
+                    d="M4 12a8 8 0 0 1 8-8"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    className="opacity-90"
+                  />
+                </svg>
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
           </button>
         </div>
       </div>
@@ -604,30 +732,31 @@ const Profile = () => {
     >
       <div className="px-5 pt-6">
         <h1
-          className={`font-bold text-[20px] mb-6 ${
+          className={`font-bold text-[20px] mb-5 ${
             isDarkMode ? "text-white" : "text-black"
           }`}
         >
           Profile
         </h1>
 
-        <div className="flex items-center gap-4 mb-6">
+        {/* User header: avatar + name + email */}
+        <div className="flex items-center gap-4 mb-11">
           <img
             src={profileImage || ed}
             alt=""
-            className="w-[55px] h-[55px] rounded-full object-cover flex-shrink-0"
+            className="w-[62px] h-[62px] rounded-full object-cover flex-shrink-0"
           />
           <div className="min-w-0">
             <p
-              className={`font-medium text-[18px] truncate ${
+              className={`font-medium text-[18px] leading-tight truncate ${
                 isDarkMode ? "text-white" : "text-black"
               }`}
             >
               {fullName}
             </p>
             <p
-              className={`font-normal text-[14px] truncate ${
-                isDarkMode ? "text-white" : "text-[#424242]"
+              className={`font-normal text-[14px] mt-1 truncate ${
+                isDarkMode ? "text-gray-300" : "text-[#424242]"
               }`}
             >
               {email}
@@ -635,22 +764,30 @@ const Profile = () => {
           </div>
         </div>
 
-        <MenuRow
-          icon={tpi}
-          label="Teacher Profile Information"
-          onClick={() => setShowTeacherProfile(true)}
-        />
-        <MenuRow
-          icon={ap}
-          label="App Preference"
-          onClick={() => setShowAppPreference(true)}
-        />
-        <MenuRow icon={hs} label="Help and Support" onClick={() => {}} />
-        <MenuRow icon={iaf} label="Invite a Friend" onClick={() => {}} />
+        {/* Menu cards (the first card sits flush under the header spacing) */}
+        <div className="-mt-[22px]">
+          <MenuRow
+            icon={tpi}
+            label="Parent Profile Information"
+            onClick={() => setShowTeacherProfile(true)}
+          />
+          <MenuRow
+            IconComponent={LinkedStudentsIcon}
+            label="Linked Students"
+            onClick={() => {}}
+          />
+          <MenuRow
+            icon={ap}
+            label="App Preference"
+            onClick={() => setShowAppPreference(true)}
+          />
+          <MenuRow icon={hs} label="Help and Support" onClick={() => {}} />
+        </div>
 
+        {/* Log out */}
         <div
           onClick={() => setShowLogoutModal(true)}
-          className="flex items-center gap-4 mt-5 py-2 cursor-pointer"
+          className="flex items-center gap-4 mt-10 pl-3 py-2 cursor-pointer"
         >
           <img src={logout} alt="" className="w-6 h-6 flex-shrink-0" />
           <p
@@ -734,6 +871,11 @@ const Profile = () => {
           from { transform: translateY(0); }
           to   { transform: translateY(100%); }
         }
+        @keyframes toast-in {
+          from { opacity: 0; transform: translate(-50%, -16px); }
+          to   { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .animate-toast      { animation: toast-in 0.3s ease-out; }
         .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
         .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
       `}</style>
