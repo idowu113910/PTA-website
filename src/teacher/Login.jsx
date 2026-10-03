@@ -31,11 +31,6 @@ const Login = () => {
     return formData.workEmail.trim() !== "" && formData.password.trim() !== "";
   };
 
-  // Wraps fetch with a single retry after a short delay — a rejected fetch
-  // (e.g. "Load failed") most often means a Render free-tier cold start
-  // dropped the connection, and retrying once gives it a chance to finish
-  // waking up. Does nothing for a genuine CORS block, which fails the same
-  // way every time.
   const fetchWithRetry = async (url, options, retries = 1, delayMs = 4000) => {
     try {
       return await fetch(url, options);
@@ -96,24 +91,26 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-6 w-full mx-auto flex flex-col justify-between">
+    <div className="min-h-screen bg-white dark:bg-[#000000] px-6 py-6 w-full mx-auto flex flex-col justify-between transition-colors duration-200">
       <div>
         {/* Header Navigation */}
         <div className="relative flex items-center justify-center pt-2 mt-4">
           <button
             type="button"
             onClick={() => navigate("/role")}
-            className="absolute left-0 p-2 flex items-center justify-center cursor-pointer"
+            className="absolute left-0 p-2 flex items-center justify-center cursor-pointer rounded-full hover:bg-gray-100 dark:hover:bg-neutral-900 transition-colors"
           >
-            <img src={back} alt="Back" className="w-5 h-5" />
+            <img src={back} alt="Back" className="w-5 h-5 dark:invert" />
           </button>
           <img src={ED} alt="Logo" className="h-16 object-contain" />
         </div>
 
         {/* Title */}
         <div className="text-center mt-6 mb-6">
-          <h1 className="text-[22px] font-bold text-gray-900">Welcome Back</h1>
-          <p className="text-[14px] text-gray-600 mt-1">
+          <h1 className="text-[22px] font-bold text-[#000000] dark:text-white">
+            Welcome Back
+          </h1>
+          <p className="text-[14px] text-gray-600 dark:text-gray-400 mt-1">
             Let's Dive Into Your Account
           </p>
         </div>
@@ -122,7 +119,7 @@ const Login = () => {
         <form onSubmit={handleNext} className="space-y-4">
           {/* Email Address */}
           <div className="mt-8">
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
+            <label className="block text-[14px] font-medium text-gray-800 dark:text-gray-200 mb-1.5">
               Email Address
             </label>
             <input
@@ -130,14 +127,14 @@ const Login = () => {
               name="workEmail"
               value={formData.workEmail}
               onChange={handleInputChange}
-              className="w-full h-12 border-[#C3C6C9] border bg-[#F8F8F8] rounded-[10px] px-4 text-[14px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+              className="w-full h-12 border border-[#C3C6C9] dark:border-gray-800 bg-[#F8F8F8] dark:bg-[#000000] rounded-[10px] px-4 text-[16px] text-[#000000] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 transition-colors"
               placeholder="Example@gmail.com"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-[14px] font-medium text-gray-800 mb-1.5">
+            <label className="block text-[14px] font-medium text-gray-800 dark:text-gray-200 mb-1.5">
               Password
             </label>
             <div className="relative">
@@ -146,13 +143,13 @@ const Login = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full h-12 border-[#C3C6C9] border bg-[#F8F8F8] rounded-[10px] pl-4 pr-12 text-[14px] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-400"
+                className="w-full h-12 border border-[#C3C6C9] dark:border-gray-800 bg-[#F8F8F8] dark:bg-[#000000] rounded-[10px] pl-4 pr-12 text-[16px] text-[#000000] dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 transition-colors"
                 placeholder="Enter your Password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -164,7 +161,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => navigate("/forgot-password")}
-              className="text-[12px] font-normal text-gray-900 hover:underline cursor-pointer"
+              className="text-[12px] font-normal text-[#000000] dark:text-gray-300 hover:underline cursor-pointer"
             >
               Forgot Password?
             </button>
@@ -172,7 +169,9 @@ const Login = () => {
 
           {/* Error message */}
           {errorMsg && (
-            <p className="text-[13px] text-red-500 text-center">{errorMsg}</p>
+            <p className="text-[13px] text-red-500 dark:text-red-400 text-center">
+              {errorMsg}
+            </p>
           )}
 
           {/* Submit Button */}
@@ -183,7 +182,7 @@ const Login = () => {
               className={`w-full h-12.5 rounded-xl text-[16px] font-medium transition-colors flex items-center justify-center gap-2 ${
                 isFormValid() && !isLoading
                   ? "bg-[#FF7B17] text-white cursor-pointer hover:bg-[#e06910]"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-200 dark:bg-neutral-900 text-gray-400 dark:text-gray-600 cursor-not-allowed"
               }`}
             >
               {isLoading ? (
@@ -198,50 +197,50 @@ const Login = () => {
           </div>
         </form>
 
+        {/* Divider */}
         <div className="flex items-center gap-4 w-full mt-6">
-          <hr className="flex-1 border-t border-gray-300" />
-          <span className="font-normal text-[14px] text-[#333333] whitespace-nowrap">
+          <hr className="flex-1 border-t border-gray-300 dark:border-gray-800" />
+          <span className="font-normal text-[14px] text-[#333333] dark:text-gray-400 whitespace-nowrap">
             Or Continue With
           </span>
-          <hr className="flex-1 border-t border-gray-300" />
+          <hr className="flex-1 border-t border-gray-300 dark:border-gray-800" />
         </div>
 
+        {/* Social Buttons */}
         <div className="flex items-center justify-center gap-10 w-full mt-8">
           <button
             type="button"
             aria-label="Continue with Facebook"
-            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] "
+            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] dark:bg-[#000000] dark:border dark:border-gray-800 hover:opacity-90 transition-all"
           >
-            <img src={fb} alt="" />
+            <img src={fb} alt="Facebook" />
           </button>
 
           <button
             type="button"
             aria-label="Continue with Google"
-            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] dark:bg-[#000000] border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-all"
           >
-            <img src={goo} alt="" />
+            <img src={goo} alt="Google" />
           </button>
 
           <button
             type="button"
             aria-label="Continue with Apple"
-            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            className="w-12 h-12 rounded-[9.89px] flex items-center justify-center bg-[#EEEEEE] dark:bg-[#000000] border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-all"
           >
-            <img src={app} alt="" />
+            <img src={app} alt="Apple" className="dark:invert" />
           </button>
         </div>
 
+        {/* Sign Up Navigation Link */}
         <div
-          onClick={() => {
-            navigate("/teacher/signup");
-          }}
-          className="flex gap-3 items-center justify-center mt-10"
+          onClick={() => navigate("/teacher/signup")}
+          className="flex gap-3 items-center justify-center mt-10 cursor-pointer"
         >
-          <p className="flex justify-center text-center font-normal text-[#001216] text-[16px]">
+          <p className="flex justify-center text-center font-normal text-[#001216] dark:text-gray-300 text-[16px]">
             Don’t have an account?
           </p>
-
           <p className="font-medium text-[16px] text-[#FF7B17]">Sign Up</p>
         </div>
       </div>
