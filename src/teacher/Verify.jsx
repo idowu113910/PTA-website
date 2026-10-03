@@ -153,12 +153,14 @@ const TeacherVerifyEmail = () => {
     setIsResending(true);
 
     try {
+      // The resend-code endpoint only accepts `email` — sending `role`
+      // makes the API reject the request ("property role should not exist").
       const response = await fetchWithRetry(RESEND_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, role: "teacher" }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
