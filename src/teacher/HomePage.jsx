@@ -431,15 +431,16 @@ const HomePage = () => {
     return date.toLocaleDateString("en-US", options);
   };
 
-  // Shared input class — base (light-mode) styling; dark-mode overrides applied inline via isDarkMode
+  // Shared input class — base (light-mode) styling; dark-mode overrides applied inline via isDarkMode.
+  // NOTE: font size is 16px on purpose — iOS Safari zooms into any input below 16px on focus.
   const inputClass =
-    "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[14px] font-normal focus:outline-none";
+    "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[16px] font-normal focus:outline-none";
 
   const inputClassLight =
-    "border-[#0000001F] bg-white text-[#303030] placeholder:text-[14px] placeholder:text-gray-400 focus:border-[#FF7B17]";
+    "border-[#0000001F] bg-white text-[#303030] placeholder:text-[16px] placeholder:text-gray-400 focus:border-[#FF7B17]";
 
   const inputClassDark =
-    "border-gray-600 bg-transparent text-white placeholder:text-[14px] placeholder:text-gray-400 focus:border-[#FF7B17]";
+    "border-gray-600 bg-transparent text-white placeholder:text-[16px] placeholder:text-gray-400 focus:border-[#FF7B17]";
 
   // Shared dropdown button class
   const dropdownBtnClassLight =
@@ -1788,7 +1789,7 @@ const HomePage = () => {
                     placeholder="e.g Grade 5"
                     value={studentClass}
                     onChange={(e) => setStudentClass(e.target.value)}
-                    className={`w-full h-[52px] rounded-[8px] border px-3 text-[14px] focus:outline-none focus:border-[#FF7B17] ${
+                    className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] focus:outline-none focus:border-[#FF7B17] ${
                       isDarkMode
                         ? "border-gray-600 bg-transparent text-white placeholder:text-gray-400"
                         : "border-[#0000001F] placeholder:text-gray-400"
@@ -1808,7 +1809,7 @@ const HomePage = () => {
                     placeholder="E.g 2024/2025"
                     value={academicSession}
                     onChange={(e) => setAcademicSession(e.target.value)}
-                    className={`w-full h-[52px] rounded-[8px] border px-3 text-[14px] focus:outline-none focus:border-[#FF7B17] ${
+                    className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] focus:outline-none focus:border-[#FF7B17] ${
                       isDarkMode
                         ? "border-gray-600 bg-transparent text-white placeholder:text-gray-400"
                         : "border-[#0000001F] placeholder:text-gray-400"
