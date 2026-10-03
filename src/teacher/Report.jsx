@@ -353,8 +353,13 @@ const Report = () => {
   );
 
   // Shared classes
+  // NOTE: inputs use a 16px font on purpose — iOS Safari zooms into any
+  // input whose font size is below 16px when it is focused. The inline
+  // style below is applied to every <input> so global CSS can't shrink it.
+  const noZoomStyle = { fontSize: "16px" };
+
   const inputClass =
-    "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[14px] font-normal focus:outline-none";
+    "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[16px] font-normal focus:outline-none";
 
   const dropdownBtnClass = `w-full h-[52px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
     isDarkMode
@@ -799,7 +804,8 @@ const Report = () => {
                   placeholder="Search Students"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`outline-none text-[14px] bg-transparent flex-1 ${
+                  style={noZoomStyle}
+                  className={`outline-none text-[16px] bg-transparent flex-1 ${
                     isDarkMode
                       ? "text-white placeholder-gray-400"
                       : "text-[#616161] placeholder-gray-400"
@@ -878,11 +884,12 @@ const Report = () => {
                     placeholder="E.g. John Smith"
                     value={studentNameAdd}
                     onChange={(e) => setStudentNameAdd(e.target.value)}
+                    style={noZoomStyle}
                     className={inputClass}
                   />
                 </div>
 
-                {/* DOB */}
+                {/* DOB — a button (not an input) so iOS never focus-zooms it */}
                 <div>
                   <label
                     className={`block text-[15px] font-medium mb-2 ${
@@ -892,16 +899,18 @@ const Report = () => {
                     Date Of Birth
                   </label>
                   <div className="relative">
-                    <input
-                      type="text"
-                      readOnly
-                      value={
-                        studentDOB ? studentDOB.toLocaleDateString("en-GB") : ""
-                      }
-                      placeholder="Select date"
+                    <button
+                      type="button"
                       onClick={() => setIsDOBOpen(true)}
-                      className={`${inputClass} cursor-pointer pr-10`}
-                    />
+                      style={noZoomStyle}
+                      className={`${inputClass} cursor-pointer pr-10 text-left ${
+                        studentDOB ? "" : "text-gray-400"
+                      }`}
+                    >
+                      {studentDOB
+                        ? studentDOB.toLocaleDateString("en-GB")
+                        : "Select date"}
+                    </button>
                     <img
                       src={cal}
                       alt="calendar"
@@ -1015,6 +1024,7 @@ const Report = () => {
                     placeholder="E.g. Stu/020/25h"
                     value={studentID}
                     onChange={(e) => setStudentID(e.target.value)}
+                    style={noZoomStyle}
                     className={inputClass}
                   />
                 </div>
@@ -1077,7 +1087,8 @@ const Report = () => {
                       placeholder="e.g Grade 5"
                       value={studentClass}
                       onChange={(e) => setStudentClass(e.target.value)}
-                      className={`w-full h-[52px] rounded-[8px] border px-3 text-[14px] placeholder:text-gray-400 focus:outline-none transition-colors ${
+                      style={noZoomStyle}
+                      className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] placeholder:text-gray-400 focus:outline-none transition-colors ${
                         isDarkMode
                           ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
                           : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
@@ -1095,7 +1106,8 @@ const Report = () => {
                       placeholder="E.g 2024/2025"
                       value={academicSession}
                       onChange={(e) => setAcademicSession(e.target.value)}
-                      className={`w-full h-[52px] rounded-[8px] border px-3 text-[14px] placeholder:text-gray-400 focus:outline-none transition-colors ${
+                      style={noZoomStyle}
+                      className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] placeholder:text-gray-400 focus:outline-none transition-colors ${
                         isDarkMode
                           ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
                           : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
@@ -1263,6 +1275,7 @@ const Report = () => {
                 placeholder="E.g. John Smith"
                 value={studentNameAdd}
                 onChange={(e) => setStudentNameAdd(e.target.value)}
+                style={noZoomStyle}
                 className={inputClass}
               />
             </div>
@@ -1448,6 +1461,7 @@ const Report = () => {
                 placeholder="Enter Comments...."
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
+                style={noZoomStyle}
                 className={inputClass}
               />
             </div>
@@ -1510,6 +1524,7 @@ const Report = () => {
                 placeholder="E.g. John Smith"
                 value={studentNameAdd}
                 onChange={(e) => setStudentNameAdd(e.target.value)}
+                style={noZoomStyle}
                 className={inputClass}
               />
             </div>
