@@ -41,6 +41,11 @@ const TeacherVerifyEmail = () => {
   const [resendMsg, setResendMsg] = useState("");
   const inputRefs = useRef([]);
 
+  // Guards the auto-send effect below against firing twice — React 18's
+  // StrictMode intentionally double-invokes effects in development, which
+  // would otherwise fire two separate "send code" requests on one mount.
+  const hasAutoSentRef = useRef(false);
+
   const code = digits.join("");
   const isCodeComplete = code.length === CODE_LENGTH;
 
@@ -111,12 +116,16 @@ const TeacherVerifyEmail = () => {
     setErrorMsg("");
 
     try {
+      // No `role` here — the resend-code endpoint is confirmed to reject
+      // unrecognized properties ("property role should not exist"), and
+      // verify-code uses the same strict validation, so sending `role`
+      // here would silently fail every verification attempt.
       const response = await fetchWithRetry(VERIFY_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, code, role: "teacher" }),
+        body: JSON.stringify({ email, code }),
       });
 
       const data = await response.json();
@@ -145,12 +154,13 @@ const TeacherVerifyEmail = () => {
     }
   };
 
-  const handleResend = async () => {
-    if (isResending || !email) return;
-
-    setResendMsg("");
-    setErrorMsg("");
-    setIsResending(true);
+  const sendCode = async ({ silent = false } = {}) => {
+    if (!email) return;
+    if (!silent) {
+      setResendMsg("");
+      setErrorMsg("");
+      setIsResending(true);
+    }
 
     try {
       // The resend-code endpoint only accepts `email` — sending `role`
@@ -166,23 +176,44 @@ const TeacherVerifyEmail = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Couldn't resend the code. Try again.");
+        throw new Error(data.message || "Couldn't send the code. Try again.");
       }
 
-      setResendMsg("A new code has been sent to your email.");
+      if (!silent) {
+        setResendMsg("A new code has been sent to your email.");
+      }
     } catch (err) {
-      if (err instanceof TypeError) {
-        setErrorMsg(
-          "Couldn't reach the server. Please check your connection and try again in a moment.",
-        );
-      } else {
-        setErrorMsg(
-          err.message || "An error occurred while resending the code.",
-        );
+      if (!silent) {
+        if (err instanceof TypeError) {
+          setErrorMsg(
+            "Couldn't reach the server. Please check your connection and try again in a moment.",
+          );
+        } else {
+          setErrorMsg(
+            err.message || "An error occurred while sending the code.",
+          );
+        }
       }
     } finally {
-      setIsResending(false);
+      if (!silent) {
+        setIsResending(false);
+      }
     }
+  };
+
+  // Actively trigger sending a code the moment this screen loads with a
+  // valid email, instead of relying solely on the registration endpoint
+  // having already dispatched one. Runs once per email.
+  useEffect(() => {
+    if (!email || hasAutoSentRef.current) return;
+    hasAutoSentRef.current = true;
+    sendCode({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email]);
+
+  const handleResend = () => {
+    if (isResending || !email) return;
+    sendCode({ silent: false });
   };
 
   if (!email) {
