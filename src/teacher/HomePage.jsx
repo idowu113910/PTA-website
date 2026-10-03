@@ -60,12 +60,22 @@ const DOB_YEARS = Array.from(
   (_, i) => new Date().getFullYear() - i,
 );
 
+// Screens on this page that are restored after a browser refresh
+const HOME_SCREEN_KEY = "teacherHomeScreen";
+const RESTORABLE_SCREENS = [
+  "home",
+  "post-homework",
+  "mark-attendance",
+  "add-grade",
+  "add-students",
+];
+
 // ── Students API ─────────────────────────────────────────────────────────
 const API_ORIGIN = "https://pta-wdln.onrender.com";
 const STUDENTS_API_URL = `${API_ORIGIN}/api/teachers/students`;
 
-// The endpoint answers 401 without a login token. Adjust the storage key(s)
-// here if your login flow saves the token under a different name.
+// The endpoint answers 401 without a valid login token, so every request
+// below goes through authFetch, which finds the token and attaches it.
 const TOKEN_FIELDS = [
   "token",
   "accessToken",
@@ -74,31 +84,50 @@ const TOKEN_FIELDS = [
   "authToken",
 ];
 
+const isJwt = (v) =>
+  typeof v === "string" && /^eyJ[\w-]+\.[\w-]+\.[\w-]*$/.test(v);
+
+// Searches a parsed object (a few levels deep) for a token field
+const findTokenDeep = (obj, depth = 0) => {
+  if (!obj || typeof obj !== "object" || depth > 3) return "";
+  for (const field of TOKEN_FIELDS) {
+    if (typeof obj[field] === "string" && obj[field].length > 10) {
+      return obj[field];
+    }
+  }
+  for (const value of Object.values(obj)) {
+    if (isJwt(value)) return value;
+    const found = findTokenDeep(value, depth + 1);
+    if (found) return found;
+  }
+  return "";
+};
+
 const tokenFromValue = (raw) => {
   if (!raw) return "";
+  if (isJwt(raw)) return raw;
   try {
     const parsed = JSON.parse(raw);
-    if (typeof parsed === "string") return parsed;
-    if (parsed && typeof parsed === "object") {
-      for (const field of TOKEN_FIELDS) {
-        if (typeof parsed[field] === "string") return parsed[field];
-        if (typeof parsed.data?.[field] === "string") return parsed.data[field];
-      }
-    }
-    return "";
+    if (typeof parsed === "string") return isJwt(parsed) ? parsed : "";
+    return findTokenDeep(parsed);
   } catch (_) {
-    // Not JSON — treat long plain strings as the token itself
-    return raw.length > 20 ? raw : "";
+    return "";
   }
 };
 
-// Looks for the login token in every storage key, so it still works
-// whatever name your login flow saved it under.
-const getAuthToken = () => {
+// Looks for the login token: first the app's user context (if it exposes
+// one), then well-known storage keys, then every stored value.
+const getAuthToken = (contextToken) => {
+  if (typeof contextToken === "string" && contextToken.length > 10) {
+    return contextToken;
+  }
   for (const storage of [localStorage, sessionStorage]) {
     for (const key of TOKEN_FIELDS) {
-      const found = tokenFromValue(storage.getItem(key));
-      if (found) return found;
+      const raw = storage.getItem(key);
+      if (raw) {
+        const cleaned = raw.replace(/^"|"$/g, "");
+        if (cleaned.length > 10) return cleaned;
+      }
     }
     for (let i = 0; i < storage.length; i++) {
       const found = tokenFromValue(storage.getItem(storage.key(i)));
@@ -108,10 +137,28 @@ const getAuthToken = () => {
   return "";
 };
 
-const authHeaders = () => {
-  const token = getAuthToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+// fetch() with the login token attached. If the server rejects the
+// "Bearer <token>" form, it retries once with the bare token.
+const authFetch = async (url, options = {}, contextToken) => {
+  const token = getAuthToken(contextToken);
+  const send = (authValue) =>
+    fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        ...(authValue ? { Authorization: authValue } : {}),
+      },
+    });
+
+  let res = await send(token ? `Bearer ${token}` : "");
+  if (res.status === 401 && token) res = await send(token);
+  return res;
 };
+
+const authErrorMessage = (contextToken) =>
+  getAuthToken(contextToken)
+    ? "The server rejected your login. Please log out and log in again."
+    : "You are not logged in on this device. Please log in again.";
 
 // Accepts the common response shapes: [...], { students: [...] }, { data: [...] }
 const extractStudentList = (data) => {
@@ -212,7 +259,16 @@ const HomePage = () => {
   const [percentage22, setPercentage22] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date("2025-06-30"));
-  const [screen, setScreen] = useState("home");
+  // Remember which screen the teacher is on so a browser refresh keeps them
+  // there (still inside the Home page).
+  const [screen, setScreen] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(HOME_SCREEN_KEY);
+      return RESTORABLE_SCREENS.includes(saved) ? saved : "home";
+    } catch (_) {
+      return "home";
+    }
+  });
   const mainScreens = ["home", "report", "message", "calendar", "profile"];
   const [isOn, setIsOn] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
@@ -221,7 +277,7 @@ const HomePage = () => {
   const [studentsError, setStudentsError] = useState("");
   const [isSavingStudent, setIsSavingStudent] = useState(false);
   const [saveStudentError, setSaveStudentError] = useState("");
-  const { fullName, grade, room } = useUser();
+  const { fullName, grade, room, token: contextToken } = useUser();
 
   const dateRef = useRef(null);
 
@@ -305,6 +361,27 @@ const HomePage = () => {
     };
   }, [isDarkMode]);
 
+  // Save the current screen so a refresh returns to it. The saved value is
+  // cleared when the teacher navigates away from this page (unmount), so
+  // coming back later starts on the normal home view.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(HOME_SCREEN_KEY, screen);
+    } catch (_) {
+      // storage unavailable — ignore
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    return () => {
+      try {
+        sessionStorage.removeItem(HOME_SCREEN_KEY);
+      } catch (_) {
+        // ignore
+      }
+    };
+  }, []);
+
   const handleFileClick = () => {
     fileInputRef.current.click();
   };
@@ -314,14 +391,18 @@ const HomePage = () => {
     setIsLoadingStudents(true);
     setStudentsError("");
     try {
-      const res = await fetch(STUDENTS_API_URL, {
-        method: "GET",
-        headers: { Accept: "application/json", ...authHeaders() },
-      });
+      const res = await authFetch(
+        STUDENTS_API_URL,
+        {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        },
+        contextToken,
+      );
       if (!res.ok) {
         throw new Error(
           res.status === 401
-            ? "Please log in again to load your students."
+            ? authErrorMessage(contextToken)
             : "Could not load students.",
         );
       }
@@ -435,27 +516,31 @@ const HomePage = () => {
     setSaveStudentError("");
 
     try {
-      const res = await fetch(STUDENTS_API_URL, {
-        method: "POST",
-        // No Content-Type header on purpose — the browser sets the
-        // multipart boundary automatically for FormData.
-        headers: { Accept: "application/json", ...authHeaders() },
-        body: buildStudentFormData({
-          name: studentNameAdd.trim(),
-          dob: studentDOB,
-          gender: selectedGender,
-          id: studentID.trim(),
-          file: selectedFile,
-          studentClass: studentClass.trim(),
-          session: academicSession.trim(),
-          term: selectedTerm,
-        }),
-      });
+      const res = await authFetch(
+        STUDENTS_API_URL,
+        {
+          method: "POST",
+          // No Content-Type header on purpose — the browser sets the
+          // multipart boundary automatically for FormData.
+          headers: { Accept: "application/json" },
+          body: buildStudentFormData({
+            name: studentNameAdd.trim(),
+            dob: studentDOB,
+            gender: selectedGender,
+            id: studentID.trim(),
+            file: selectedFile,
+            studentClass: studentClass.trim(),
+            session: academicSession.trim(),
+            term: selectedTerm,
+          }),
+        },
+        contextToken,
+      );
 
       if (!res.ok) {
         let message = "Could not add student. Please try again.";
         if (res.status === 401) {
-          message = "Please log in again to add a student.";
+          message = authErrorMessage(contextToken);
         } else {
           try {
             const errBody = await res.json();
