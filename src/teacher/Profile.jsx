@@ -256,7 +256,7 @@ const Profile = () => {
       }`}
     >
       <span
-        className={`text-[14px] flex-1 truncate ${
+        className={`text-[16px] flex-1 truncate ${
           isDarkMode ? "text-white" : "text-[#303030]"
         }`}
       >
@@ -276,13 +276,13 @@ const Profile = () => {
     <div className="flex gap-2 mt-1">
       <button
         onClick={onSave}
-        className="flex-1 h-[42px] bg-[#E8620A] text-white rounded-[8px] text-[13px] font-medium"
+        className="flex-1 h-[42px] bg-[#E8620A] text-white rounded-[8px] text-[14px] font-medium"
       >
         Save
       </button>
       <button
         onClick={onCancel}
-        className={`flex-1 h-[42px] rounded-[8px] text-[13px] ${
+        className={`flex-1 h-[42px] rounded-[8px] text-[14px] ${
           isDarkMode
             ? "border border-gray-700 text-white"
             : "border border-black/10 text-[#303030]"
@@ -416,7 +416,7 @@ const Profile = () => {
                 setTempFullName(e.target.value);
                 setHasChanges(true);
               }}
-              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[16px] ${
                 isDarkMode
                   ? "border border-gray-700 bg-[#000000] text-white"
                   : "border border-black/10 text-[#303030]"
@@ -434,13 +434,13 @@ const Profile = () => {
               Email
             </h2>
             <input
-              type="text"
+              type="email"
               value={tempEmail}
               onChange={(e) => {
                 setTempEmail(e.target.value);
                 setHasChanges(true);
               }}
-              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[16px] ${
                 isDarkMode
                   ? "border border-gray-700 bg-[#000000] text-white"
                   : "border border-black/10 text-[#303030]"
@@ -466,7 +466,7 @@ const Profile = () => {
               <div className="flex flex-col gap-2 mt-2">
                 <div className="flex gap-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[11px] text-gray-400">
+                    <label className="text-[12px] text-gray-400">
                       Area code
                     </label>
                     <input
@@ -477,21 +477,21 @@ const Profile = () => {
                       onKeyDown={handleKeyDown}
                       maxLength={6}
                       placeholder="+234"
-                      className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[14px] outline-none ${
+                      className={`w-[80px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[16px] outline-none ${
                         isDarkMode ? "bg-[#000000] text-white" : ""
                       }`}
                     />
                   </div>
                   <div className="flex flex-col gap-1 flex-1">
-                    <label className="text-[11px] text-gray-400">Number</label>
+                    <label className="text-[12px] text-gray-400">Number</label>
                     <input
-                      type="text"
+                      type="tel"
                       value={phoneNum}
                       onChange={(e) => setPhoneNum(e.target.value)}
                       onKeyDown={handleKeyDown}
                       maxLength={15}
                       placeholder="703 543 2234"
-                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none ${
+                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[16px] outline-none ${
                         isDarkMode ? "bg-[#000000] text-white" : ""
                       }`}
                     />
@@ -534,7 +534,7 @@ const Profile = () => {
                     setTempGender(e.target.value);
                     setHasChanges(true);
                   }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] ${
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[16px] ${
                     isDarkMode ? "bg-[#000000] text-white" : "bg-white"
                   }`}
                 >
@@ -578,7 +578,7 @@ const Profile = () => {
                     setTempClass(e.target.value);
                     setHasChanges(true);
                   }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[16px] ${
                     isDarkMode ? "bg-[#000000] text-white" : ""
                   }`}
                 />
@@ -620,7 +620,7 @@ const Profile = () => {
                     setTempAge(e.target.value);
                     setHasChanges(true);
                   }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[16px] ${
                     isDarkMode ? "bg-[#000000] text-white" : ""
                   }`}
                 />
@@ -852,6 +852,10 @@ const Profile = () => {
       )}
 
       <style>{`
+        /* Global protection to prevent auto-zoom on mobile inputs */
+        input, select, textarea {
+          font-size: 16px !important;
+        }
         @keyframes slide-up {
           from { transform: translateY(100%); }
           to   { transform: translateY(0); }
