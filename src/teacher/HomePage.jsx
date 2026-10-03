@@ -40,6 +40,78 @@ import parentImg3 from "../assets/Tamara.svg";
 
 registerLocale("en-GB", enGB);
 
+// ── Students API ─────────────────────────────────────────────────────────
+const API_ORIGIN = "https://pta-wdln.onrender.com";
+const STUDENTS_API_URL = `${API_ORIGIN}/api/teachers/students`;
+
+// The endpoint answers 401 without a login token. Adjust the storage key(s)
+// here if your login flow saves the token under a different name.
+const getAuthToken = () =>
+  localStorage.getItem("token") ||
+  localStorage.getItem("authToken") ||
+  localStorage.getItem("accessToken") ||
+  sessionStorage.getItem("token") ||
+  "";
+
+const authHeaders = () => {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+// Accepts the common response shapes: [...], { students: [...] }, { data: [...] }
+const extractStudentList = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.students)) return data.students;
+  if (Array.isArray(data?.data?.students)) return data.data.students;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+};
+
+// Converts whatever the backend returns into the shape the UI uses
+const normalizeStudent = (s) => {
+  const rawImage = s.photo || s.image || s.profileImage || s.avatar || "";
+  const image = rawImage
+    ? rawImage.startsWith("/")
+      ? `${API_ORIGIN}${rawImage}`
+      : rawImage
+    : "/default-avatar.png";
+
+  return {
+    id: String(s.studentId || s.studentID || s.student_id || s._id || s.id),
+    name:
+      s.fullName ||
+      s.name ||
+      [s.firstName, s.lastName].filter(Boolean).join(" ") ||
+      "Unnamed Student",
+    image,
+    class: s.class || s.className || s.grade || "",
+  };
+};
+
+// Field names sent to the backend when adding a student.
+// If your API expects different keys, rename them here — nothing else changes.
+const buildStudentFormData = ({
+  name,
+  dob,
+  gender,
+  id,
+  file,
+  studentClass,
+  session,
+  term,
+}) => {
+  const fd = new FormData();
+  fd.append("name", name);
+  fd.append("dateOfBirth", dob.toISOString());
+  fd.append("gender", gender);
+  fd.append("studentId", id);
+  fd.append("class", studentClass);
+  fd.append("academicSession", session);
+  fd.append("term", term);
+  if (file) fd.append("photo", file);
+  return fd;
+};
+
 // ── Follows the device's light/dark mode and reacts live when it changes ──
 function useSystemDarkMode() {
   const [isSystemDark, setIsSystemDark] = useState(
@@ -90,6 +162,10 @@ const HomePage = () => {
   const [isOn, setIsOn] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [students, setStudents] = useState([]);
+  const [isLoadingStudents, setIsLoadingStudents] = useState(false);
+  const [studentsError, setStudentsError] = useState("");
+  const [isSavingStudent, setIsSavingStudent] = useState(false);
+  const [saveStudentError, setSaveStudentError] = useState("");
   const { fullName, grade, room } = useUser();
 
   const dateRef = useRef(null);
@@ -178,9 +254,33 @@ const HomePage = () => {
     fileInputRef.current.click();
   };
 
+  // Load the teacher's students from the backend
+  const fetchStudents = async () => {
+    setIsLoadingStudents(true);
+    setStudentsError("");
+    try {
+      const res = await fetch(STUDENTS_API_URL, {
+        method: "GET",
+        headers: { Accept: "application/json", ...authHeaders() },
+      });
+      if (!res.ok) {
+        throw new Error(
+          res.status === 401
+            ? "Please log in again to load your students."
+            : "Could not load students.",
+        );
+      }
+      const data = await res.json();
+      setStudents(extractStudentList(data).map(normalizeStudent));
+    } catch (err) {
+      setStudentsError(err.message || "Could not load students.");
+    } finally {
+      setIsLoadingStudents(false);
+    }
+  };
+
   useEffect(() => {
-    const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-    setStudents(storedStudents);
+    fetchStudents();
   }, []);
 
   const handleFileChange = (e) => {
@@ -194,13 +294,7 @@ const HomePage = () => {
   const targetPercentage89 = 89;
   const targetPercentage22 = 22;
 
-  const [studentAttendance, setStudentAttendance] = useState({
-    "06201": null,
-    "06202": null,
-    "06203": null,
-    "06204": null,
-    "06205": null,
-  });
+  const [studentAttendance, setStudentAttendance] = useState({});
 
   const [counts, setCounts] = useState({ present: 0, absent: 0, late: 0 });
 
@@ -242,16 +336,6 @@ const HomePage = () => {
 
   const grades = ["A+", "B+", "C+", "D+", "E+", "F-"];
 
-  const studentss = [
-    { id: "06201", name: "Divine Ekubor", image: dv },
-    { id: "06202", name: "Emma Wilson", image: em },
-    { id: "06203", name: "Shayla Jason", image: sh },
-    { id: "06204", name: "Bryan Williams", image: br },
-    { id: "06205", name: "Amaya Isah", image: am },
-    { id: "06206", name: "Tamara Wilson", image: ta },
-    { id: "06207", name: "Sean King", image: se },
-  ];
-
   const genders = ["Male", "Female"];
   const terms = ["Term 1", "Term 2", "Term 3"];
 
@@ -288,29 +372,63 @@ const HomePage = () => {
     academicSession.trim() !== "" &&
     selectedTerm !== "";
 
-  const handleSaveStudent = () => {
-    const storedStudents = JSON.parse(localStorage.getItem("students")) || [];
-    const newStudent = {
-      id: studentID,
-      name: studentNameAdd,
-      image: selectedFile
-        ? URL.createObjectURL(selectedFile)
-        : "/default-avatar.png",
-      class: studentClass,
-      session: academicSession,
-      gender: selectedGender,
-      dob: studentDOB,
-    };
-    const updatedStudents = [...storedStudents, newStudent];
-    localStorage.setItem("students", JSON.stringify(updatedStudents));
-    setShowStudentSuccess(true);
-    setStudentNameAdd("");
-    setStudentID("");
-    setSelectedFile(null);
-    setStudentClass("");
-    setAcademicSession("");
-    setSelectedGender("");
-    setStudentDOB(null);
+  // Sends the new student to the backend, then refreshes the list so the
+  // student shows up on the Mark Attendance screen.
+  const handleSaveStudent = async () => {
+    if (isSavingStudent) return;
+    setIsSavingStudent(true);
+    setSaveStudentError("");
+
+    try {
+      const res = await fetch(STUDENTS_API_URL, {
+        method: "POST",
+        // No Content-Type header on purpose — the browser sets the
+        // multipart boundary automatically for FormData.
+        headers: { Accept: "application/json", ...authHeaders() },
+        body: buildStudentFormData({
+          name: studentNameAdd.trim(),
+          dob: studentDOB,
+          gender: selectedGender,
+          id: studentID.trim(),
+          file: selectedFile,
+          studentClass: studentClass.trim(),
+          session: academicSession.trim(),
+          term: selectedTerm,
+        }),
+      });
+
+      if (!res.ok) {
+        let message = "Could not add student. Please try again.";
+        if (res.status === 401) {
+          message = "Please log in again to add a student.";
+        } else {
+          try {
+            const errBody = await res.json();
+            message = errBody?.message || errBody?.error || message;
+          } catch (_) {
+            // keep the default message
+          }
+        }
+        throw new Error(message);
+      }
+
+      await fetchStudents();
+
+      setShowStudentSuccess(true);
+      setStudentNameAdd("");
+      setStudentID("");
+      setSelectedFile(null);
+      setStudentClass("");
+      setAcademicSession("");
+      setSelectedGender("");
+      setStudentDOB(null);
+    } catch (err) {
+      setSaveStudentError(
+        err.message || "Could not add student. Please try again.",
+      );
+    } finally {
+      setIsSavingStudent(false);
+    }
   };
 
   const handleCloseStudentSuccess = () => {
@@ -1044,9 +1162,32 @@ const HomePage = () => {
             Student List
           </p>
 
+          {/* Loading / error / empty states for the student list */}
+          {isLoadingStudents && students.length === 0 && (
+            <p
+              className={`px-5 text-[13px] ${
+                isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+              }`}
+            >
+              Loading students...
+            </p>
+          )}
+          {studentsError && (
+            <p className="px-5 text-[13px] text-red-500">{studentsError}</p>
+          )}
+          {!isLoadingStudents && !studentsError && students.length === 0 && (
+            <p
+              className={`px-5 text-[13px] ${
+                isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+              }`}
+            >
+              No students yet. Add a student to see them here.
+            </p>
+          )}
+
           {/* Student rows — outlined, transparent in dark mode */}
           <div className="px-5 flex flex-col gap-3">
-            {studentss.map((student) => (
+            {students.map((student) => (
               <div
                 key={student.id}
                 className={`rounded-[6px] px-3 py-2 flex items-center justify-between ${
@@ -1910,16 +2051,21 @@ const HomePage = () => {
                 : "bg-white border-[#E3E3E3]"
             }`}
           >
+            {saveStudentError && (
+              <p className="text-red-500 text-[13px] mb-2">
+                {saveStudentError}
+              </p>
+            )}
             <button
               onClick={handleSaveStudent}
-              disabled={!isStudentFormValid}
+              disabled={!isStudentFormValid || isSavingStudent}
               className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
-                isStudentFormValid
+                isStudentFormValid && !isSavingStudent
                   ? "bg-[#FF7B17] cursor-pointer"
                   : "bg-gray-300 cursor-not-allowed"
               }`}
             >
-              Add Student
+              {isSavingStudent ? "Adding..." : "Add Student"}
             </button>
           </div>
 
