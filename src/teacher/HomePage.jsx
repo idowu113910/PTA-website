@@ -1167,6 +1167,7 @@ const HomePage = () => {
                   placeholder="E.g. John Smith"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
+                  style={{ fontSize: "16px" }}
                   className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
               </div>
@@ -1371,11 +1372,12 @@ const HomePage = () => {
                   placeholder="Input Maximum Score"
                   value={totalMark}
                   onChange={(e) => setTotalMark(e.target.value)}
+                  style={{ fontSize: "16px" }}
                   className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
               </div>
 
-              {/* Date */}
+              {/* Date — a button (not an input) so iOS never focus-zooms it */}
               <div>
                 <label
                   className={`block text-[15px] font-medium mb-2 ${
@@ -1385,18 +1387,26 @@ const HomePage = () => {
                   Date
                 </label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    readOnly
-                    value={
-                      selectedDate
-                        ? selectedDate.toLocaleDateString("en-GB")
-                        : ""
-                    }
-                    placeholder="Select date"
+                  <button
+                    type="button"
                     onClick={() => setIsOpen(true)}
-                    className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight} cursor-pointer pr-10`}
-                  />
+                    style={{ fontSize: "16px" }}
+                    className={`w-full h-[52px] rounded-[8px] border px-3 pr-10 text-left focus:outline-none focus:border-[#FF7B17] ${
+                      isDarkMode
+                        ? "border-gray-600 bg-transparent"
+                        : "border-[#0000001F] bg-white"
+                    } ${
+                      selectedDate
+                        ? isDarkMode
+                          ? "text-white"
+                          : "text-[#303030]"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {selectedDate
+                      ? selectedDate.toLocaleDateString("en-GB")
+                      : "Select date"}
+                  </button>
                   <img
                     src={cal}
                     alt="calendar"
@@ -1583,11 +1593,12 @@ const HomePage = () => {
                   placeholder="E.g. John Smith"
                   value={studentNameAdd}
                   onChange={(e) => setStudentNameAdd(e.target.value)}
+                  style={{ fontSize: "16px" }}
                   className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
               </div>
 
-              {/* Date of Birth */}
+              {/* Date of Birth — a button (not an input) so iOS never focus-zooms it */}
               <div>
                 <label
                   className={`block text-[15px] font-medium mb-2 ${
@@ -1597,16 +1608,26 @@ const HomePage = () => {
                   Date Of Birth
                 </label>
                 <div className="relative">
-                  <input
-                    type="text"
-                    readOnly
-                    value={
-                      studentDOB ? studentDOB.toLocaleDateString("en-GB") : ""
-                    }
-                    placeholder="Select date"
+                  <button
+                    type="button"
                     onClick={() => setIsDOBOpen(true)}
-                    className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight} cursor-pointer pr-10`}
-                  />
+                    style={{ fontSize: "16px" }}
+                    className={`w-full h-[52px] rounded-[8px] border px-3 pr-10 text-left focus:outline-none focus:border-[#FF7B17] ${
+                      isDarkMode
+                        ? "border-gray-600 bg-transparent"
+                        : "border-[#0000001F] bg-white"
+                    } ${
+                      studentDOB
+                        ? isDarkMode
+                          ? "text-white"
+                          : "text-[#303030]"
+                        : "text-gray-400"
+                    }`}
+                  >
+                    {studentDOB
+                      ? studentDOB.toLocaleDateString("en-GB")
+                      : "Select date"}
+                  </button>
                   <img
                     src={cal}
                     alt="calendar"
@@ -1717,6 +1738,7 @@ const HomePage = () => {
                   placeholder="E.g. Stu/020/25h"
                   value={studentID}
                   onChange={(e) => setStudentID(e.target.value)}
+                  style={{ fontSize: "16px" }}
                   className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
               </div>
@@ -1789,6 +1811,7 @@ const HomePage = () => {
                     placeholder="e.g Grade 5"
                     value={studentClass}
                     onChange={(e) => setStudentClass(e.target.value)}
+                    style={{ fontSize: "16px" }}
                     className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] focus:outline-none focus:border-[#FF7B17] ${
                       isDarkMode
                         ? "border-gray-600 bg-transparent text-white placeholder:text-gray-400"
@@ -1809,6 +1832,7 @@ const HomePage = () => {
                     placeholder="E.g 2024/2025"
                     value={academicSession}
                     onChange={(e) => setAcademicSession(e.target.value)}
+                    style={{ fontSize: "16px" }}
                     className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] focus:outline-none focus:border-[#FF7B17] ${
                       isDarkMode
                         ? "border-gray-600 bg-transparent text-white placeholder:text-gray-400"
