@@ -40,18 +40,73 @@ import parentImg3 from "../assets/Tamara.svg";
 
 registerLocale("en-GB", enGB);
 
+// Month / year options for the Date Of Birth calendar header
+const DOB_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const DOB_YEARS = Array.from(
+  { length: 100 },
+  (_, i) => new Date().getFullYear() - i,
+);
+
 // ── Students API ─────────────────────────────────────────────────────────
 const API_ORIGIN = "https://pta-wdln.onrender.com";
 const STUDENTS_API_URL = `${API_ORIGIN}/api/teachers/students`;
 
 // The endpoint answers 401 without a login token. Adjust the storage key(s)
 // here if your login flow saves the token under a different name.
-const getAuthToken = () =>
-  localStorage.getItem("token") ||
-  localStorage.getItem("authToken") ||
-  localStorage.getItem("accessToken") ||
-  sessionStorage.getItem("token") ||
-  "";
+const TOKEN_FIELDS = [
+  "token",
+  "accessToken",
+  "access_token",
+  "jwt",
+  "authToken",
+];
+
+const tokenFromValue = (raw) => {
+  if (!raw) return "";
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === "string") return parsed;
+    if (parsed && typeof parsed === "object") {
+      for (const field of TOKEN_FIELDS) {
+        if (typeof parsed[field] === "string") return parsed[field];
+        if (typeof parsed.data?.[field] === "string") return parsed.data[field];
+      }
+    }
+    return "";
+  } catch (_) {
+    // Not JSON — treat long plain strings as the token itself
+    return raw.length > 20 ? raw : "";
+  }
+};
+
+// Looks for the login token in every storage key, so it still works
+// whatever name your login flow saved it under.
+const getAuthToken = () => {
+  for (const storage of [localStorage, sessionStorage]) {
+    for (const key of TOKEN_FIELDS) {
+      const found = tokenFromValue(storage.getItem(key));
+      if (found) return found;
+    }
+    for (let i = 0; i < storage.length; i++) {
+      const found = tokenFromValue(storage.getItem(storage.key(i)));
+      if (found) return found;
+    }
+  }
+  return "";
+};
 
 const authHeaders = () => {
   const token = getAuthToken();
@@ -1692,7 +1747,7 @@ const HomePage = () => {
             isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
           }`}
         >
-          <div className="pb-28 overflow-y-auto">
+          <div className="pb-72 overflow-y-auto">
             <div
               className="flex items-center gap-4 px-5 py-5 cursor-pointer"
               onClick={() => setScreen("home")}
@@ -1784,17 +1839,170 @@ const HomePage = () => {
                           isDarkMode ? "bg-[#1e1e1e]" : "bg-white"
                         }`}
                       >
-                        <DatePicker
-                          selected={studentDOB}
-                          onChange={(date) => {
-                            setStudentDOB(date);
-                            setIsDOBOpen(false);
-                          }}
-                          inline
-                          showPopperArrow={false}
-                          maxDate={new Date()}
-                          locale="en-GB"
-                        />
+                        <div
+                          className={`dob-picker ${isDarkMode ? "dob-dark" : ""}`}
+                        >
+                          <style>{`
+                            .dob-picker .react-datepicker {
+                              width: 100%;
+                              border: none;
+                              background: transparent;
+                              font-family: inherit;
+                            }
+                            .dob-picker .react-datepicker__month-container {
+                              float: none;
+                              width: 100%;
+                            }
+                            .dob-picker .react-datepicker__header {
+                              background: transparent;
+                              border-bottom: none;
+                              padding: 0;
+                            }
+                            .dob-picker .react-datepicker__month {
+                              margin: 0;
+                            }
+                            .dob-picker .react-datepicker__day-names,
+                            .dob-picker .react-datepicker__week {
+                              display: flex;
+                              justify-content: space-around;
+                            }
+                            .dob-picker .react-datepicker__day-name,
+                            .dob-picker .react-datepicker__day {
+                              width: 2rem;
+                              line-height: 2rem;
+                              margin: 0.1rem;
+                              border-radius: 9999px;
+                              font-size: 13px;
+                              color: #303030;
+                            }
+                            .dob-picker .react-datepicker__day-name {
+                              color: #9c9c9c;
+                              font-weight: 500;
+                            }
+                            .dob-picker .react-datepicker__day:hover {
+                              background: #fff0e5;
+                            }
+                            .dob-picker .react-datepicker__day--keyboard-selected {
+                              background: transparent;
+                              color: inherit;
+                            }
+                            .dob-picker .react-datepicker__day--selected,
+                            .dob-picker .react-datepicker__day--selected:hover {
+                              background: #ff7b17;
+                              color: #ffffff;
+                              font-weight: 600;
+                            }
+                            .dob-picker .react-datepicker__day--today {
+                              font-weight: 700;
+                              box-shadow: inset 0 0 0 1px #ff7b17;
+                            }
+                            .dob-picker .react-datepicker__day--disabled,
+                            .dob-picker .react-datepicker__day--disabled:hover {
+                              color: #c4c4c4;
+                              background: transparent;
+                              cursor: not-allowed;
+                            }
+                            .dob-picker .react-datepicker__day--outside-month {
+                              visibility: hidden;
+                            }
+                            .dob-header {
+                              display: flex;
+                              gap: 8px;
+                              margin-bottom: 10px;
+                            }
+                            .dob-header select {
+                              flex: 1;
+                              min-width: 0;
+                              height: 40px;
+                              padding: 0 8px;
+                              border-radius: 8px;
+                              border: 1px solid #0000001f;
+                              background: #ffffff;
+                              color: #303030;
+                              font-size: 16px;
+                              font-weight: 500;
+                              outline: none;
+                            }
+                            .dob-header select:focus {
+                              border-color: #ff7b17;
+                            }
+                            .dob-dark .react-datepicker__day-name {
+                              color: #9ca3af;
+                            }
+                            .dob-dark .react-datepicker__day {
+                              color: #ffffff;
+                            }
+                            .dob-dark .react-datepicker__day:hover {
+                              background: #2a2a2a;
+                            }
+                            .dob-dark .react-datepicker__day--selected,
+                            .dob-dark .react-datepicker__day--selected:hover {
+                              background: #ff7b17;
+                              color: #ffffff;
+                            }
+                            .dob-dark .react-datepicker__day--disabled,
+                            .dob-dark .react-datepicker__day--disabled:hover {
+                              color: #4b5563;
+                              background: transparent;
+                            }
+                            .dob-dark .dob-header select {
+                              background: #2a2a2a;
+                              border-color: #4b5563;
+                              color: #ffffff;
+                            }
+                          `}</style>
+                          <DatePicker
+                            selected={studentDOB}
+                            onChange={(date) => {
+                              setStudentDOB(date);
+                              setIsDOBOpen(false);
+                            }}
+                            inline
+                            showPopperArrow={false}
+                            maxDate={new Date()}
+                            locale="en-GB"
+                            renderCustomHeader={({
+                              date,
+                              changeYear,
+                              changeMonth,
+                            }) => (
+                              <div className="dob-header">
+                                <select
+                                  value={date.getMonth()}
+                                  onChange={(e) =>
+                                    changeMonth(Number(e.target.value))
+                                  }
+                                >
+                                  {DOB_MONTHS.map((month, index) => (
+                                    <option
+                                      key={month}
+                                      value={index}
+                                      disabled={
+                                        date.getFullYear() ===
+                                          new Date().getFullYear() &&
+                                        index > new Date().getMonth()
+                                      }
+                                    >
+                                      {month}
+                                    </option>
+                                  ))}
+                                </select>
+                                <select
+                                  value={date.getFullYear()}
+                                  onChange={(e) =>
+                                    changeYear(Number(e.target.value))
+                                  }
+                                >
+                                  {DOB_YEARS.map((year) => (
+                                    <option key={year} value={year}>
+                                      {year}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+                          />
+                        </div>
                         <button
                           onClick={() => setIsDOBOpen(false)}
                           className="mt-2 px-4 py-2 bg-[#3B82F6] text-white rounded-md w-full"
