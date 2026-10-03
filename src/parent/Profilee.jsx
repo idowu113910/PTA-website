@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import ed from "../assets/edithh.svg";
 import tpi from "../assets/TPI.svg";
@@ -8,11 +8,11 @@ import back from "../assets/back2.svg";
 import pn from "../assets/pencil.svg";
 import sth from "../assets/switchh.svg";
 import sthOn from "../assets/ON.svg";
+import logout from "../assets/logout section.svg";
 import { useUser } from "../teacher/UserContext";
 import BottomNavigation from "../components/BottomNavigation";
-import logout from "../assets/logout section.svg";
 
-// Right-pointing chevron used on every menu card (matches the design)
+// Right-pointing chevron icon
 const Chevron = ({ className = "" }) => (
   <svg
     viewBox="0 0 8 13"
@@ -28,7 +28,7 @@ const Chevron = ({ className = "" }) => (
   </svg>
 );
 
-// Linked Students icon (two linked paperclips, as in the design)
+// Linked Students icon
 const LinkedStudentsIcon = ({ className = "" }) => (
   <svg
     viewBox="0 0 24 24"
@@ -50,23 +50,7 @@ const LinkedStudentsIcon = ({ className = "" }) => (
 );
 
 const Profile = () => {
-  // Theme follows the device's light/dark setting only (no manual toggle)
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    );
-  });
-
-  // Listen for device theme preference changes automatically
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e) => setIsDarkMode(e.matches);
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
+  const navigate = useNavigate();
   const {
     fullName,
     updateFullName,
@@ -76,38 +60,33 @@ const Profile = () => {
     updateProfileImage,
   } = useUser();
 
-  const navigate = useNavigate();
-  const fileInputRef = useRef(null);
-  const codeRef = useRef(null);
+  // Automatic dark mode detection via system preferences
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    );
+  });
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsDarkMode(e.matches);
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  // UI View states
   const [showTeacherProfile, setShowTeacherProfile] = useState(false);
   const [showAppPreference, setShowAppPreference] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
+  const [isClosingModal, setIsClosingModal] = useState(false);
   const [hideBackdrop, setHideBackdrop] = useState(false);
 
+  // Form temporary states
   const [tempFullName, setTempFullName] = useState("");
   const [tempEmail, setTempEmail] = useState("");
-  const [hasChanges, setHasChanges] = useState(false);
-  // New photo chosen but not saved yet (applied when "Save Changes" is clicked)
   const [tempImage, setTempImage] = useState(null);
-  // Save state: loading spinner on the button + success notification
-  const [isSaving, setIsSaving] = useState(false);
-  const [showSaveToast, setShowSaveToast] = useState(false);
-  const saveTimerRef = useRef(null);
-  const toastTimerRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      clearTimeout(saveTimerRef.current);
-      clearTimeout(toastTimerRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    setTempFullName(fullName || "");
-    setTempEmail(email || "");
-  }, [fullName, email]);
 
   const [genderValue, setGenderValue] = useState("Female");
   const [tempGender, setTempGender] = useState("Female");
@@ -121,9 +100,11 @@ const Profile = () => {
   const [tempAge, setTempAge] = useState("12");
   const [isEditingAge, setIsEditingAge] = useState(false);
 
+  // App preferences
   const [isSwitchOn, setIsSwitchOn] = useState(false);
-  const [SwitchAuto, setSwitchAuto] = useState(false);
+  const [switchAuto, setSwitchAuto] = useState(false);
 
+  // Phone state
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [savedCode, setSavedCode] = useState("+234");
   const [savedNumber, setSavedNumber] = useState("703 543 2234");
@@ -132,8 +113,35 @@ const Profile = () => {
   const [phoneError, setPhoneError] = useState("");
   const [phoneToast, setPhoneToast] = useState("");
 
+  // Save states
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSaveToast, setShowSaveToast] = useState(false);
+
+  // Refs
+  const fileInputRef = useRef(null);
+  const codeRef = useRef(null);
+  const saveTimerRef = useRef(null);
+  const toastTimerRef = useRef(null);
+  const closeModalTimerRef = useRef(null);
+
+  // Reset temp state on prop change
+  useEffect(() => {
+    setTempFullName(fullName || "");
+    setTempEmail(email || "");
+  }, [fullName, email]);
+
+  // Clean timers on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeout(saveTimerRef.current);
+      clearTimeout(toastTimerRef.current);
+      clearTimeout(closeModalTimerRef.current);
+    };
+  }, []);
+
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -144,52 +152,59 @@ const Profile = () => {
     }
   };
 
-  const handleClose = () => {
+  const handleCloseModal = useCallback(() => {
     setHideBackdrop(true);
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
+    setIsClosingModal(true);
+    closeModalTimerRef.current = setTimeout(() => {
+      setIsClosingModal(false);
       setHideBackdrop(false);
       setShowLogoutModal(false);
-    }, 1400);
-  };
+    }, 400);
+  }, []);
 
-  function handleSaveChanges() {
+  const handleSaveChanges = () => {
     if (!hasChanges || isSaving) return;
     setIsSaving(true);
-    // Short delay so the loading state is visible, then apply the changes
+
     saveTimerRef.current = setTimeout(() => {
-      updateFullName(tempFullName);
-      updateEmail(tempEmail);
-      if (tempImage) {
+      if (updateFullName) updateFullName(tempFullName);
+      if (updateEmail) updateEmail(tempEmail);
+      if (tempImage && updateProfileImage) {
         updateProfileImage(tempImage);
         setTempImage(null);
       }
       setHasChanges(false);
       setIsSaving(false);
       setShowSaveToast(true);
-      toastTimerRef.current = setTimeout(() => setShowSaveToast(false), 3000);
-    }, 1200);
-  }
 
-  function openEdit() {
+      toastTimerRef.current = setTimeout(() => {
+        setShowSaveToast(false);
+      }, 3000);
+    }, 1000);
+  };
+
+  // Phone editing handlers
+  const openPhoneEdit = () => {
     setAreaCode(savedCode);
     setPhoneNum(savedNumber);
     setPhoneError("");
     setPhoneToast("");
     setIsEditingPhone(true);
     setTimeout(() => codeRef.current?.focus(), 50);
-  }
-  function closeEdit() {
+  };
+
+  const closePhoneEdit = () => {
     setIsEditingPhone(false);
     setPhoneError("");
-  }
-  function handleAreaCodeChange(e) {
+  };
+
+  const handleAreaCodeChange = (e) => {
     let val = e.target.value;
     if (!val.startsWith("+")) val = "+" + val.replace(/\+/g, "");
     setAreaCode(val);
-  }
-  function validate() {
+  };
+
+  const validatePhone = () => {
     if (!areaCode.startsWith("+") || areaCode.length < 2) {
       setPhoneError("Area code must start with + (e.g. +234)");
       return false;
@@ -200,26 +215,29 @@ const Profile = () => {
     }
     setPhoneError("");
     return true;
-  }
-  function handlePhoneSave() {
-    if (!validate()) return;
+  };
+
+  const handlePhoneSave = () => {
+    if (!validatePhone()) return;
     setSavedCode(areaCode.trim());
     setSavedNumber(phoneNum.trim());
     setIsEditingPhone(false);
     setPhoneToast("Number saved successfully");
+    setHasChanges(true);
     setTimeout(() => setPhoneToast(""), 3000);
-  }
-  function handleKeyDown(e) {
-    if (e.key === "Enter") handlePhoneSave();
-    if (e.key === "Escape") closeEdit();
-  }
+  };
 
-  // Menu card — matches the design: thin gray border, 10px radius, icon on
-  // the left, label, and a dark chevron on the right.
+  const handlePhoneKeyDown = (e) => {
+    if (e.key === "Enter") handlePhoneSave();
+    if (e.key === "Escape") closePhoneEdit();
+  };
+
+  // Helper UI Components
   const MenuRow = ({ icon, IconComponent, label, onClick }) => (
-    <div
+    <button
+      type="button"
       onClick={onClick}
-      className={`flex w-full h-[58px] rounded-[10px] px-3 gap-4 mt-[22px] items-center cursor-pointer transition-colors duration-200 ${
+      className={`flex w-full h-[58px] rounded-[10px] px-3 gap-4 mt-[22px] items-center text-left transition-colors duration-200 ${
         isDarkMode
           ? "border border-gray-800 active:bg-gray-900"
           : "border border-[#9F9D9D] bg-white active:bg-gray-50"
@@ -238,19 +256,19 @@ const Profile = () => {
           className={`w-6 h-6 flex-shrink-0 ${isDarkMode ? "invert" : ""}`}
         />
       )}
-      <p
+      <span
         className={`font-medium text-[18px] flex-1 truncate ${
           isDarkMode ? "text-white" : "text-[#1A1818]"
         }`}
       >
         {label}
-      </p>
+      </span>
       <Chevron
         className={`w-2 h-[13px] flex-shrink-0 ${
           isDarkMode ? "text-white" : "text-[#1A1818]"
         }`}
       />
-    </div>
+    </button>
   );
 
   const FieldRow = ({ value, onEdit }) => (
@@ -260,16 +278,21 @@ const Profile = () => {
       }`}
     >
       <span
-        className={`text-[14px] flex-1 truncate ${
+        className={`text-[16px] flex-1 truncate ${
           isDarkMode ? "text-white" : "text-[#303030]"
         }`}
       >
         {value}
       </span>
-      <button onClick={onEdit} className="p-1 flex-shrink-0">
+      <button
+        type="button"
+        onClick={onEdit}
+        className="p-1 flex-shrink-0"
+        aria-label="Edit field"
+      >
         <img
           src={pn}
-          alt="edit"
+          alt=""
           className={`w-[18px] h-[18px] ${isDarkMode ? "invert" : ""}`}
         />
       </button>
@@ -279,14 +302,16 @@ const Profile = () => {
   const SaveCancel = ({ onSave, onCancel }) => (
     <div className="flex gap-2 mt-1">
       <button
+        type="button"
         onClick={onSave}
-        className="flex-1 h-[42px] bg-[#E8620A] text-white rounded-[8px] text-[13px] font-medium"
+        className="flex-1 h-[42px] bg-[#E8620A] text-white rounded-[8px] text-[13px] font-medium active:opacity-90"
       >
         Save
       </button>
       <button
+        type="button"
         onClick={onCancel}
-        className={`flex-1 h-[42px] rounded-[8px] text-[13px] ${
+        className={`flex-1 h-[42px] rounded-[8px] text-[13px] font-medium ${
           isDarkMode
             ? "border border-gray-800 text-white"
             : "border border-black/10 text-[#303030]"
@@ -297,7 +322,7 @@ const Profile = () => {
     </div>
   );
 
-  // ── App Preference Screen ────────────────────────────────────────
+  // --- Sub-View: App Preference Screen ---
   if (showAppPreference) {
     return (
       <div
@@ -306,10 +331,14 @@ const Profile = () => {
         }`}
       >
         <div className="flex items-center gap-4 px-5 pt-6 pb-4">
-          <button onClick={() => setShowAppPreference(false)}>
+          <button
+            type="button"
+            onClick={() => setShowAppPreference(false)}
+            aria-label="Back to main profile"
+          >
             <img
               src={back}
-              alt="back"
+              alt=""
               className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
             />
           </button>
@@ -321,12 +350,12 @@ const Profile = () => {
             {
               label: "Notification",
               val: isSwitchOn,
-              set: () => setIsSwitchOn(!isSwitchOn),
+              set: () => setIsSwitchOn((prev) => !prev),
             },
             {
               label: "Auto-Login",
-              val: SwitchAuto,
-              set: () => setSwitchAuto(!SwitchAuto),
+              val: switchAuto,
+              set: () => setSwitchAuto((prev) => !prev),
             },
           ].map(({ label, val, set }) => (
             <div
@@ -338,10 +367,14 @@ const Profile = () => {
               }`}
             >
               <p className="font-medium text-[18px]">{label}</p>
-              <button onClick={set}>
+              <button
+                type="button"
+                onClick={set}
+                aria-label={`Toggle ${label}`}
+              >
                 <img
                   src={val ? sthOn : sth}
-                  alt="toggle"
+                  alt=""
                   className="w-[34px] h-[20px]"
                 />
               </button>
@@ -354,7 +387,7 @@ const Profile = () => {
     );
   }
 
-  // ── Edit Profile Screen ──────────────────────────────────────────
+  // --- Sub-View: Edit Profile Screen ---
   if (showTeacherProfile) {
     return (
       <div
@@ -363,17 +396,21 @@ const Profile = () => {
         }`}
       >
         <div className="flex items-center gap-4 px-5 pt-6 pb-2">
-          <button onClick={() => setShowTeacherProfile(false)}>
+          <button
+            type="button"
+            onClick={() => setShowTeacherProfile(false)}
+            aria-label="Back"
+          >
             <img
               src={back}
-              alt="back"
+              alt=""
               className={`w-6 h-6 ${isDarkMode ? "invert" : ""}`}
             />
           </button>
           <h2 className="text-[20px] font-medium">Edit Profile</h2>
         </div>
 
-        {/* Avatar */}
+        {/* Profile Avatar */}
         <div className="flex items-center justify-center mt-4 relative w-fit mx-auto">
           <input
             type="file"
@@ -384,16 +421,18 @@ const Profile = () => {
           />
           <img
             src={tempImage || profileImage || ed}
-            alt="profile"
+            alt="User Avatar"
             className="w-[75px] h-[75px] object-cover rounded-full"
           />
           <button
-            onClick={() => fileInputRef.current.click()}
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
             className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-md bg-[#D9D9D9] border border-[#D9D9D9] flex items-center justify-center"
+            aria-label="Change photo"
           >
             <img
               src={pn}
-              alt="edit"
+              alt=""
               className={`w-4 h-4 ${isDarkMode ? "invert" : ""}`}
             />
           </button>
@@ -404,15 +443,15 @@ const Profile = () => {
         </p>
 
         <div className="px-5 mt-4 flex flex-col gap-4">
-          {/* Full Name */}
+          {/* Full Name Input */}
           <div>
-            <h2
-              className={`font-medium text-[16px] mb-1 ${
+            <label
+              className={`block font-medium text-[16px] mb-1 ${
                 isDarkMode ? "text-white" : "text-[#303030]"
               }`}
             >
               Full Name
-            </h2>
+            </label>
             <input
               type="text"
               value={tempFullName}
@@ -420,7 +459,7 @@ const Profile = () => {
                 setTempFullName(e.target.value);
                 setHasChanges(true);
               }}
-              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[16px] ${
                 isDarkMode
                   ? "border border-gray-800 bg-[#121212] text-white"
                   : "border border-black/10 text-[#303030]"
@@ -428,23 +467,23 @@ const Profile = () => {
             />
           </div>
 
-          {/* Email */}
+          {/* Email Input */}
           <div>
-            <h2
-              className={`font-medium text-[16px] mb-1 ${
+            <label
+              className={`block font-medium text-[16px] mb-1 ${
                 isDarkMode ? "text-white" : "text-[#303030]"
               }`}
             >
               Email
-            </h2>
+            </label>
             <input
-              type="text"
+              type="email"
               value={tempEmail}
               onChange={(e) => {
                 setTempEmail(e.target.value);
                 setHasChanges(true);
               }}
-              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[16px] ${
                 isDarkMode
                   ? "border border-gray-800 bg-[#121212] text-white"
                   : "border border-black/10 text-[#303030]"
@@ -452,50 +491,48 @@ const Profile = () => {
             />
           </div>
 
-          {/* Mobile Number */}
+          {/* Mobile Number Input */}
           <div>
-            <h2
-              className={`font-medium text-[16px] mb-1 ${
+            <label
+              className={`block font-medium text-[16px] mb-1 ${
                 isDarkMode ? "text-white" : "text-[#303030]"
               }`}
             >
               Mobile Number
-            </h2>
+            </label>
             {!isEditingPhone ? (
               <FieldRow
                 value={`${savedCode} ${savedNumber}`}
-                onEdit={openEdit}
+                onEdit={openPhoneEdit}
               />
             ) : (
               <div className="flex flex-col gap-2 mt-2">
                 <div className="flex gap-2">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[11px] text-gray-400">
-                      Area code
-                    </label>
+                    <span className="text-[11px] text-gray-400">Area code</span>
                     <input
                       ref={codeRef}
                       type="text"
                       value={areaCode}
                       onChange={handleAreaCodeChange}
-                      onKeyDown={handleKeyDown}
+                      onKeyDown={handlePhoneKeyDown}
                       maxLength={6}
                       placeholder="+234"
-                      className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[14px] outline-none ${
+                      className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[16px] outline-none ${
                         isDarkMode ? "bg-[#121212] text-white" : ""
                       }`}
                     />
                   </div>
                   <div className="flex flex-col gap-1 flex-1">
-                    <label className="text-[11px] text-gray-400">Number</label>
+                    <span className="text-[11px] text-gray-400">Number</span>
                     <input
                       type="text"
                       value={phoneNum}
                       onChange={(e) => setPhoneNum(e.target.value)}
-                      onKeyDown={handleKeyDown}
+                      onKeyDown={handlePhoneKeyDown}
                       maxLength={15}
                       placeholder="703 543 2234"
-                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none ${
+                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[16px] outline-none ${
                         isDarkMode ? "bg-[#121212] text-white" : ""
                       }`}
                     />
@@ -504,7 +541,10 @@ const Profile = () => {
                 {phoneError && (
                   <p className="text-[12px] text-red-500">{phoneError}</p>
                 )}
-                <SaveCancel onSave={handlePhoneSave} onCancel={closeEdit} />
+                <SaveCancel
+                  onSave={handlePhoneSave}
+                  onCancel={closePhoneEdit}
+                />
               </div>
             )}
             {phoneToast && (
@@ -514,15 +554,15 @@ const Profile = () => {
             )}
           </div>
 
-          {/* Gender */}
+          {/* Gender Select */}
           <div>
-            <h2
-              className={`font-medium text-[16px] mb-1 ${
+            <label
+              className={`block font-medium text-[16px] mb-1 ${
                 isDarkMode ? "text-white" : "text-[#303030]"
               }`}
             >
               Gender
-            </h2>
+            </label>
             <FieldRow
               value={genderValue}
               onEdit={() => {
@@ -534,11 +574,8 @@ const Profile = () => {
               <div className="flex flex-col gap-2 mt-2">
                 <select
                   value={tempGender}
-                  onChange={(e) => {
-                    setTempGender(e.target.value);
-                    setHasChanges(true);
-                  }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] ${
+                  onChange={(e) => setTempGender(e.target.value)}
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[16px] ${
                     isDarkMode ? "bg-[#121212] text-white" : "bg-white"
                   }`}
                 >
@@ -550,6 +587,7 @@ const Profile = () => {
                   onSave={() => {
                     setGenderValue(tempGender);
                     setIsEditingGender(false);
+                    setHasChanges(true);
                   }}
                   onCancel={() => setIsEditingGender(false)}
                 />
@@ -557,15 +595,15 @@ const Profile = () => {
             )}
           </div>
 
-          {/* Class */}
+          {/* Class Field */}
           <div>
-            <h2
-              className={`font-medium text-[16px] mb-1 ${
+            <label
+              className={`block font-medium text-[16px] mb-1 ${
                 isDarkMode ? "text-white" : "text-[#303030]"
               }`}
             >
               Class
-            </h2>
+            </label>
             <FieldRow
               value={classValue}
               onEdit={() => {
@@ -578,11 +616,8 @@ const Profile = () => {
                 <input
                   type="text"
                   value={tempClass}
-                  onChange={(e) => {
-                    setTempClass(e.target.value);
-                    setHasChanges(true);
-                  }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                  onChange={(e) => setTempClass(e.target.value)}
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[16px] ${
                     isDarkMode ? "bg-[#121212] text-white" : ""
                   }`}
                 />
@@ -590,6 +625,7 @@ const Profile = () => {
                   onSave={() => {
                     setClassValue(tempClass);
                     setIsEditingClass(false);
+                    setHasChanges(true);
                   }}
                   onCancel={() => setIsEditingClass(false)}
                 />
@@ -597,15 +633,15 @@ const Profile = () => {
             )}
           </div>
 
-          {/* Age */}
+          {/* Age Field */}
           <div>
-            <h2
-              className={`font-medium text-[16px] mb-1 ${
+            <label
+              className={`block font-medium text-[16px] mb-1 ${
                 isDarkMode ? "text-white" : "text-[#303030]"
               }`}
             >
               Age
-            </h2>
+            </label>
             <FieldRow
               value={ageValue}
               onEdit={() => {
@@ -620,11 +656,8 @@ const Profile = () => {
                   value={tempAge}
                   min="1"
                   max="100"
-                  onChange={(e) => {
-                    setTempAge(e.target.value);
-                    setHasChanges(true);
-                  }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                  onChange={(e) => setTempAge(e.target.value)}
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[16px] ${
                     isDarkMode ? "bg-[#121212] text-white" : ""
                   }`}
                 />
@@ -632,6 +665,7 @@ const Profile = () => {
                   onSave={() => {
                     setAgeValue(tempAge);
                     setIsEditingAge(false);
+                    setHasChanges(true);
                   }}
                   onCancel={() => setIsEditingAge(false)}
                 />
@@ -640,40 +674,31 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Success notification */}
+        {/* Success Toast */}
         {showSaveToast && (
-          <>
-            <style>{`
-            @keyframes toast-in {
-              from { opacity: 0; transform: translate(-50%, -16px); }
-              to   { opacity: 1; transform: translate(-50%, 0); }
-            }
-            .animate-toast { animation: toast-in 0.3s ease-out; }
-          `}</style>
-            <div
-              role="status"
-              className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-40px)] max-w-[390px] px-4 py-3 rounded-[10px] shadow-lg flex items-center gap-3 bg-[#22C55E] text-white text-[14px] font-medium animate-toast"
+          <div
+            role="status"
+            className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-40px)] max-w-[390px] px-4 py-3 rounded-[10px] shadow-lg flex items-center gap-3 bg-[#22C55E] text-white text-[14px] font-medium animate-toast"
+          >
+            <svg
+              className="w-5 h-5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
             >
-              <svg
-                className="w-5 h-5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              <span>Your changes have been made successfully</span>
-            </div>
-          </>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.5"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            <span>Your changes have been saved successfully</span>
+          </div>
         )}
 
-        {/* Save Changes */}
+        {/* Sticky Footer Save Button */}
         <div
           className={`fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4 z-10 ${
             isDarkMode
@@ -682,6 +707,7 @@ const Profile = () => {
           }`}
         >
           <button
+            type="button"
             disabled={!hasChanges || isSaving}
             onClick={handleSaveChanges}
             className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-colors flex items-center justify-center gap-2 ${
@@ -723,13 +749,31 @@ const Profile = () => {
     );
   }
 
-  // ── Main Profile Screen ──────────────────────────────────────────
+  // --- Main View: Profile Menu ---
   return (
     <div
       className={`min-h-screen w-full max-w-[430px] min-w-[320px] mx-auto pb-24 transition-colors duration-200 ${
         isDarkMode ? "bg-[#000000] text-white" : "bg-white text-gray-900"
       }`}
     >
+      <style>{`
+        @keyframes slide-up {
+          from { transform: translateY(100%); }
+          to   { transform: translateY(0); }
+        }
+        @keyframes slide-down {
+          from { transform: translateY(0); }
+          to   { transform: translateY(100%); }
+        }
+        @keyframes toast-in {
+          from { opacity: 0; transform: translate(-50%, -16px); }
+          to   { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .animate-toast      { animation: toast-in 0.3s ease-out; }
+        .animate-slide-up   { animation: slide-up 0.4s cubic-bezier(0.32,0.72,0,1); }
+        .animate-slide-down { animation: slide-down 0.4s cubic-bezier(0.32,0.72,0,1) forwards; }
+      `}</style>
+
       <div className="px-5 pt-6">
         <h1
           className={`font-bold text-[20px] mb-5 ${
@@ -739,7 +783,7 @@ const Profile = () => {
           Profile
         </h1>
 
-        {/* User header: avatar + name + email */}
+        {/* User Header */}
         <div className="flex items-center gap-4 mb-11">
           <img
             src={profileImage || ed}
@@ -764,7 +808,7 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Menu cards (the first card sits flush under the header spacing) */}
+        {/* Options Menu */}
         <div className="-mt-[22px]">
           <MenuRow
             icon={tpi}
@@ -784,20 +828,21 @@ const Profile = () => {
           <MenuRow icon={hs} label="Help and Support" onClick={() => {}} />
         </div>
 
-        {/* Log out */}
-        <div
+        {/* Logout trigger */}
+        <button
+          type="button"
           onClick={() => setShowLogoutModal(true)}
-          className="flex items-center gap-4 mt-10 pl-3 py-2 cursor-pointer"
+          className="flex items-center gap-4 mt-10 pl-3 py-2 cursor-pointer w-full text-left"
         >
           <img src={logout} alt="" className="w-6 h-6 flex-shrink-0" />
-          <p
+          <span
             className={`font-medium text-[18px] ${
               isDarkMode ? "text-red-500" : "text-[#FF0000]"
             }`}
           >
             Log out
-          </p>
-        </div>
+          </span>
+        </button>
       </div>
 
       {/* Logout Modal */}
@@ -808,13 +853,13 @@ const Profile = () => {
               className={`absolute inset-0 ${
                 isDarkMode ? "bg-black/80" : "bg-black/40"
               }`}
-              onClick={handleClose}
+              onClick={handleCloseModal}
             />
           )}
           <div
             className={`relative w-full max-w-[430px] rounded-t-[20px] px-6 pt-6 pb-8 shadow-2xl overflow-y-auto max-h-[90vh] mb-[65px] transition-colors duration-200 ${
               isDarkMode ? "bg-[#121212] text-white" : "bg-white text-gray-900"
-            } ${isClosing ? "animate-slide-down" : "animate-slide-up"}`}
+            } ${isClosingModal ? "animate-slide-down" : "animate-slide-up"}`}
           >
             <div
               className={`w-10 h-1 rounded-full mx-auto mb-5 ${
@@ -839,6 +884,7 @@ const Profile = () => {
             </p>
             <div className="flex flex-col gap-3">
               <button
+                type="button"
                 onClick={() => {
                   setShowLogoutModal(false);
                   navigate("/role");
@@ -848,7 +894,8 @@ const Profile = () => {
                 Yes, Logout
               </button>
               <button
-                onClick={handleClose}
+                type="button"
+                onClick={handleCloseModal}
                 className={`w-full h-[52px] border rounded-[10px] text-[18px] font-medium active:opacity-80 cursor-pointer ${
                   isDarkMode
                     ? "border-red-900/40 text-red-400 bg-red-950/20"
@@ -861,24 +908,6 @@ const Profile = () => {
           </div>
         </div>
       )}
-
-      <style>{`
-        @keyframes slide-up {
-          from { transform: translateY(100%); }
-          to   { transform: translateY(0); }
-        }
-        @keyframes slide-down {
-          from { transform: translateY(0); }
-          to   { transform: translateY(100%); }
-        }
-        @keyframes toast-in {
-          from { opacity: 0; transform: translate(-50%, -16px); }
-          to   { opacity: 1; transform: translate(-50%, 0); }
-        }
-        .animate-toast      { animation: toast-in 0.3s ease-out; }
-        .animate-slide-up   { animation: slide-up   0.8s cubic-bezier(0.32,0.72,0,1); }
-        .animate-slide-down { animation: slide-down 1.4s cubic-bezier(0.32,0.72,0,1) forwards; }
-      `}</style>
 
       <BottomNavigation />
     </div>
