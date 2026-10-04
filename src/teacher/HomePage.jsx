@@ -34,7 +34,7 @@ import ch from "../assets/choose.svg";
 import BottomNavigation from "../components/BottomNavigation";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
-import { getAuthToken, authErrorMessage } from "./utils/auth";
+import { getAuthToken, authErrorMessage } from "../utils/auth";
 import parentImg1 from "../assets/divine.svg";
 import parentImg2 from "../assets/Shayla.svg";
 import parentImg3 from "../assets/Tamara.svg";
@@ -94,7 +94,14 @@ const normalizeStudent = (s) => {
     : "/default-avatar.png";
 
   return {
-    id: String(s.studentId || s.studentID || s.student_id || s._id || s.id),
+    id: String(
+      s.studentCode ||
+        s.studentId ||
+        s.studentID ||
+        s.student_id ||
+        s._id ||
+        s.id,
+    ),
     name:
       s.fullName ||
       s.name ||
@@ -105,28 +112,49 @@ const normalizeStudent = (s) => {
   };
 };
 
-// Field names sent to the backend when adding a student.
-// If your API expects different keys, rename them here — nothing else changes.
-const buildStudentFormData = ({
+// What the backend asks for when adding a student (from its validation
+// errors): firstName, lastName, studentCode (3+ characters) and dateOfBirth
+// (ISO 8601). The other form fields are sent as optional extras; if the
+// backend says one of them "should not exist", it is dropped automatically
+// (see handleSaveStudent), so the request still goes through.
+const splitFullName = (fullName) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] || "",
+    lastName: parts.slice(1).join(" "),
+  };
+};
+
+// Local calendar date as YYYY-MM-DD (avoids the off-by-one-day shift that
+// toISOString() can cause in some timezones)
+const toIsoDate = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const buildStudentPayload = ({
   name,
   dob,
   gender,
   id,
-  file,
   studentClass,
   session,
   term,
 }) => {
-  const fd = new FormData();
-  fd.append("name", name);
-  fd.append("dateOfBirth", dob.toISOString());
-  fd.append("gender", gender);
-  fd.append("studentId", id);
-  fd.append("class", studentClass);
-  fd.append("academicSession", session);
-  fd.append("term", term);
-  if (file) fd.append("photo", file);
-  return fd;
+  const { firstName, lastName } = splitFullName(name);
+  return {
+    firstName,
+    lastName,
+    studentCode: id,
+    dateOfBirth: toIsoDate(dob),
+    // optional extras
+    gender,
+    class: studentClass,
+    academicSession: session,
+    term,
+  };
 };
 
 // ── Follows the device's light/dark mode and reacts live when it changes ──
@@ -436,25 +464,53 @@ const HomePage = () => {
       const accessToken = getAuthToken(contextToken);
       if (!accessToken) throw new Error(authErrorMessage(contextToken));
 
-      const res = await fetch(STUDENTS_API_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: "application/json",
-          // No "Content-Type" on purpose: this request sends a photo, so the
-          // body is FormData and the browser sets the multipart type itself.
-        },
-        body: buildStudentFormData({
-          name: studentNameAdd.trim(),
-          dob: studentDOB,
-          gender: selectedGender,
-          id: studentID.trim(),
-          file: selectedFile,
-          studentClass: studentClass.trim(),
-          session: academicSession.trim(),
-          term: selectedTerm,
-        }),
+      const payload = buildStudentPayload({
+        name: studentNameAdd,
+        dob: studentDOB,
+        gender: selectedGender,
+        id: studentID.trim(),
+        studentClass: studentClass.trim(),
+        session: academicSession.trim(),
+        term: selectedTerm,
       });
+
+      if (!payload.lastName) {
+        throw new Error("Please enter the student's first and last name.");
+      }
+
+      // Send as JSON. If the backend rejects an optional field with
+      // "property X should not exist", drop it and try again.
+      let res;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        res = await fetch(STUDENTS_API_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok || res.status !== 400) break;
+
+        let errBody = {};
+        try {
+          errBody = await res.clone().json();
+        } catch (_) {
+          break;
+        }
+        const messages = Array.isArray(errBody.message)
+          ? errBody.message
+          : [errBody.message].filter(Boolean);
+        const rejected = messages
+          .map((m) => /^property (\S+) should not exist/.exec(m)?.[1])
+          .filter(Boolean);
+        if (rejected.length === 0) break;
+
+        console.warn("Backend does not accept these fields:", rejected);
+        rejected.forEach((key) => delete payload[key]);
+      }
 
       if (!res.ok) {
         let message = "Could not add student. Please try again.";
@@ -463,7 +519,8 @@ const HomePage = () => {
         } else {
           try {
             const errBody = await res.json();
-            message = errBody?.message || errBody?.error || message;
+            const raw = errBody?.message || errBody?.error || message;
+            message = Array.isArray(raw) ? raw.join(", ") : raw;
           } catch (_) {
             // keep the default message
           }
