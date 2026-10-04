@@ -76,7 +76,28 @@ const Login = () => {
 
       // Saves the access token (accessToken / access_token / token) so the
       // teacher pages can send it in the Authorization header.
-      saveTokenFromResponse(data);
+      const savedToken = saveTokenFromResponse(data);
+
+      // TEMPORARY diagnostic (remove once login works): records only the
+      // NAMES of the fields in the login response, never their values.
+      try {
+        localStorage.setItem(
+          "loginDebug",
+          JSON.stringify({
+            tokenSaved: Boolean(savedToken),
+            responseKeys: Object.keys(data || {}),
+            nestedKeys: Object.fromEntries(
+              Object.entries(data || {})
+                .filter(
+                  ([, v]) => v && typeof v === "object" && !Array.isArray(v),
+                )
+                .map(([k, v]) => [k, Object.keys(v)]),
+            ),
+          }),
+        );
+      } catch (_) {
+        // ignore
+      }
 
       navigate("/teacher/home");
     } catch (err) {

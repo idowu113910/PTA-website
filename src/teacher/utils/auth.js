@@ -86,7 +86,16 @@ export const getAuthToken = (contextToken) => {
   return "";
 };
 
-export const authErrorMessage = (contextToken) =>
-  getAuthToken(contextToken)
-    ? "The server rejected your login. Please log out and log in again."
-    : "You are not logged in on this device. Please log in again.";
+export const authErrorMessage = (contextToken) => {
+  if (getAuthToken(contextToken)) {
+    return "The server rejected your login. Please log out and log in again.";
+  }
+  // TEMPORARY diagnostic (remove once login works)
+  const debug = localStorage.getItem("loginDebug");
+  return (
+    "You are not logged in on this device. Please log in again. " +
+    (debug
+      ? `[login info: ${debug}]`
+      : "[login info: none - the updated login page has not run on this device]")
+  );
+};
