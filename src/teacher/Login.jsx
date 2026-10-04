@@ -6,6 +6,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
 import app from "../assets/Apple.svg";
+import { saveTokenFromResponse } from "../utils/auth";
 
 const LOGIN_ENDPOINT = "https://pta-wdln.onrender.com/api/auth/teacher/login";
 
@@ -72,9 +73,10 @@ const Login = () => {
         localStorage.setItem("fullName", data.fullName);
       }
       localStorage.setItem("userEmail", formData.workEmail);
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
+
+      // Saves the access token (accessToken / access_token / token) so the
+      // teacher pages can send it in the Authorization header.
+      saveTokenFromResponse(data);
 
       navigate("/teacher/home");
     } catch (err) {

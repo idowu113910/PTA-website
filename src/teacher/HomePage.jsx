@@ -34,6 +34,7 @@ import ch from "../assets/choose.svg";
 import BottomNavigation from "../components/BottomNavigation";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
+import { getAuthToken, authErrorMessage } from "../utils/auth";
 import parentImg1 from "../assets/divine.svg";
 import parentImg2 from "../assets/Shayla.svg";
 import parentImg3 from "../assets/Tamara.svg";
@@ -73,92 +74,6 @@ const RESTORABLE_SCREENS = [
 // ── Students API ─────────────────────────────────────────────────────────
 const API_ORIGIN = "https://pta-wdln.onrender.com";
 const STUDENTS_API_URL = `${API_ORIGIN}/api/teachers/students`;
-
-// The endpoint answers 401 without a valid login token, so every request
-// below goes through authFetch, which finds the token and attaches it.
-const TOKEN_FIELDS = [
-  "token",
-  "accessToken",
-  "access_token",
-  "jwt",
-  "authToken",
-];
-
-const isJwt = (v) =>
-  typeof v === "string" && /^eyJ[\w-]+\.[\w-]+\.[\w-]*$/.test(v);
-
-// Searches a parsed object (a few levels deep) for a token field
-const findTokenDeep = (obj, depth = 0) => {
-  if (!obj || typeof obj !== "object" || depth > 3) return "";
-  for (const field of TOKEN_FIELDS) {
-    if (typeof obj[field] === "string" && obj[field].length > 10) {
-      return obj[field];
-    }
-  }
-  for (const value of Object.values(obj)) {
-    if (isJwt(value)) return value;
-    const found = findTokenDeep(value, depth + 1);
-    if (found) return found;
-  }
-  return "";
-};
-
-const tokenFromValue = (raw) => {
-  if (!raw) return "";
-  if (isJwt(raw)) return raw;
-  try {
-    const parsed = JSON.parse(raw);
-    if (typeof parsed === "string") return isJwt(parsed) ? parsed : "";
-    return findTokenDeep(parsed);
-  } catch (_) {
-    return "";
-  }
-};
-
-// Looks for the login token: first the app's user context (if it exposes
-// one), then well-known storage keys, then every stored value.
-const getAuthToken = (contextToken) => {
-  if (typeof contextToken === "string" && contextToken.length > 10) {
-    return contextToken;
-  }
-  for (const storage of [localStorage, sessionStorage]) {
-    for (const key of TOKEN_FIELDS) {
-      const raw = storage.getItem(key);
-      if (raw) {
-        const cleaned = raw.replace(/^"|"$/g, "");
-        if (cleaned.length > 10) return cleaned;
-      }
-    }
-    for (let i = 0; i < storage.length; i++) {
-      const found = tokenFromValue(storage.getItem(storage.key(i)));
-      if (found) return found;
-    }
-  }
-  return "";
-};
-
-// fetch() with the login token attached. If the server rejects the
-// "Bearer <token>" form, it retries once with the bare token.
-const authFetch = async (url, options = {}, contextToken) => {
-  const token = getAuthToken(contextToken);
-  const send = (authValue) =>
-    fetch(url, {
-      ...options,
-      headers: {
-        ...(options.headers || {}),
-        ...(authValue ? { Authorization: authValue } : {}),
-      },
-    });
-
-  let res = await send(token ? `Bearer ${token}` : "");
-  if (res.status === 401 && token) res = await send(token);
-  return res;
-};
-
-const authErrorMessage = (contextToken) =>
-  getAuthToken(contextToken)
-    ? "The server rejected your login. Please log out and log in again."
-    : "You are not logged in on this device. Please log in again.";
 
 // Accepts the common response shapes: [...], { students: [...] }, { data: [...] }
 const extractStudentList = (data) => {
@@ -391,14 +306,16 @@ const HomePage = () => {
     setIsLoadingStudents(true);
     setStudentsError("");
     try {
-      const res = await authFetch(
-        STUDENTS_API_URL,
-        {
-          method: "GET",
-          headers: { Accept: "application/json" },
+      const accessToken = getAuthToken(contextToken);
+      if (!accessToken) throw new Error(authErrorMessage(contextToken));
+
+      const res = await fetch(STUDENTS_API_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
         },
-        contextToken,
-      );
+      });
       if (!res.ok) {
         throw new Error(
           res.status === 401
@@ -516,26 +433,28 @@ const HomePage = () => {
     setSaveStudentError("");
 
     try {
-      const res = await authFetch(
-        STUDENTS_API_URL,
-        {
-          method: "POST",
-          // No Content-Type header on purpose — the browser sets the
-          // multipart boundary automatically for FormData.
-          headers: { Accept: "application/json" },
-          body: buildStudentFormData({
-            name: studentNameAdd.trim(),
-            dob: studentDOB,
-            gender: selectedGender,
-            id: studentID.trim(),
-            file: selectedFile,
-            studentClass: studentClass.trim(),
-            session: academicSession.trim(),
-            term: selectedTerm,
-          }),
+      const accessToken = getAuthToken(contextToken);
+      if (!accessToken) throw new Error(authErrorMessage(contextToken));
+
+      const res = await fetch(STUDENTS_API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+          // No "Content-Type" on purpose: this request sends a photo, so the
+          // body is FormData and the browser sets the multipart type itself.
         },
-        contextToken,
-      );
+        body: buildStudentFormData({
+          name: studentNameAdd.trim(),
+          dob: studentDOB,
+          gender: selectedGender,
+          id: studentID.trim(),
+          file: selectedFile,
+          studentClass: studentClass.trim(),
+          session: academicSession.trim(),
+          term: selectedTerm,
+        }),
+      });
 
       if (!res.ok) {
         let message = "Could not add student. Please try again.";
