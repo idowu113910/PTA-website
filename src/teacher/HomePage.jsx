@@ -34,7 +34,7 @@ import ch from "../assets/choose.svg";
 import BottomNavigation from "../components/BottomNavigation";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
-import { getAuthToken, authErrorMessage } from "../utils/auth";
+import { getAuthToken, authErrorMessage } from "./utils/auth";
 import parentImg1 from "../assets/divine.svg";
 import parentImg2 from "../assets/Shayla.svg";
 import parentImg3 from "../assets/Tamara.svg";

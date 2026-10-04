@@ -6,7 +6,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import fb from "../assets/facebook.svg";
 import goo from "../assets/Google.svg";
 import app from "../assets/Apple.svg";
-import { saveTokenFromResponse } from "../utils/auth";
+import { saveTokenFromResponse } from "./utils/auth";
 
 const LOGIN_ENDPOINT = "https://pta-wdln.onrender.com/api/auth/teacher/login";
 

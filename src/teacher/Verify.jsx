@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import back from "../assets/back2.svg";
 import ED from "../assets/ED role.svg";
-import { saveTokenFromResponse } from "../utils/auth";
+import { saveTokenFromResponse } from "./utils/auth";
 
 const CODE_LENGTH = 6;
 const RESEND_ENDPOINT = "https://pta-wdln.onrender.com/api/auth/resend-code";
