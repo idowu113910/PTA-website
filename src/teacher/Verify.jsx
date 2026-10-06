@@ -157,7 +157,7 @@ const TeacherVerifyEmail = () => {
       // authenticated requests can send it later.
       saveTokenFromResponse(data);
 
-      navigate("/teacher/login");
+      navigate("/teacher/home");
     } catch (err) {
       if (err instanceof TypeError) {
         setErrorMsg(
