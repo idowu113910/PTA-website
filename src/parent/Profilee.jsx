@@ -886,6 +886,13 @@ const Profile = () => {
               <button
                 type="button"
                 onClick={() => {
+                  // Remember that this device already has an account so the
+                  // role select sends the user to the login page next time
+                  try {
+                    localStorage.setItem("hasAccount", "true");
+                  } catch (_) {
+                    // storage unavailable — ignore
+                  }
                   setShowLogoutModal(false);
                   navigate("/role");
                 }}
