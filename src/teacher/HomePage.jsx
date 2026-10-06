@@ -84,24 +84,14 @@ const extractStudentList = (data) => {
   return [];
 };
 
-// Turns whatever image value the backend returns (full URL, relative path with
-// or without a leading slash, or an object with a url) into a usable src
-const resolveImageUrl = (raw) => {
-  const value =
-    raw && typeof raw === "object"
-      ? raw.url || raw.secure_url || raw.path || ""
-      : raw;
-  if (!value || typeof value !== "string") return "/default-avatar.png";
-  if (/^(https?:)?\/\//i.test(value) || /^(data|blob):/i.test(value)) {
-    return value;
-  }
-  return `${API_ORIGIN}${value.startsWith("/") ? "" : "/"}${value}`;
-};
-
 // Converts whatever the backend returns into the shape the UI uses
 const normalizeStudent = (s) => {
   const rawImage = s.photo || s.image || s.profileImage || s.avatar || "";
-  const image = resolveImageUrl(rawImage);
+  const image = rawImage
+    ? rawImage.startsWith("/")
+      ? `${API_ORIGIN}${rawImage}`
+      : rawImage
+    : "/default-avatar.png";
 
   return {
     id: String(
@@ -134,10 +124,6 @@ const REQUIRED_STUDENT_KEYS = [
   "studentCode",
   "dateOfBirth",
 ];
-
-// Field names the backend might use for the uploaded photo. They are tried in
-// order if the server answers "Unexpected field".
-const PHOTO_FIELD_NAMES = ["photo", "image", "profileImage", "avatar"];
 
 const splitFullName = (fullName) => {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -180,17 +166,6 @@ const buildStudentPayload = ({
   if (session) payload.academicSession = session;
   if (term) payload.term = term;
   return payload;
-};
-
-// Builds the multipart body used when a photo is attached: every text field
-// plus the image file under the given field name
-const buildStudentFormData = (payload, file, photoField) => {
-  const formData = new FormData();
-  Object.entries(payload).forEach(([key, value]) => {
-    formData.append(key, value);
-  });
-  formData.append(photoField, file, file.name);
-  return formData;
 };
 
 // Reads the validation messages out of a backend error body
@@ -538,44 +513,27 @@ const HomePage = () => {
         term: selectedTerm,
       });
 
-      // With a photo the request is multipart/form-data (file attached);
-      // without one it is plain JSON. If the backend rejects an optional field
-      // (it "should not exist" or its value is not accepted), drop it and try
-      // again. If it says "Unexpected field" for the photo, the next possible
-      // photo field name is tried. Network failures (e.g. the server waking
-      // up) are retried too.
+      // Send as JSON. If the backend rejects an optional field (it "should
+      // not exist" or its value is not accepted), drop it and try again.
+      // Network failures (e.g. the server waking up) are retried too.
       let res;
       let networkRetries = 0;
-      let photoFieldIndex = 0;
-      for (let attempt = 0; attempt < 10; attempt++) {
-        const headers = {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: "application/json",
-        };
-        let body;
-        if (selectedFile) {
-          // Do NOT set Content-Type here: the browser adds the multipart
-          // boundary itself.
-          body = buildStudentFormData(
-            payload,
-            selectedFile,
-            PHOTO_FIELD_NAMES[photoFieldIndex],
-          );
-        } else {
-          headers["Content-Type"] = "application/json";
-          body = JSON.stringify(payload);
-        }
-
+      for (let attempt = 0; attempt < 6; attempt++) {
         try {
           res = await fetch(STUDENTS_API_URL, {
             method: "POST",
-            headers,
-            body,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
           });
         } catch (_) {
           if (networkRetries < 2) {
             networkRetries++;
             await wait(3000);
+            attempt--;
             continue;
           }
           throw new Error(
@@ -591,20 +549,7 @@ const HomePage = () => {
         } catch (_) {
           break;
         }
-        const messages = getErrorMessages(errBody);
-
-        // The server did not expect the photo under this field name
-        if (selectedFile && messages.some((m) => /unexpected field/i.test(m))) {
-          if (photoFieldIndex < PHOTO_FIELD_NAMES.length - 1) {
-            photoFieldIndex++;
-            continue;
-          }
-          throw new Error(
-            "The server did not accept the photo upload. Please check the photo field name expected by the backend.",
-          );
-        }
-
-        const rejected = findRejectedKeys(messages, payload);
+        const rejected = findRejectedKeys(getErrorMessages(errBody), payload);
         if (rejected.length === 0) break;
 
         console.warn("Backend does not accept these fields:", rejected);
