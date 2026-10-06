@@ -308,9 +308,11 @@ const HomePage = () => {
   }, [location]);
 
   // Keep html/body background, color-scheme and the browser top bar
-  // (status bar) in sync with the device's light/dark mode.
+  // (status bar) in sync with the device's light/dark mode. The Mark
+  // Attendance screen is always black (#000000).
   useEffect(() => {
-    const bg = isDarkMode ? "#000000" : "#FFFFFF";
+    const useBlack = isDarkMode || screen === "mark-attendance";
+    const bg = useBlack ? "#000000" : "#FFFFFF";
     const root = document.documentElement;
 
     const prevRootBg = root.style.backgroundColor;
@@ -322,7 +324,7 @@ const HomePage = () => {
 
     root.style.backgroundColor = bg;
     document.body.style.backgroundColor = bg;
-    root.style.colorScheme = isDarkMode ? "dark" : "light";
+    root.style.colorScheme = useBlack ? "dark" : "light";
 
     // Replace any existing theme-color tags so iOS/Android re-read the color
     document
@@ -342,7 +344,7 @@ const HomePage = () => {
         .forEach((m) => m.remove());
       originalMetas.forEach((m) => document.head.appendChild(m));
     };
-  }, [isDarkMode]);
+  }, [isDarkMode, screen]);
 
   // Save the current screen so a refresh returns to it. The saved value is
   // cleared when the teacher navigates away from this page (unmount), so
@@ -1105,325 +1107,343 @@ const HomePage = () => {
       )}
 
       {/* ================= MARK ATTENDANCE SCREEN ================= */}
-      {screen === "mark-attendance" && (
-        <div
-          className={`pb-28 transition-colors duration-200 ${
-            isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
-          }`}
-        >
-          <div
-            className="flex items-center gap-4 px-5 py-5 cursor-pointer"
-            onClick={() => setScreen("home")}
-          >
-            <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
-            <h2
-              className={`text-[20px] font-medium ${
-                isDarkMode ? "text-white" : "text-black"
-              }`}
-            >
-              Attendance
-            </h2>
-          </div>
-
-          {/* Class Attendance header */}
-          <div className="px-5">
-            <div className="flex justify-between items-center">
-              <p
-                className={`font-semibold text-[15px] ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
-              >
-                Class Attendance
-              </p>
-              <p
-                className={`font-medium text-[13px] ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
-              >
-                Today
-              </p>
-            </div>
-          </div>
-
-          {/* Date navigator — outlined, transparent in dark mode */}
-          <div
-            className={`rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3 ${
-              isDarkMode
-                ? "border border-gray-600 bg-transparent"
-                : "border border-[#E3E3E3] bg-white"
-            }`}
-          >
-            <img
-              src={back3}
-              alt="previous day"
-              onClick={handlePrevDay}
-              className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
-                isDarkMode ? "invert" : ""
-              }`}
-            />
-            <p
-              className={`font-medium text-[13px] text-center truncate mx-2 ${
-                isDarkMode ? "text-white" : "text-black"
-              }`}
-            >
-              {formatDate(currentDate)}
-            </p>
-            <img
-              src={front}
-              alt="next day"
-              onClick={handleNextDay}
-              className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
-                isDarkMode ? "invert" : ""
-              }`}
-            />
-          </div>
-
-          {/* Today's Summary — outlined, transparent in dark mode */}
-          <div
-            className={`rounded-[6px] mx-5 mt-4 p-3 ${
-              isDarkMode
-                ? "border border-gray-600 bg-transparent"
-                : "border border-[#E3E3E3] bg-white"
-            }`}
-          >
-            <h2
-              className={`font-medium text-[13px] mb-2 ${
-                isDarkMode ? "text-white" : "text-black"
-              }`}
-            >
-              Today's Summary
-            </h2>
-            <div className="flex justify-between gap-2">
-              {/* Present */}
-              <div
-                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
-                  isDarkMode
-                    ? "border border-gray-700 bg-transparent"
-                    : "bg-[#F0FDF4]"
-                }`}
-              >
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
-                    isDarkMode ? "bg-green-900/40" : "bg-green-100"
-                  }`}
-                >
-                  <svg
-                    className="w-4 h-4 text-green-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <p
-                  className={`text-[14px] font-semibold ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  {counts.present}
-                </p>
-                <p
-                  className={`text-[12px] font-medium ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  Present
-                </p>
-              </div>
-
-              {/* Absent */}
-              <div
-                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
-                  isDarkMode
-                    ? "border border-gray-700 bg-transparent"
-                    : "bg-[#FDF1F1]"
-                }`}
-              >
-                <img src={pre} alt="" className="w-6 h-6 mb-1" />
-                <p
-                  className={`text-[14px] font-semibold ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  {counts.absent}
-                </p>
-                <p
-                  className={`text-[12px] font-medium ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  Absent
-                </p>
-              </div>
-
-              {/* Late */}
-              <div
-                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
-                  isDarkMode
-                    ? "border border-gray-700 bg-transparent"
-                    : "bg-[#FEFCE9]"
-                }`}
-              >
-                <img src={late} alt="" className="w-6 h-6 mb-1" />
-                <p
-                  className={`text-[14px] font-semibold ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  {counts.late}
-                </p>
-                <p
-                  className={`text-[12px] font-medium ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  Late
-                </p>
-              </div>
-            </div>
-
+      {/* Always black (#000000): isDarkMode is forced to true inside this
+          screen only, so it ignores the device's light/dark setting. */}
+      {screen === "mark-attendance" &&
+        (() => {
+          const isDarkMode = true;
+          return (
             <div
-              className={`w-full h-[1px] mt-3 mb-2 ${
-                isDarkMode ? "bg-gray-700" : "bg-[#D9D9D9]"
-              }`}
-            />
-
-            <div className="flex justify-between">
-              <p
-                className={`font-medium text-[14px] ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
-              >
-                Total Students
-              </p>
-              <p
-                className={`font-semibold text-[14px] ${
-                  isDarkMode ? "text-white" : "text-black"
-                }`}
-              >
-                {students.length}
-              </p>
-            </div>
-          </div>
-
-          <p
-            className={`font-medium text-[17px] px-5 mt-4 mb-2 ${
-              isDarkMode ? "text-white" : "text-black"
-            }`}
-          >
-            Student List
-          </p>
-
-          {/* Loading / error / empty states for the student list */}
-          {isLoadingStudents && students.length === 0 && (
-            <p
-              className={`px-5 text-[13px] ${
-                isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+              className={`min-h-screen pb-28 transition-colors duration-200 ${
+                isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
               }`}
             >
-              Loading students...
-            </p>
-          )}
-          {studentsError && (
-            <p className="px-5 text-[13px] text-red-500">{studentsError}</p>
-          )}
-          {!isLoadingStudents && !studentsError && students.length === 0 && (
-            <p
-              className={`px-5 text-[13px] ${
-                isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
-              }`}
-            >
-              No students yet. Add a student to see them here.
-            </p>
-          )}
-
-          {/* Student rows — outlined, transparent in dark mode */}
-          <div className="px-5 flex flex-col gap-3">
-            {students.map((student) => (
               <div
-                key={student.id}
-                className={`rounded-[6px] px-3 py-2 flex items-center justify-between ${
+                className="flex items-center gap-4 px-5 py-5 cursor-pointer"
+                onClick={() => setScreen("home")}
+              >
+                <img
+                  src={back}
+                  alt="back"
+                  className={isDarkMode ? "invert" : ""}
+                />
+                <h2
+                  className={`text-[20px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Attendance
+                </h2>
+              </div>
+
+              {/* Class Attendance header */}
+              <div className="px-5">
+                <div className="flex justify-between items-center">
+                  <p
+                    className={`font-semibold text-[15px] ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
+                    Class Attendance
+                  </p>
+                  <p
+                    className={`font-medium text-[13px] ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
+                    Today
+                  </p>
+                </div>
+              </div>
+
+              {/* Date navigator — outlined, transparent in dark mode */}
+              <div
+                className={`rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3 ${
                   isDarkMode
                     ? "border border-gray-600 bg-transparent"
                     : "border border-[#E3E3E3] bg-white"
                 }`}
               >
-                {/* Left: avatar + info */}
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <img
-                    src={student.image}
-                    alt={student.name}
-                    className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
-                  />
-                  <div className="min-w-0">
+                <img
+                  src={back3}
+                  alt="previous day"
+                  onClick={handlePrevDay}
+                  className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
+                    isDarkMode ? "invert" : ""
+                  }`}
+                />
+                <p
+                  className={`font-medium text-[13px] text-center truncate mx-2 ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  {formatDate(currentDate)}
+                </p>
+                <img
+                  src={front}
+                  alt="next day"
+                  onClick={handleNextDay}
+                  className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
+                    isDarkMode ? "invert" : ""
+                  }`}
+                />
+              </div>
+
+              {/* Today's Summary — outlined, transparent in dark mode */}
+              <div
+                className={`rounded-[6px] mx-5 mt-4 p-3 ${
+                  isDarkMode
+                    ? "border border-gray-600 bg-transparent"
+                    : "border border-[#E3E3E3] bg-white"
+                }`}
+              >
+                <h2
+                  className={`font-medium text-[13px] mb-2 ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Today's Summary
+                </h2>
+                <div className="flex justify-between gap-2">
+                  {/* Present */}
+                  <div
+                    className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                      isDarkMode
+                        ? "border border-gray-700 bg-transparent"
+                        : "bg-[#F0FDF4]"
+                    }`}
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
+                        isDarkMode ? "bg-green-900/40" : "bg-green-100"
+                      }`}
+                    >
+                      <svg
+                        className="w-4 h-4 text-green-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
                     <p
-                      className={`font-semibold text-[14px] truncate ${
+                      className={`text-[14px] font-semibold ${
                         isDarkMode ? "text-white" : "text-black"
                       }`}
                     >
-                      {student.name}
+                      {counts.present}
                     </p>
                     <p
-                      className={`font-medium text-[12px] ${
-                        isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+                      className={`text-[12px] font-medium ${
+                        isDarkMode ? "text-white" : "text-black"
                       }`}
                     >
-                      ID: {student.id}
+                      Present
+                    </p>
+                  </div>
+
+                  {/* Absent */}
+                  <div
+                    className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                      isDarkMode
+                        ? "border border-gray-700 bg-transparent"
+                        : "bg-[#FDF1F1]"
+                    }`}
+                  >
+                    <img src={pre} alt="" className="w-6 h-6 mb-1" />
+                    <p
+                      className={`text-[14px] font-semibold ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {counts.absent}
+                    </p>
+                    <p
+                      className={`text-[12px] font-medium ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
+                      Absent
+                    </p>
+                  </div>
+
+                  {/* Late */}
+                  <div
+                    className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                      isDarkMode
+                        ? "border border-gray-700 bg-transparent"
+                        : "bg-[#FEFCE9]"
+                    }`}
+                  >
+                    <img src={late} alt="" className="w-6 h-6 mb-1" />
+                    <p
+                      className={`text-[14px] font-semibold ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {counts.late}
+                    </p>
+                    <p
+                      className={`text-[12px] font-medium ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
+                      Late
                     </p>
                   </div>
                 </div>
 
-                {/* Right: status icons */}
-                <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                  <img
-                    src={
-                      studentAttendance[student.id] === "present" ? presC : pres
-                    }
-                    onClick={() => handleStatusClick(student.id, "present")}
-                    className="cursor-pointer w-7 h-7"
-                    alt="present"
-                  />
-                  <img
-                    src={
-                      studentAttendance[student.id] === "absent" ? absC : abs
-                    }
-                    onClick={() => handleStatusClick(student.id, "absent")}
-                    className="cursor-pointer w-7 h-7"
-                    alt="absent"
-                  />
-                  <img
-                    src={
-                      studentAttendance[student.id] === "late" ? lateC : latee
-                    }
-                    onClick={() => handleStatusClick(student.id, "late")}
-                    className="cursor-pointer w-7 h-7"
-                    alt="late"
-                  />
+                <div
+                  className={`w-full h-[1px] mt-3 mb-2 ${
+                    isDarkMode ? "bg-gray-700" : "bg-[#D9D9D9]"
+                  }`}
+                />
+
+                <div className="flex justify-between">
+                  <p
+                    className={`font-medium text-[14px] ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
+                    Total Students
+                  </p>
+                  <p
+                    className={`font-semibold text-[14px] ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
+                    {students.length}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Fixed Save Button */}
-          <div
-            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
-              isDarkMode
-                ? "bg-[#000000] border-gray-800"
-                : "bg-white border-[#E3E3E3]"
-            }`}
-          >
-            <button className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
-              Save
-            </button>
-          </div>
-        </div>
-      )}
+              <p
+                className={`font-medium text-[17px] px-5 mt-4 mb-2 ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Student List
+              </p>
+
+              {/* Loading / error / empty states for the student list */}
+              {isLoadingStudents && students.length === 0 && (
+                <p
+                  className={`px-5 text-[13px] ${
+                    isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+                  }`}
+                >
+                  Loading students...
+                </p>
+              )}
+              {studentsError && (
+                <p className="px-5 text-[13px] text-red-500">{studentsError}</p>
+              )}
+              {!isLoadingStudents &&
+                !studentsError &&
+                students.length === 0 && (
+                  <p
+                    className={`px-5 text-[13px] ${
+                      isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+                    }`}
+                  >
+                    No students yet. Add a student to see them here.
+                  </p>
+                )}
+
+              {/* Student rows — outlined, transparent in dark mode */}
+              <div className="px-5 flex flex-col gap-3">
+                {students.map((student) => (
+                  <div
+                    key={student.id}
+                    className={`rounded-[6px] px-3 py-2 flex items-center justify-between ${
+                      isDarkMode
+                        ? "border border-gray-600 bg-transparent"
+                        : "border border-[#E3E3E3] bg-white"
+                    }`}
+                  >
+                    {/* Left: avatar + info */}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <img
+                        src={student.image}
+                        alt={student.name}
+                        className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <p
+                          className={`font-semibold text-[14px] truncate ${
+                            isDarkMode ? "text-white" : "text-black"
+                          }`}
+                        >
+                          {student.name}
+                        </p>
+                        <p
+                          className={`font-medium text-[12px] ${
+                            isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+                          }`}
+                        >
+                          ID: {student.id}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Right: status icons */}
+                    <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                      <img
+                        src={
+                          studentAttendance[student.id] === "present"
+                            ? presC
+                            : pres
+                        }
+                        onClick={() => handleStatusClick(student.id, "present")}
+                        className="cursor-pointer w-7 h-7"
+                        alt="present"
+                      />
+                      <img
+                        src={
+                          studentAttendance[student.id] === "absent"
+                            ? absC
+                            : abs
+                        }
+                        onClick={() => handleStatusClick(student.id, "absent")}
+                        className="cursor-pointer w-7 h-7"
+                        alt="absent"
+                      />
+                      <img
+                        src={
+                          studentAttendance[student.id] === "late"
+                            ? lateC
+                            : latee
+                        }
+                        onClick={() => handleStatusClick(student.id, "late")}
+                        className="cursor-pointer w-7 h-7"
+                        alt="late"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Fixed Save Button */}
+              <div
+                className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
+                  isDarkMode
+                    ? "bg-[#000000] border-gray-800"
+                    : "bg-white border-[#E3E3E3]"
+                }`}
+              >
+                <button className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
+                  Save
+                </button>
+              </div>
+            </div>
+          );
+        })()}
 
       {/* ================= ADD GRADE SCREEN ================= */}
       {screen === "add-grade" && (
