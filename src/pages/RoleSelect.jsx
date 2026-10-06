@@ -16,22 +16,27 @@ const RoleSelect = () => {
   const handleNext = () => {
     if (!selectedRole) return;
 
-    // This device already has an account if onboarding data was saved
-    // or a logout left the "hasAccount" flag behind
+    // Check if this device already has saved onboarding data
     const savedName = localStorage.getItem("fullName");
     const savedEmail = localStorage.getItem("userEmail");
-    const hasAccount =
-      localStorage.getItem("hasAccount") === "true" ||
-      (savedName &&
-        savedName.trim() !== "" &&
-        savedEmail &&
-        savedEmail.trim() !== "");
+    const alreadyOnboarded =
+      savedName &&
+      savedName.trim() !== "" &&
+      savedEmail &&
+      savedEmail.trim() !== "";
 
-    // Existing account -> that role's login page. New device -> signup.
     if (selectedRole === "parent") {
-      navigate(hasAccount ? "/parent/login" : "/parent/signup");
+      if (alreadyOnboarded) {
+        navigate("/parent/home");
+      } else {
+        navigate("/parent/signup");
+      }
     } else if (selectedRole === "teacher") {
-      navigate(hasAccount ? "/teacher/login" : "/teacher/signup");
+      if (alreadyOnboarded) {
+        navigate("/teacher/home");
+      } else {
+        navigate("/teacher/signup");
+      }
     }
   };
 
