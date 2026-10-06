@@ -115,13 +115,23 @@ const normalizeStudent = (s) => {
 // What the backend asks for when adding a student (from its validation
 // errors): firstName, lastName, studentCode (3+ characters) and dateOfBirth
 // (ISO 8601). The other form fields are sent as optional extras; if the
-// backend says one of them "should not exist", it is dropped automatically
-// (see handleSaveStudent), so the request still goes through.
+// backend rejects one of them (e.g. "should not exist" or "must be one of
+// the following values"), it is dropped automatically (see
+// handleSaveStudent), so the request still goes through.
+const REQUIRED_STUDENT_KEYS = [
+  "firstName",
+  "lastName",
+  "studentCode",
+  "dateOfBirth",
+];
+
 const splitFullName = (fullName) => {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  const firstName = parts[0] || "";
   return {
-    firstName: parts[0] || "",
-    lastName: parts.slice(1).join(" "),
+    firstName,
+    // If only one name was typed, reuse it so the required lastName is filled
+    lastName: parts.slice(1).join(" ") || firstName,
   };
 };
 
@@ -144,18 +154,48 @@ const buildStudentPayload = ({
   term,
 }) => {
   const { firstName, lastName } = splitFullName(name);
-  return {
+  const payload = {
     firstName,
     lastName,
     studentCode: id,
     dateOfBirth: toIsoDate(dob),
-    // optional extras
-    gender,
-    class: studentClass,
-    academicSession: session,
-    term,
   };
+  // optional extras — only sent when filled in
+  if (gender) payload.gender = gender;
+  if (studentClass) payload.class = studentClass;
+  if (session) payload.academicSession = session;
+  if (term) payload.term = term;
+  return payload;
 };
+
+// Reads the validation messages out of a backend error body
+const getErrorMessages = (errBody) => {
+  const raw = errBody?.message ?? errBody?.error;
+  return (Array.isArray(raw) ? raw : [raw]).filter(
+    (m) => typeof m === "string",
+  );
+};
+
+// Finds which payload fields the backend complained about and that we are
+// allowed to drop: anything it says "should not exist", plus any optional
+// field whose value it rejected (message starts with the field name).
+const findRejectedKeys = (messages, payload) => {
+  const rejected = new Set();
+  messages.forEach((m) => {
+    const notExist = /^property (\S+) should not exist/.exec(m)?.[1];
+    if (notExist && notExist in payload) rejected.add(notExist);
+
+    Object.keys(payload).forEach((key) => {
+      if (REQUIRED_STUDENT_KEYS.includes(key)) return;
+      if (m.startsWith(`${key} `) || m.includes(`property ${key} `)) {
+        rejected.add(key);
+      }
+    });
+  });
+  return Array.from(rejected);
+};
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // ── Follows the device's light/dark mode and reacts live when it changes ──
 function useSystemDarkMode() {
@@ -443,15 +483,12 @@ const HomePage = () => {
     setIsTermOpen(false);
   };
 
+  // Only what the backend actually requires: name, date of birth, student ID.
+  // Gender, photo, class, session and term are optional.
   const isStudentFormValid =
     studentNameAdd.trim() !== "" &&
     studentDOB !== null &&
-    selectedGender !== "" &&
-    studentID.trim() !== "" &&
-    selectedFile !== null &&
-    studentClass.trim() !== "" &&
-    academicSession.trim() !== "" &&
-    selectedTerm !== "";
+    studentID.trim() !== "";
 
   // Sends the new student to the backend, then refreshes the list so the
   // student shows up on the Mark Attendance screen.
@@ -474,23 +511,33 @@ const HomePage = () => {
         term: selectedTerm,
       });
 
-      if (!payload.lastName) {
-        throw new Error("Please enter the student's first and last name.");
-      }
-
-      // Send as JSON. If the backend rejects an optional field with
-      // "property X should not exist", drop it and try again.
+      // Send as JSON. If the backend rejects an optional field (it "should
+      // not exist" or its value is not accepted), drop it and try again.
+      // Network failures (e.g. the server waking up) are retried too.
       let res;
-      for (let attempt = 0; attempt < 5; attempt++) {
-        res = await fetch(STUDENTS_API_URL, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
+      let networkRetries = 0;
+      for (let attempt = 0; attempt < 6; attempt++) {
+        try {
+          res = await fetch(STUDENTS_API_URL, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+        } catch (_) {
+          if (networkRetries < 2) {
+            networkRetries++;
+            await wait(3000);
+            attempt--;
+            continue;
+          }
+          throw new Error(
+            "Could not reach the server. Please check your connection and try again.",
+          );
+        }
 
         if (res.ok || res.status !== 400) break;
 
@@ -500,12 +547,7 @@ const HomePage = () => {
         } catch (_) {
           break;
         }
-        const messages = Array.isArray(errBody.message)
-          ? errBody.message
-          : [errBody.message].filter(Boolean);
-        const rejected = messages
-          .map((m) => /^property (\S+) should not exist/.exec(m)?.[1])
-          .filter(Boolean);
+        const rejected = findRejectedKeys(getErrorMessages(errBody), payload);
         if (rejected.length === 0) break;
 
         console.warn("Backend does not accept these fields:", rejected);
