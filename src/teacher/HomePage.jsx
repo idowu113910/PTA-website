@@ -100,7 +100,9 @@ const resolveImageUrl = (raw) => {
 
 // Converts whatever the backend returns into the shape the UI uses
 const normalizeStudent = (s) => {
-  const rawImage = s.photo || s.image || s.profileImage || s.avatar || "";
+  // The backend sends the photo as `avatarUrl` (null when no photo is stored)
+  const rawImage =
+    s.avatarUrl || s.photo || s.image || s.profileImage || s.avatar || "";
   const image = resolveImageUrl(rawImage);
 
   return {
@@ -1427,6 +1429,10 @@ const HomePage = () => {
                       <img
                         src={student.image}
                         alt={student.name}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/default-avatar.png";
+                        }}
                         className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
                       />
                       <div className="min-w-0">
