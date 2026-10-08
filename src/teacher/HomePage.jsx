@@ -71,6 +71,30 @@ const RESTORABLE_SCREENS = [
   "add-students",
 ];
 
+// The student list is saved here (localStorage survives closing the browser)
+// so it still shows even when the login token has expired.
+// If you have a logout function, call localStorage.removeItem(STUDENTS_CACHE_KEY)
+// there so the next person to log in on this device doesn't see this list.
+const STUDENTS_CACHE_KEY = "teacherStudentsCache";
+
+const loadCachedStudents = () => {
+  try {
+    const raw = localStorage.getItem(STUDENTS_CACHE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+};
+
+const saveCachedStudents = (list) => {
+  try {
+    localStorage.setItem(STUDENTS_CACHE_KEY, JSON.stringify(list));
+  } catch (_) {
+    // storage unavailable or full — ignore
+  }
+};
+
 // ── Students API ─────────────────────────────────────────────────────────
 const API_ORIGIN = "https://pta-wdln.onrender.com";
 const STUDENTS_API_URL = `${API_ORIGIN}/api/teachers/students`;
@@ -282,7 +306,9 @@ const HomePage = () => {
   const mainScreens = ["home", "report", "message", "calendar", "profile"];
   const [isOn, setIsOn] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
-  const [students, setStudents] = useState([]);
+  // Starts from the saved list so students show instantly, even offline or
+  // with an expired login
+  const [students, setStudents] = useState(() => loadCachedStudents());
   const [isLoadingStudents, setIsLoadingStudents] = useState(false);
   const [studentsError, setStudentsError] = useState("");
   const [isSavingStudent, setIsSavingStudent] = useState(false);
@@ -398,7 +424,9 @@ const HomePage = () => {
     fileInputRef.current.click();
   };
 
-  // Load the teacher's students from the backend
+  // Load the teacher's students from the backend. A successful load replaces
+  // the saved list. If the load fails (expired login, no network, server
+  // asleep) the saved list stays on screen instead of being wiped.
   const fetchStudents = async () => {
     setIsLoadingStudents(true);
     setStudentsError("");
@@ -421,9 +449,14 @@ const HomePage = () => {
         );
       }
       const data = await res.json();
-      setStudents(extractStudentList(data).map(normalizeStudent));
+      const list = extractStudentList(data).map(normalizeStudent);
+      setStudents(list);
+      saveCachedStudents(list);
     } catch (err) {
-      setStudentsError(err.message || "Could not load students.");
+      // Only show an error when there is no saved list to fall back on
+      if (loadCachedStudents().length === 0) {
+        setStudentsError(err.message || "Could not load students.");
+      }
     } finally {
       setIsLoadingStudents(false);
     }
