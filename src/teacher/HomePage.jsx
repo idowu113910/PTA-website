@@ -77,6 +77,13 @@ const RESTORABLE_SCREENS = [
 // there so the next person to log in on this device doesn't see this list.
 const STUDENTS_CACHE_KEY = "teacherStudentsCache";
 
+// When the teacher taps Save on the Mark Attendance screen, the students shown
+// there are stored under this key. The Report page reads the same key to show
+// them on its own Mark Attendance screen.
+// If you have a logout function, call localStorage.removeItem(SAVED_ATTENDANCE_KEY)
+// there as well.
+const SAVED_ATTENDANCE_KEY = "teacherAttendanceStudents";
+
 const loadCachedStudents = () => {
   try {
     const raw = localStorage.getItem(STUDENTS_CACHE_KEY);
@@ -497,6 +504,16 @@ const HomePage = () => {
       newCounts[status] = newCounts[status] + 1;
       return newCounts;
     });
+  };
+
+  // Save button on the Mark Attendance screen: stores the students shown there
+  // so the Report page's Mark Attendance screen can display them too.
+  const handleSaveAttendance = () => {
+    try {
+      localStorage.setItem(SAVED_ATTENDANCE_KEY, JSON.stringify(students));
+    } catch (_) {
+      // storage unavailable or full — ignore
+    }
   };
 
   const subjects = [
@@ -1531,7 +1548,10 @@ const HomePage = () => {
                     : "bg-white border-[#E3E3E3]"
                 }`}
               >
-                <button className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
+                <button
+                  onClick={handleSaveAttendance}
+                  className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"
+                >
                   Save
                 </button>
               </div>

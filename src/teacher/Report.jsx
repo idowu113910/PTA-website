@@ -39,6 +39,21 @@ import rr from "../assets/report review.svg";
 
 registerLocale("en-GB", enGB);
 
+// The Home page's Save button on its Mark Attendance screen stores the
+// students under this key. This page reads it to show the same students on
+// its own Mark Attendance screen.
+const SAVED_ATTENDANCE_KEY = "teacherAttendanceStudents";
+
+const loadSavedAttendanceStudents = () => {
+  try {
+    const raw = localStorage.getItem(SAVED_ATTENDANCE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+};
+
 // ── Follows the device's light/dark mode and reacts live when it changes ──
 function useSystemDarkMode() {
   const [isSystemDark, setIsSystemDark] = useState(
@@ -149,6 +164,19 @@ const Report = () => {
     { id: "06206", name: "Tamara Wilson", image: ta },
     { id: "06207", name: "Sean King", image: se },
   ]);
+
+  // Students saved from the Home page's Mark Attendance screen. These are the
+  // ones shown on this page's Mark Attendance screen.
+  const [savedStudents, setSavedStudents] = useState(() =>
+    loadSavedAttendanceStudents(),
+  );
+
+  // Re-read the saved list every time the Mark Attendance screen is opened
+  useEffect(() => {
+    if (screen === "mark-attendance") {
+      setSavedStudents(loadSavedAttendanceStudents());
+    }
+  }, [screen]);
 
   const [studentAttendance, setStudentAttendance] = useState({
     "06201": null,
@@ -669,7 +697,7 @@ const Report = () => {
                   isDarkMode ? "text-white" : "text-black"
                 }`}
               >
-                {students.length}
+                {savedStudents.length}
               </p>
             </div>
           </div>
@@ -682,8 +710,19 @@ const Report = () => {
             Student List
           </p>
 
+          {savedStudents.length === 0 && (
+            <p
+              className={`px-5 text-[13px] ${
+                isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+              }`}
+            >
+              No students yet. Save attendance on the Home page to see students
+              here.
+            </p>
+          )}
+
           <div className="px-5 flex flex-col gap-3">
-            {students.map((student) => (
+            {savedStudents.map((student) => (
               <div
                 key={student.id}
                 className={`rounded-[6px] px-3 py-2 flex items-center justify-between ${
@@ -696,6 +735,10 @@ const Report = () => {
                   <img
                     src={student.image}
                     alt={student.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/default-avatar.png";
+                    }}
                     className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
                   />
                   <div className="min-w-0">
@@ -739,18 +782,6 @@ const Report = () => {
                 </div>
               </div>
             ))}
-          </div>
-
-          <div
-            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
-              isDarkMode
-                ? "bg-[#000000] border-gray-800"
-                : "bg-white border-[#E3E3E3]"
-            }`}
-          >
-            <button className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white">
-              Save
-            </button>
           </div>
         </div>
       )}
