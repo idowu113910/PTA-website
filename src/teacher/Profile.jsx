@@ -14,22 +14,40 @@ import { useUser } from "./UserContext";
 import BottomNavigation from "../components/BottomNavigation";
 import logout from "../assets/logout section.svg";
 
+// iOS Safari zooms into any input / select whose font size is below 16px
+// when it is focused. This inline style keeps every field at 16px so the
+// page never zooms (an inline style can't be overridden by global CSS).
+const noZoom = { fontSize: "16px" };
+
 const Profile = () => {
   // Theme follows the device's light/dark setting only (no manual toggle)
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    );
-  });
+  const [isDarkMode, setIsDarkMode] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
 
   // Listen for device theme preference changes automatically
   useEffect(() => {
+    if (!window.matchMedia) return;
+
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (e) => setIsDarkMode(e.matches);
 
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
+
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
+    };
   }, []);
 
   const {
@@ -416,7 +434,8 @@ const Profile = () => {
                 setTempFullName(e.target.value);
                 setHasChanges(true);
               }}
-              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+              style={noZoom}
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[16px] ${
                 isDarkMode
                   ? "border border-gray-700 bg-[#000000] text-white"
                   : "border border-black/10 text-[#303030]"
@@ -440,7 +459,8 @@ const Profile = () => {
                 setTempEmail(e.target.value);
                 setHasChanges(true);
               }}
-              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[14px] ${
+              style={noZoom}
+              className={`w-full h-[57px] rounded-[8px] px-3 outline-none text-[16px] ${
                 isDarkMode
                   ? "border border-gray-700 bg-[#000000] text-white"
                   : "border border-black/10 text-[#303030]"
@@ -477,7 +497,8 @@ const Profile = () => {
                       onKeyDown={handleKeyDown}
                       maxLength={6}
                       placeholder="+234"
-                      className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[14px] outline-none ${
+                      style={noZoom}
+                      className={`w-[72px] h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-2 text-center text-[16px] outline-none ${
                         isDarkMode ? "bg-[#000000] text-white" : ""
                       }`}
                     />
@@ -491,7 +512,8 @@ const Profile = () => {
                       onKeyDown={handleKeyDown}
                       maxLength={15}
                       placeholder="703 543 2234"
-                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[14px] outline-none ${
+                      style={noZoom}
+                      className={`w-full h-[57px] border-[1.5px] border-[#378ADD] rounded-[8px] px-3 text-[16px] outline-none ${
                         isDarkMode ? "bg-[#000000] text-white" : ""
                       }`}
                     />
@@ -534,7 +556,8 @@ const Profile = () => {
                     setTempGender(e.target.value);
                     setHasChanges(true);
                   }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[14px] ${
+                  style={noZoom}
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 text-[16px] ${
                     isDarkMode ? "bg-[#000000] text-white" : "bg-white"
                   }`}
                 >
@@ -578,7 +601,8 @@ const Profile = () => {
                     setTempClass(e.target.value);
                     setHasChanges(true);
                   }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                  style={noZoom}
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[16px] ${
                     isDarkMode ? "bg-[#000000] text-white" : ""
                   }`}
                 />
@@ -613,6 +637,7 @@ const Profile = () => {
               <div className="flex flex-col gap-2 mt-2">
                 <input
                   type="number"
+                  inputMode="numeric"
                   value={tempAge}
                   min="1"
                   max="100"
@@ -620,7 +645,8 @@ const Profile = () => {
                     setTempAge(e.target.value);
                     setHasChanges(true);
                   }}
-                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[14px] ${
+                  style={noZoom}
+                  className={`w-full h-[57px] border-[1.5px] border-blue-400 rounded-[8px] px-3 outline-none text-[16px] ${
                     isDarkMode ? "bg-[#000000] text-white" : ""
                   }`}
                 />

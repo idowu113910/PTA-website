@@ -1663,7 +1663,7 @@ const HomePage = () => {
                         Successful!
                       </h3>
                       <p className="text-[14px] text-center mb-6 text-gray-400">
-                        Attendance has been saved
+                        Attendance has successfully been saved
                       </p>
                       <button
                         onClick={() => setShowAttendanceSuccess(false)}
