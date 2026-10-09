@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import BottomNavigation from "../components/BottomNavigation";
 import arr from "../assets/arr down.svg";
+import arrDrop from "../assets/arr drop down.svg";
 import ma from "../assets/Attendance.svg";
 import br from "../assets/Bryan.svg";
 import brr from "../assets/behaviour.svg";
@@ -30,7 +31,6 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
 import enGB from "date-fns/locale/en-GB";
-import { useLocation, useNavigate } from "react-router-dom";
 import ch from "../assets/choose.svg";
 import on from "../assets/switch.svg";
 import off from "../assets/off.svg";
@@ -38,12 +38,33 @@ import ana from "../assets/report rewww.svg";
 import rr from "../assets/report review.svg";
 
 registerLocale("en-GB", enGB);
+
 // Every student ID starts with this; the teacher only types the last digit
 const STUDENT_ID_PREFIX = "06020";
 
+// Month / year options for the Date Of Birth calendar header
+const DOB_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+const DOB_YEARS = Array.from(
+  { length: 100 },
+  (_, i) => new Date().getFullYear() - i,
+);
+
 // The Home page's Save button on its Mark Attendance screen stores the
 // students under this key. This page reads it to show the same students on
-// its own Mark Attendance screen.
+// its own Mark Attendance and My Students screens.
 const SAVED_ATTENDANCE_KEY = "teacherAttendanceStudents";
 
 const loadSavedAttendanceStudents = () => {
@@ -90,14 +111,11 @@ function useSystemDarkMode() {
 }
 
 const Report = () => {
-  // Theme comes straight from the device's light/dark setting — no context,
-  // no provider, no manual toggle.
+  // Theme comes straight from the device's light/dark setting
   const isDarkMode = useSystemDarkMode();
 
   // Keep html/body background, color-scheme, and the browser's theme-color
-  // meta tag in sync with the device's light/dark mode, same as the other
-  // teacher screens — this is what makes the Safari status-bar/safe-area
-  // strip repaint immediately instead of lagging behind.
+  // meta tag in sync with the device's light/dark mode.
   useEffect(() => {
     const bg = isDarkMode ? "#000000" : "#FFFFFF";
     const root = document.documentElement;
@@ -134,11 +152,8 @@ const Report = () => {
 
   const [screen, setScreen] = useState("report");
   const mainScreens = ["report"];
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const [currentDate, setCurrentDate] = useState(new Date("2025-06-30"));
-  const [selectedDate, setSelectedDate] = useState(null);
   const [studentDOB, setStudentDOB] = useState(null);
   const [isDOBOpen, setIsDOBOpen] = useState(false);
 
@@ -167,34 +182,20 @@ const Report = () => {
     { id: "06207", name: "Sean King", image: se },
   ]);
 
-  // Students saved from the Home page's Mark Attendance screen. These are the
-  // ones shown on this page's Mark Attendance screen.
+  // Students saved from the Home page's Mark Attendance screen
   const [savedStudents, setSavedStudents] = useState(() =>
     loadSavedAttendanceStudents(),
   );
 
-  // Re-read the saved list every time Mark Attendance or My Students is opened
+  // Re-read the saved list every time Mark Attendance or My Students opens
   useEffect(() => {
     if (screen === "mark-attendance" || screen === "my-students") {
       setSavedStudents(loadSavedAttendanceStudents());
     }
   }, [screen]);
 
-  const [studentAttendance, setStudentAttendance] = useState({
-    "06201": null,
-    "06202": null,
-    "06203": null,
-    "06204": null,
-    "06205": null,
-  });
+  const [studentAttendance, setStudentAttendance] = useState({});
   const [counts, setCounts] = useState({ present: 0, absent: 0, late: 0 });
-
-  const [studentName, setStudentName] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedAssessment, setSelectedAssessment] = useState("");
-  const [selectedGrade, setSelectedGrade] = useState("");
-  const [totalMark, setTotalMark] = useState("");
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [studentNameAdd, setStudentNameAdd] = useState("");
@@ -207,10 +208,9 @@ const Report = () => {
   const [isOn, setIsOn] = useState(false);
   const [comments, setComments] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
 
   const fileInputRef = useRef(null);
-  const genders = ["Male", "Female", "Other"];
+  const genders = ["Male", "Female"];
 
   const [progressBars, setProgressBars] = useState({
     teamwork: 0,
@@ -240,14 +240,6 @@ const Report = () => {
   const [selectedReportType, setSelectedReportType] = useState("");
   const [isReportTypeOpen, setIsReportTypeOpen] = useState(false);
 
-  React.useEffect(() => {
-    const handleGlobalMouseUp = () => setActiveDrag(null);
-    if (activeDrag) {
-      window.addEventListener("mouseup", handleGlobalMouseUp);
-      return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
-    }
-  }, [activeDrag]);
-
   const handleToggle = () => setIsOn(!isOn);
 
   const handleSelectGender = (gender) => {
@@ -267,10 +259,9 @@ const Report = () => {
     if (e.target.files?.[0]) setSelectedFile(e.target.files[0]);
   };
 
-  const handleMouseDown = (skillId) => setActiveDrag(skillId);
-  const handleMouseUp = () => setActiveDrag(null);
-  const handleMouseMove = (e, skillId) => {
-    if (activeDrag !== skillId) return;
+  // Skill sliders use pointer events so they work with a finger as well as
+  // a mouse.
+  const setSliderFromPointer = (e, skillId) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pct = Math.min(
       Math.max(((e.clientX - rect.left) / rect.width) * 100, 0),
@@ -278,14 +269,15 @@ const Report = () => {
     );
     setProgressBars((prev) => ({ ...prev, [skillId]: Math.round(pct) }));
   };
-  const handleSliderClick = (e, skillId) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pct = Math.min(
-      Math.max(((e.clientX - rect.left) / rect.width) * 100, 0),
-      100,
-    );
-    setProgressBars((prev) => ({ ...prev, [skillId]: Math.round(pct) }));
+  const handleSliderDown = (e, skillId) => {
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    setActiveDrag(skillId);
+    setSliderFromPointer(e, skillId);
   };
+  const handleSliderMove = (e, skillId) => {
+    if (activeDrag === skillId) setSliderFromPointer(e, skillId);
+  };
+  const handleSliderUp = () => setActiveDrag(null);
 
   const handleStatusClick = (studentId, status) => {
     const prev = studentAttendance[studentId];
@@ -376,6 +368,8 @@ const Report = () => {
       year: "numeric",
     });
 
+  // The Add Student button only appears once the whole form is filled
+  // (the photo is optional).
   const isStudentFormValid =
     studentNameAdd.trim() !== "" &&
     studentDOB !== null &&
@@ -400,27 +394,56 @@ const Report = () => {
     s.name.toLowerCase().startsWith(searchQuery.toLowerCase()),
   );
 
-  // Shared classes
+  // ── Shared classes (same as the Home page) ──
   // NOTE: inputs use a 16px font on purpose — iOS Safari zooms into any
-  // input whose font size is below 16px when it is focused. The inline
-  // style below is applied to every <input> so global CSS can't shrink it.
+  // input whose font size is below 16px when it is focused.
   const noZoomStyle = { fontSize: "16px" };
-  const inputClass =
-  "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[16px] font-normal focus:outline-none";
-  
-    const formInputClass = `${inputClass} placeholder:text-gray-400 focus:border-[#FF7B17] transition-colors ${
-      isDarkMode
-        ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
-        : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
-    }`;
 
-  const dropdownBtnClass = `w-full h-[52px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
-    isDarkMode
-      ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
-      : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
+  const inputClass =
+    "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[16px] font-normal focus:outline-none";
+
+  const inputClassLight =
+    "border-[#0000001F] bg-white text-[#303030] placeholder:text-[16px] placeholder:text-gray-400 focus:border-[#FF7B17]";
+
+  const inputClassDark =
+    "border-gray-600 bg-transparent text-white placeholder:text-[16px] placeholder:text-gray-400 focus:border-[#FF7B17]";
+
+  const themedInput = `${inputClass} ${
+    isDarkMode ? inputClassDark : inputClassLight
   }`;
-  const fixedBtnWrapper =
-    "fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-[#E3E3E3] px-5 py-3 z-50";
+
+  const dropdownBtnClassLight =
+    "w-full h-[52px] px-3 border border-[#0000001F] rounded-[8px] bg-white flex items-center justify-between text-[14px]";
+  const dropdownBtnClassDark =
+    "w-full h-[52px] px-3 border border-gray-600 rounded-[8px] bg-transparent flex items-center justify-between text-[14px]";
+
+  const dropdownPanelLight =
+    "absolute z-10 mt-1 w-full bg-white border border-[#E5E7EB] rounded-[8px] shadow-md";
+  const dropdownPanelDark =
+    "absolute z-10 mt-1 w-full bg-[#1e1e1e] border border-gray-700 rounded-[8px] shadow-md";
+  const dropdownItemLight =
+    "px-4 py-3 text-[14px] text-[#303030] cursor-pointer hover:bg-[#EFF6FF]";
+  const dropdownItemDark =
+    "px-4 py-3 text-[14px] text-white cursor-pointer hover:bg-[#2a2a2a]";
+
+  const labelClass = `block text-[15px] font-medium mb-2 ${
+    isDarkMode ? "text-white" : "text-[#303030]"
+  }`;
+
+  // Theme-aware dropdown used by the Behaviour and Generate Report screens
+  const dropdownBtn48 = `w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
+    isDarkMode
+      ? "bg-[#1E1E1E] border-[#2A2A2A]"
+      : "bg-[#FCFCFC] border-[#D9D9D9]"
+  }`;
+  const dropdownPanel = `absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
+    isDarkMode
+      ? "bg-[#000000] border-[#2A2A2A] text-white"
+      : "bg-white border-[#E5E7EB] text-gray-900"
+  }`;
+  const dropdownItem = `px-4 py-3 text-[14px] cursor-pointer ${
+    isDarkMode ? "hover:bg-[#1E1E1E]" : "hover:bg-[#EFF6FF]"
+  }`;
 
   return (
     <div
@@ -471,13 +494,7 @@ const Report = () => {
             </button>
 
             {isTermDropdownOpen && (
-              <div
-                className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
-                  isDarkMode
-                    ? "bg-[#000000] border-[#2A2A2A] text-white"
-                    : "bg-white border-[#E5E7EB] text-gray-900"
-                }`}
-              >
+              <div className={dropdownPanel}>
                 {termYears.map((term) => (
                   <div
                     key={term}
@@ -536,7 +553,7 @@ const Report = () => {
       {/* ================= MARK ATTENDANCE ================= */}
       {screen === "mark-attendance" && (
         <div
-          className={`pb-28  ${
+          className={`pb-28 ${
             isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
           }`}
         >
@@ -813,7 +830,7 @@ const Report = () => {
 
       {/* ================= MY STUDENTS ================= */}
       {screen === "my-students" && (
-        <div className="pb-24">
+        <div className={showAddStudent ? "" : "pb-24"}>
           {!showAddStudent ? (
             <>
               {/* Header */}
@@ -874,7 +891,9 @@ const Report = () => {
                 {filteredStudents.map((student) => (
                   <div
                     key={student.id}
-                    className="border border-[#E3E3E3] rounded-[6px] px-3 py-2 flex items-center gap-2"
+                    className={`rounded-[6px] px-3 py-2 flex items-center gap-2 border ${
+                      isDarkMode ? "border-gray-600" : "border-[#E3E3E3]"
+                    }`}
                   >
                     <img
                       src={student.image}
@@ -917,315 +936,496 @@ const Report = () => {
               </div>
             </>
           ) : (
+            /* ============ ADD STUDENT (styled like the Home page) ============ */
             <div
-              className={`pb-28 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
+              className={`relative min-h-screen transition-colors duration-200 ${
+                isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
+              }`}
             >
-              <div className="flex items-center gap-4 px-5 py-5">
-                <img
-                  src={back}
-                  alt="back"
+              <div className="pb-72 overflow-y-auto">
+                <div
+                  className="flex items-center gap-4 px-5 py-5 cursor-pointer"
                   onClick={() => setShowAddStudent(false)}
-                  className={`cursor-pointer ${isDarkMode ? "invert" : ""}`}
-                />
-                <h2 className="text-[20px] font-medium">Add Student</h2>
-              </div>
-
-              <div className="px-5 flex flex-col gap-5">
-                <h4 className="font-semibold text-[17px]">
-                  Student Information
-                </h4>
-
-                {/* Student Name */}
-                <div>
-                  <label className="block text-[15px] font-medium mb-2">
-                    Student Name
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="E.g. John Smith"
-                    value={studentNameAdd}
-                    onChange={(e) => setStudentNameAdd(e.target.value)}
-                    style={noZoomStyle}
-                    className={formInputClass}
+                >
+                  <img
+                    src={back}
+                    alt="back"
+                    className={isDarkMode ? "invert" : ""}
                   />
-                </div>
-
-                {/* DOB — a button (not an input) so iOS never focus-zooms it */}
-                <div>
-                  <label className="block text-[15px] font-medium mb-2">
-                    Date Of Birth
-                  </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsDOBOpen(true)}
-                      style={noZoomStyle}
-                      className={`${formInputClass} cursor-pointer pr-10 text-left ${
-                        studentDOB ? "" : "!text-gray-400"
-                      }`}
-                    >
-                      {studentDOB
-                        ? studentDOB.toLocaleDateString("en-GB")
-                        : "Select date"}
-                    </button>
-                    <img
-                      src={cal}
-                      alt="calendar"
-                      onClick={() => setIsDOBOpen(true)}
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer transition-all ${
-                        isDarkMode ? "brightness-0 invert opacity-80" : ""
-                      }`}
-                    />
-                    {isDOBOpen && (
-                      <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 px-4">
-                        <div
-                          className={`rounded-xl p-4 shadow-lg w-full max-w-[320px] transition-colors ${
-                            isDarkMode
-                              ? "bg-[#1E1E1E] text-white"
-                              : "bg-white text-gray-900"
-                          }`}
-                        >
-                          <DatePicker
-                            selected={studentDOB}
-                            onChange={(d) => {
-                              setStudentDOB(d);
-                              setIsDOBOpen(false);
-                            }}
-                            inline
-                            showPopperArrow={false}
-                            maxDate={new Date()}
-                            locale="en-GB"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setIsDOBOpen(false)}
-                            className="mt-2 px-4 py-2 bg-[#FF7B17] hover:bg-[#E06A10] text-white font-medium rounded-md w-full transition-colors"
-                          >
-                            Close
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Gender */}
-                <div>
-                  <label className="block text-[15px] font-medium mb-2">
-                    Gender
-                  </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsGenderOpen(!isGenderOpen)}
-                      className={`w-full h-[48px] px-3 border rounded-[7px] flex items-center justify-between transition-colors ${
-                        isDarkMode
-                          ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
-                          : "bg-[#FCFCFC] border-[#D9D9D9] text-[#303030]"
-                      }`}
-                    >
-                      <span className={selectedGender ? "" : "text-gray-400"}>
-                        {selectedGender || "Select a gender"}
-                      </span>
-                      <img
-                        src={arr}
-                        alt=""
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isGenderOpen ? "rotate-180" : ""
-                        } ${isDarkMode ? "brightness-0 invert" : ""}`}
-                      />
-                    </button>
-
-                    {isGenderOpen && (
-                      <div
-                        className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
-                          isDarkMode
-                            ? "bg-[#000000] border-[#2A2A2A] text-white"
-                            : "bg-white border-[#E5E7EB] text-gray-900"
-                        }`}
-                      >
-                        {genders.map((g) => (
-                          <div
-                            key={g}
-                            onClick={() => handleSelectGender(g)}
-                            className={`px-4 py-3 text-[14px] cursor-pointer ${
-                              isDarkMode
-                                ? "hover:bg-[#1E1E1E]"
-                                : "hover:bg-[#EFF6FF]"
-                            }`}
-                          >
-                            {g}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Student ID — "06020" is fixed, the teacher types only the last digit */}
-                <div>
-                  <label className="block text-[15px] font-medium mb-2">
-                    Student ID
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    placeholder="E.g. 060201"
-                    value={studentID}
-                    onChange={handleStudentIdChange}
-                    style={noZoomStyle}
-                    className={formInputClass}
-                  />
-                </div>
-
-                {/* Upload Photo */}
-                <div>
-                  <label className="block text-[15px] font-medium mb-2">
-                    Upload Photo
-                  </label>
-                  <div
-                    className={`flex items-center justify-between border rounded-[8px] h-[52px] px-3 cursor-pointer transition-colors ${
-                      isDarkMode
-                        ? "bg-[#1E1E1E] border-[#2A2A2A]"
-                        : "bg-[#FCFCFC] border-[#0000001F]"
+                  <h2
+                    className={`text-[20px] font-medium ${
+                      isDarkMode ? "text-white" : "text-black"
                     }`}
-                    onClick={handleFileClick}
                   >
-                    <span
-                      className={`text-[14px] truncate flex-1 ${
-                        selectedFile ? "" : "text-gray-400"
-                      }`}
-                    >
-                      {selectedFile ? selectedFile.name : "Choose File"}
-                    </span>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <img
-                      src={ch}
-                      alt=""
-                      className={`w-[18px] h-[18px] flex-shrink-0 ml-2 ${
-                        isDarkMode ? "brightness-200" : ""
-                      }`}
-                    />
-                  </div>
+                    Add Student
+                  </h2>
                 </div>
 
-                <h4 className="font-semibold text-[17px] pt-1">
-                  Class & Academic Info
-                </h4>
+                <div className="px-5 flex flex-col gap-5">
+                  <h4
+                    className={`font-semibold text-[17px] ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
+                    Student Information
+                  </h4>
 
-                {/* Class + Session */}
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <label className="block text-[15px] font-medium mb-2">
-                      Class
-                    </label>
+                  {/* Student Name */}
+                  <div>
+                    <label className={labelClass}>Student Name</label>
                     <input
                       type="text"
-                      placeholder="e.g Grade 5"
-                      value={studentClass}
-                      onChange={(e) => setStudentClass(e.target.value)}
+                      placeholder="E.g. John Smith"
+                      value={studentNameAdd}
+                      onChange={(e) => setStudentNameAdd(e.target.value)}
                       style={noZoomStyle}
-                      className={formInputClass}
+                      className={themedInput}
                     />
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-[15px] font-medium mb-2">
-                      Academic Session
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="E.g 2024/2025"
-                      value={academicSession}
-                      onChange={(e) => setAcademicSession(e.target.value)}
-                      style={noZoomStyle}
-                      className={formInputClass}
-                    />
-                  </div>
-                </div>
 
-                {/* Term */}
-                <div>
-                  <label className="block text-[15px] font-medium mb-2">
-                    Term
-                  </label>
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsTermOpen(!isTermOpen)}
-                      className={`w-full h-[52px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
-                        isDarkMode
-                          ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
-                          : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
-                      }`}
-                    >
-                      <span className={selectedTerm ? "" : "text-gray-400"}>
-                        {selectedTerm || "Select Term"}
-                      </span>
-                      <img
-                        src={arr}
-                        alt=""
-                        className={`transition-transform duration-200 ${
-                          isTermOpen ? "rotate-180" : ""
-                        } ${isDarkMode ? "brightness-0 invert" : ""}`}
-                      />
-                    </button>
-
-                    {isTermOpen && (
-                      <div
-                        className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
+                  {/* Date of Birth — a button (not an input) so iOS never focus-zooms it */}
+                  <div>
+                    <label className={labelClass}>Date Of Birth</label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsDOBOpen(true)}
+                        style={noZoomStyle}
+                        className={`w-full h-[52px] rounded-[8px] border px-3 pr-10 text-left focus:outline-none focus:border-[#FF7B17] ${
                           isDarkMode
-                            ? "bg-[#000000] border-[#2A2A2A] text-white"
-                            : "bg-white border-[#E5E7EB] text-gray-900"
+                            ? "border-gray-600 bg-transparent"
+                            : "border-[#0000001F] bg-white"
+                        } ${
+                          studentDOB
+                            ? isDarkMode
+                              ? "text-white"
+                              : "text-[#303030]"
+                            : "text-gray-400"
                         }`}
                       >
-                        {terms.map((t) => (
+                        {studentDOB
+                          ? studentDOB.toLocaleDateString("en-GB")
+                          : "Select date"}
+                      </button>
+                      <img
+                        src={cal}
+                        alt="calendar"
+                        onClick={() => setIsDOBOpen(true)}
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer w-5 h-5 ${
+                          isDarkMode ? "invert" : ""
+                        }`}
+                      />
+                      {isDOBOpen && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 px-4">
                           <div
-                            key={t}
-                            onClick={() => handleSelectTerm(t)}
-                            className={`px-4 py-3 text-[14px] cursor-pointer ${
-                              isDarkMode
-                                ? "hover:bg-[#1E1E1E]"
-                                : "hover:bg-[#EFF6FF]"
+                            className={`rounded-xl p-4 shadow-lg w-full max-w-[320px] ${
+                              isDarkMode ? "bg-[#1e1e1e]" : "bg-white"
                             }`}
                           >
-                            {t}
+                            <div
+                              className={`dob-picker ${isDarkMode ? "dob-dark" : ""}`}
+                            >
+                              <style>{`
+                                .dob-picker .react-datepicker {
+                                  width: 100%;
+                                  border: none;
+                                  background: transparent;
+                                  font-family: inherit;
+                                }
+                                .dob-picker .react-datepicker__month-container {
+                                  float: none;
+                                  width: 100%;
+                                }
+                                .dob-picker .react-datepicker__header {
+                                  background: transparent;
+                                  border-bottom: none;
+                                  padding: 0;
+                                }
+                                .dob-picker .react-datepicker__month {
+                                  margin: 0;
+                                }
+                                .dob-picker .react-datepicker__day-names,
+                                .dob-picker .react-datepicker__week {
+                                  display: flex;
+                                  justify-content: space-around;
+                                }
+                                .dob-picker .react-datepicker__day-name,
+                                .dob-picker .react-datepicker__day {
+                                  width: 2rem;
+                                  line-height: 2rem;
+                                  margin: 0.1rem;
+                                  border-radius: 9999px;
+                                  font-size: 13px;
+                                  color: #303030;
+                                }
+                                .dob-picker .react-datepicker__day-name {
+                                  color: #9c9c9c;
+                                  font-weight: 500;
+                                }
+                                .dob-picker .react-datepicker__day:hover {
+                                  background: #fff0e5;
+                                }
+                                .dob-picker .react-datepicker__day--keyboard-selected {
+                                  background: transparent;
+                                  color: inherit;
+                                }
+                                .dob-picker .react-datepicker__day--selected,
+                                .dob-picker .react-datepicker__day--selected:hover {
+                                  background: #ff7b17;
+                                  color: #ffffff;
+                                  font-weight: 600;
+                                }
+                                .dob-picker .react-datepicker__day--today {
+                                  font-weight: 700;
+                                  box-shadow: inset 0 0 0 1px #ff7b17;
+                                }
+                                .dob-picker .react-datepicker__day--disabled,
+                                .dob-picker .react-datepicker__day--disabled:hover {
+                                  color: #c4c4c4;
+                                  background: transparent;
+                                  cursor: not-allowed;
+                                }
+                                .dob-picker .react-datepicker__day--outside-month {
+                                  visibility: hidden;
+                                }
+                                .dob-header {
+                                  display: flex;
+                                  gap: 8px;
+                                  margin-bottom: 10px;
+                                }
+                                .dob-header select {
+                                  flex: 1;
+                                  min-width: 0;
+                                  height: 40px;
+                                  padding: 0 8px;
+                                  border-radius: 8px;
+                                  border: 1px solid #0000001f;
+                                  background: #ffffff;
+                                  color: #303030;
+                                  font-size: 16px;
+                                  font-weight: 500;
+                                  outline: none;
+                                }
+                                .dob-header select:focus {
+                                  border-color: #ff7b17;
+                                }
+                                .dob-dark .react-datepicker__day-name {
+                                  color: #9ca3af;
+                                }
+                                .dob-dark .react-datepicker__day {
+                                  color: #ffffff;
+                                }
+                                .dob-dark .react-datepicker__day:hover {
+                                  background: #2a2a2a;
+                                }
+                                .dob-dark .react-datepicker__day--selected,
+                                .dob-dark .react-datepicker__day--selected:hover {
+                                  background: #ff7b17;
+                                  color: #ffffff;
+                                }
+                                .dob-dark .react-datepicker__day--disabled,
+                                .dob-dark .react-datepicker__day--disabled:hover {
+                                  color: #4b5563;
+                                  background: transparent;
+                                }
+                                .dob-dark .dob-header select {
+                                  background: #2a2a2a;
+                                  border-color: #4b5563;
+                                  color: #ffffff;
+                                }
+                              `}</style>
+                              <DatePicker
+                                selected={studentDOB}
+                                onChange={(date) => {
+                                  setStudentDOB(date);
+                                  setIsDOBOpen(false);
+                                }}
+                                inline
+                                showPopperArrow={false}
+                                maxDate={new Date()}
+                                locale="en-GB"
+                                renderCustomHeader={({
+                                  date,
+                                  changeYear,
+                                  changeMonth,
+                                }) => (
+                                  <div className="dob-header">
+                                    <select
+                                      value={date.getMonth()}
+                                      onChange={(e) =>
+                                        changeMonth(Number(e.target.value))
+                                      }
+                                    >
+                                      {DOB_MONTHS.map((month, index) => (
+                                        <option
+                                          key={month}
+                                          value={index}
+                                          disabled={
+                                            date.getFullYear() ===
+                                              new Date().getFullYear() &&
+                                            index > new Date().getMonth()
+                                          }
+                                        >
+                                          {month}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <select
+                                      value={date.getFullYear()}
+                                      onChange={(e) =>
+                                        changeYear(Number(e.target.value))
+                                      }
+                                    >
+                                      {DOB_YEARS.map((year) => (
+                                        <option key={year} value={year}>
+                                          {year}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setIsDOBOpen(false)}
+                              className="mt-2 px-4 py-2 bg-[#3B82F6] text-white rounded-md w-full"
+                            >
+                              Close
+                            </button>
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label className={labelClass}>Gender</label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsGenderOpen(!isGenderOpen)}
+                        className={
+                          isDarkMode
+                            ? dropdownBtnClassDark
+                            : dropdownBtnClassLight
+                        }
+                      >
+                        <span
+                          className={
+                            selectedGender
+                              ? isDarkMode
+                                ? "text-white"
+                                : "text-[#303030]"
+                              : "text-gray-400"
+                          }
+                        >
+                          {selectedGender || "Select a gender"}
+                        </span>
+                        <img
+                          src={arrDrop}
+                          alt="dropdown"
+                          className={`transition-transform duration-200 ${
+                            isGenderOpen ? "rotate-180" : ""
+                          } ${isDarkMode ? "invert" : ""}`}
+                        />
+                      </button>
+                      {isGenderOpen && (
+                        <div
+                          className={
+                            isDarkMode ? dropdownPanelDark : dropdownPanelLight
+                          }
+                        >
+                          {genders.map((gender) => (
+                            <div
+                              key={gender}
+                              onClick={() => handleSelectGender(gender)}
+                              className={
+                                isDarkMode
+                                  ? dropdownItemDark
+                                  : dropdownItemLight
+                              }
+                            >
+                              {gender}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Student ID — "06020" is fixed, the teacher types only the last digit */}
+                  <div>
+                    <label className={labelClass}>Student ID</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      placeholder="E.g. 060201"
+                      value={studentID}
+                      onChange={handleStudentIdChange}
+                      style={noZoomStyle}
+                      className={themedInput}
+                    />
+                  </div>
+
+                  {/* Upload Photo */}
+                  <div>
+                    <label className={labelClass}>Upload Photo</label>
+                    <div
+                      className={`flex items-center justify-between rounded-[8px] h-[52px] px-3 cursor-pointer ${
+                        isDarkMode
+                          ? "border border-gray-600 bg-transparent"
+                          : "border border-[#0000001F] bg-white"
+                      }`}
+                      onClick={handleFileClick}
+                    >
+                      <span
+                        className={`text-[14px] truncate flex-1 ${
+                          selectedFile
+                            ? isDarkMode
+                              ? "text-white"
+                              : "text-[#303030]"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {selectedFile ? selectedFile.name : "Choose File"}
+                      </span>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <img
+                        src={ch}
+                        alt=""
+                        className={`w-[18px] h-[18px] flex-shrink-0 ml-2 ${
+                          isDarkMode ? "invert" : ""
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  <h4
+                    className={`font-semibold text-[17px] pt-2 ${
+                      isDarkMode ? "text-white" : "text-black"
+                    }`}
+                  >
+                    Class & Academic Info
+                  </h4>
+
+                  {/* Class + Academic Session side by side */}
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <label className={labelClass}>Class</label>
+                      <input
+                        type="text"
+                        placeholder="e.g Grade 5"
+                        value={studentClass}
+                        onChange={(e) => setStudentClass(e.target.value)}
+                        style={noZoomStyle}
+                        className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] focus:outline-none focus:border-[#FF7B17] ${
+                          isDarkMode
+                            ? "border-gray-600 bg-transparent text-white placeholder:text-gray-400"
+                            : "border-[#0000001F] placeholder:text-gray-400"
+                        }`}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className={labelClass}>Academic Session</label>
+                      <input
+                        type="text"
+                        placeholder="E.g 2024/2025"
+                        value={academicSession}
+                        onChange={(e) => setAcademicSession(e.target.value)}
+                        style={noZoomStyle}
+                        className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] focus:outline-none focus:border-[#FF7B17] ${
+                          isDarkMode
+                            ? "border-gray-600 bg-transparent text-white placeholder:text-gray-400"
+                            : "border-[#0000001F] placeholder:text-gray-400"
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Term */}
+                  <div>
+                    <label className={labelClass}>Term</label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsTermOpen(!isTermOpen)}
+                        className={
+                          isDarkMode
+                            ? dropdownBtnClassDark
+                            : dropdownBtnClassLight
+                        }
+                      >
+                        <span
+                          className={
+                            selectedTerm
+                              ? isDarkMode
+                                ? "text-white"
+                                : "text-[#303030]"
+                              : "text-gray-400"
+                          }
+                        >
+                          {selectedTerm || "Select Term"}
+                        </span>
+                        <img
+                          src={arrDrop}
+                          alt="dropdown"
+                          className={`transition-transform duration-200 ${
+                            isTermOpen ? "rotate-180" : ""
+                          } ${isDarkMode ? "invert" : ""}`}
+                        />
+                      </button>
+                      {isTermOpen && (
+                        <div
+                          className={
+                            isDarkMode ? dropdownPanelDark : dropdownPanelLight
+                          }
+                        >
+                          {terms.map((term) => (
+                            <div
+                              key={term}
+                              onClick={() => handleSelectTerm(term)}
+                              className={
+                                isDarkMode
+                                  ? dropdownItemDark
+                                  : dropdownItemLight
+                              }
+                            >
+                              {term}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Fixed Add Student button */}
-              <div
-                className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
-                  isDarkMode
-                    ? "bg-[#000000] border-[#2A2A2A]"
-                    : "bg-white border-[#E3E3E3]"
-                }`}
-              >
-                <button
-                  onClick={handleSaveStudent}
-                  disabled={!isStudentFormValid}
-                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] transition-all ${
-                    isStudentFormValid
-                      ? "bg-[#FF7B17] hover:bg-[#E06A10] text-white cursor-pointer shadow-md"
-                      : isDarkMode
-                        ? "bg-[#2A2A2A] text-gray-500 cursor-not-allowed border border-[#333333]"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              {/* Fixed Add Student button — only appears once the form is complete */}
+              {isStudentFormValid && (
+                <div
+                  className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+                    isDarkMode
+                      ? "bg-[#000000] border-gray-800"
+                      : "bg-white border-[#E3E3E3]"
                   }`}
                 >
-                  Add Student
-                </button>
-              </div>
+                  <button
+                    onClick={handleSaveStudent}
+                    className="w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white bg-[#FF7B17] cursor-pointer"
+                  >
+                    Add Student
+                  </button>
+                </div>
+              )}
 
               {/* Success sheet */}
               {showStudentSuccess && (
@@ -1236,7 +1436,7 @@ const Report = () => {
                   />
                   <div
                     className={`relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up ${
-                      isDarkMode ? "bg-[#1E1E1E]" : "bg-white"
+                      isDarkMode ? "bg-[#1e1e1e]" : "bg-white"
                     }`}
                   >
                     <div className="flex flex-col items-center">
@@ -1292,7 +1492,6 @@ const Report = () => {
       {screen === "behaviour" && (
         <div
           className={`pb-28 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"}`}
-          onMouseUp={handleMouseUp}
         >
           <div
             className="flex items-center gap-4 px-5 py-5 cursor-pointer"
@@ -1300,7 +1499,7 @@ const Report = () => {
           >
             <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
             <h2
-              className={`text-[20px] font-medium ${isDarkMode ? "bg-[#000000] text-white" : "bg-white  text-[#000000]"}`}
+              className={`text-[20px] font-medium ${isDarkMode ? "text-white" : "text-[#000000]"}`}
             >
               Add Behaviour
             </h2>
@@ -1309,37 +1508,25 @@ const Report = () => {
           <div className="px-5 flex flex-col gap-5">
             {/* Student Name */}
             <div>
-              <label
-                className={`block text-[15px] font-medium ] mb-2 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
-              >
-                Student Name
-              </label>
+              <label className={labelClass}>Student Name</label>
               <input
                 type="text"
                 placeholder="E.g. John Smith"
                 value={studentNameAdd}
                 onChange={(e) => setStudentNameAdd(e.target.value)}
                 style={noZoomStyle}
-                className={inputClass}
+                className={themedInput}
               />
             </div>
 
             {/* Gender */}
             <div>
-              <label
-                className={`block text-[15px] font-medium ] mb-2 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
-              >
-                Gender
-              </label>
+              <label className={labelClass}>Gender</label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsGenderOpen(!isGenderOpen)}
-                  className={`w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
-                    isDarkMode
-                      ? "bg-[#1E1E1E] border-[#2A2A2A]"
-                      : "bg-[#FCFCFC] border-[#D9D9D9]"
-                  }`}
+                  className={dropdownBtn48}
                 >
                   <span
                     className={
@@ -1362,22 +1549,12 @@ const Report = () => {
                 </button>
 
                 {isGenderOpen && (
-                  <div
-                    className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
-                      isDarkMode
-                        ? "bg-[#000000] border-[#2A2A2A] text-white"
-                        : "bg-white border-[#E5E7EB] text-gray-900"
-                    }`}
-                  >
+                  <div className={dropdownPanel}>
                     {genders.map((g) => (
                       <div
                         key={g}
                         onClick={() => handleSelectGender(g)}
-                        className={`px-4 py-3 text-[14px] cursor-pointer ${
-                          isDarkMode
-                            ? "hover:bg-[#1E1E1E]"
-                            : "hover:bg-[#EFF6FF]"
-                        }`}
+                        className={dropdownItem}
                       >
                         {g}
                       </div>
@@ -1389,22 +1566,12 @@ const Report = () => {
 
             {/* Academic Term */}
             <div>
-              <label
-                className={`block text-[15px] font-medium mb-2 ${
-                  isDarkMode ? "text-white" : "text-[#303030]"
-                }`}
-              >
-                Academic Term
-              </label>
+              <label className={labelClass}>Academic Term</label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsTermOpen(!isTermOpen)}
-                  className={`w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
-                    isDarkMode
-                      ? "bg-[#1E1E1E] border-[#2A2A2A]"
-                      : "bg-[#FCFCFC] border-[#D9D9D9]"
-                  }`}
+                  className={dropdownBtn48}
                 >
                   <span
                     className={
@@ -1427,22 +1594,12 @@ const Report = () => {
                 </button>
 
                 {isTermOpen && (
-                  <div
-                    className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
-                      isDarkMode
-                        ? "bg-[#000000] border-[#2A2A2A] text-white"
-                        : "bg-white border-[#E5E7EB] text-gray-900"
-                    }`}
-                  >
+                  <div className={dropdownPanel}>
                     {terms.map((t) => (
                       <div
                         key={t}
                         onClick={() => handleSelectTerm(t)}
-                        className={`px-4 py-3 text-[14px] cursor-pointer ${
-                          isDarkMode
-                            ? "hover:bg-[#1E1E1E]"
-                            : "hover:bg-[#EFF6FF]"
-                        }`}
+                        className={dropdownItem}
                       >
                         {t}
                       </div>
@@ -1451,10 +1608,11 @@ const Report = () => {
                 )}
               </div>
             </div>
+
             {/* Social Skills */}
             <div>
               <h2
-                className={`font-medium text-[15px] text-black mb-3 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#000000]"}`}
+                className={`font-medium text-[15px] mb-3 ${isDarkMode ? "text-white" : "text-[#000000]"}`}
               >
                 Social Skills Assessment
               </h2>
@@ -1463,7 +1621,7 @@ const Report = () => {
                   <div key={skill.id}>
                     <div className="flex justify-between mb-1">
                       <p
-                        className={`font-normal text-[14px] ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#000000]"}`}
+                        className={`font-normal text-[14px] ${isDarkMode ? "text-white" : "text-[#000000]"}`}
                       >
                         {skill.label}
                       </p>
@@ -1472,10 +1630,11 @@ const Report = () => {
                       </span>
                     </div>
                     <div
-                      className="w-full h-2 bg-gray-200 rounded-full cursor-pointer relative"
-                      onMouseDown={() => handleMouseDown(skill.id)}
-                      onMouseMove={(e) => handleMouseMove(e, skill.id)}
-                      onClick={(e) => handleSliderClick(e, skill.id)}
+                      className="w-full h-2 bg-gray-200 rounded-full cursor-pointer relative touch-none"
+                      onPointerDown={(e) => handleSliderDown(e, skill.id)}
+                      onPointerMove={(e) => handleSliderMove(e, skill.id)}
+                      onPointerUp={handleSliderUp}
+                      onPointerCancel={handleSliderUp}
                     >
                       <div
                         className="h-full bg-[#22C55E] rounded-full"
@@ -1495,25 +1654,21 @@ const Report = () => {
 
             {/* Comments */}
             <div>
-              <label
-                className={`block text-[15px] font-medium text-[#303030] mb-2 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
-              >
-                Add Comments
-              </label>
+              <label className={labelClass}>Add Comments</label>
               <input
                 type="text"
                 placeholder="Enter Comments...."
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
                 style={noZoomStyle}
-                className={inputClass}
+                className={themedInput}
               />
             </div>
 
             {/* Notify Parents */}
             <div className="flex justify-between items-center pb-2">
               <h6
-                className={`font-medium text-[15px] ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"}`}
+                className={`font-medium text-[15px] ${isDarkMode ? "text-white" : "text-black"}`}
               >
                 Notify Parents
               </h6>
@@ -1526,7 +1681,13 @@ const Report = () => {
             </div>
           </div>
 
-          <div className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-black border-t border-[#1F1F1F] px-5 py-3 z-40">
+          <div
+            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+              isDarkMode
+                ? "bg-black border-[#1F1F1F]"
+                : "bg-white border-[#E3E3E3]"
+            }`}
+          >
             <button
               onClick={() => {}}
               disabled={!isBehaviourFormValid}
@@ -1558,30 +1719,20 @@ const Report = () => {
           <div className="px-5 flex flex-col gap-5">
             {/* Student Name */}
             <div>
-              <label
-                className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-[#303030]"}`}
-              >
-                Student Name
-              </label>
+              <label className={labelClass}>Student Name</label>
               <input
                 type="text"
                 placeholder="E.g. John Smith"
                 value={studentNameAdd}
                 onChange={(e) => setStudentNameAdd(e.target.value)}
                 style={noZoomStyle}
-                className={inputClass}
+                className={themedInput}
               />
             </div>
 
             {/* Academic Term */}
             <div>
-              <label
-                className={`block text-[15px] font-medium mb-2 ${
-                  isDarkMode ? "text-white" : "text-[#303030]"
-                }`}
-              >
-                Academic Term
-              </label>
+              <label className={labelClass}>Academic Term</label>
               <div className="relative">
                 <button
                   type="button"
@@ -1589,11 +1740,7 @@ const Report = () => {
                     setIsTermOpen(!isTermOpen);
                     setIsReportTypeOpen(false);
                   }}
-                  className={`w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
-                    isDarkMode
-                      ? "bg-[#1E1E1E] border-[#2A2A2A]"
-                      : "bg-[#FCFCFC] border-[#D9D9D9]"
-                  }`}
+                  className={dropdownBtn48}
                 >
                   <span
                     className={
@@ -1616,22 +1763,12 @@ const Report = () => {
                 </button>
 
                 {isTermOpen && (
-                  <div
-                    className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md ${
-                      isDarkMode
-                        ? "bg-[#000000] border-[#2A2A2A] text-white"
-                        : "bg-white border-[#E5E7EB] text-gray-900"
-                    }`}
-                  >
+                  <div className={dropdownPanel}>
                     {terms.map((t) => (
                       <div
                         key={t}
                         onClick={() => handleSelectTerm(t)}
-                        className={`px-4 py-3 text-[14px] cursor-pointer ${
-                          isDarkMode
-                            ? "hover:bg-[#1E1E1E]"
-                            : "hover:bg-[#EFF6FF]"
-                        }`}
+                        className={dropdownItem}
                       >
                         {t}
                       </div>
@@ -1643,13 +1780,7 @@ const Report = () => {
 
             {/* Report Type */}
             <div>
-              <label
-                className={`block text-[15px] font-medium mb-2 ${
-                  isDarkMode ? "text-white" : "text-[#303030]"
-                }`}
-              >
-                Report Type
-              </label>
+              <label className={labelClass}>Report Type</label>
               <div className="relative">
                 <button
                   type="button"
@@ -1657,11 +1788,7 @@ const Report = () => {
                     setIsReportTypeOpen(!isReportTypeOpen);
                     setIsTermOpen(false);
                   }}
-                  className={`w-full h-[48px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
-                    isDarkMode
-                      ? "bg-[#1E1E1E] border-[#2A2A2A]"
-                      : "bg-[#FCFCFC] border-[#D9D9D9]"
-                  }`}
+                  className={dropdownBtn48}
                 >
                   <span
                     className={
@@ -1685,21 +1812,13 @@ const Report = () => {
 
                 {isReportTypeOpen && (
                   <div
-                    className={`absolute z-10 mt-1 w-full border rounded-[8px] shadow-md max-h-[220px] overflow-y-auto ${
-                      isDarkMode
-                        ? "bg-[#000000] border-[#2A2A2A] text-white"
-                        : "bg-white border-[#E5E7EB] text-gray-900"
-                    }`}
+                    className={`${dropdownPanel} max-h-[220px] overflow-y-auto`}
                   >
                     {reportTypes.map((rt) => (
                       <div
                         key={rt}
                         onClick={() => handleSelectReportType(rt)}
-                        className={`px-4 py-3 text-[14px] cursor-pointer ${
-                          isDarkMode
-                            ? "hover:bg-[#1E1E1E]"
-                            : "hover:bg-[#EFF6FF]"
-                        }`}
+                        className={dropdownItem}
                       >
                         {rt}
                       </div>
@@ -1741,8 +1860,8 @@ const Report = () => {
                   isDarkMode ? "text-[#737373]" : "text-[#9E9E9E]"
                 }`}
               >
-                Preview the generated attendance summary report for Shayla
-                Jason.
+                Preview the generated attendance summary report for{" "}
+                {studentNameAdd.trim() || "the selected student"}.
               </p>
             </div>
           </div>
@@ -1755,9 +1874,9 @@ const Report = () => {
             }`}
           >
             <button
-              disabled={!isBehaviourFormValid}
+              disabled={!isBehaviourFormValid || selectedReportType === ""}
               className={`w-full h-[50px] rounded-[12px] font-semibold text-[16px] transition-all ${
-                isBehaviourFormValid
+                isBehaviourFormValid && selectedReportType !== ""
                   ? "bg-[#FF7B17] hover:bg-[#E06A10] text-white cursor-pointer shadow-md"
                   : isDarkMode
                     ? "bg-[#262626] text-[#737373] cursor-not-allowed"
@@ -1772,7 +1891,7 @@ const Report = () => {
 
       {mainScreens.includes(screen) && <BottomNavigation />}
 
-      <style jsx>{`
+      <style>{`
         @keyframes slide-up {
           from {
             transform: translateY(100%);
