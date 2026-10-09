@@ -581,11 +581,16 @@ const HomePage = () => {
 
   // Only what the backend actually requires: name, date of birth, student ID.
   // Gender, photo, class, session and term are optional.
+  // The whole form must be filled out before the Add Student button appears
   const isStudentFormValid =
     studentNameAdd.trim() !== "" &&
     studentDOB !== null &&
-    studentID.trim() !== "";
-
+    selectedGender !== "" &&
+    studentID.trim() !== "" &&
+    selectedFile !== null &&
+    studentClass.trim() !== "" &&
+    academicSession.trim() !== "" &&
+    selectedTerm !== "";
   // Sends the new student to the backend, then refreshes the list so the
   // student shows up on the Mark Attendance screen.
   const handleSaveStudent = async () => {
@@ -2417,7 +2422,7 @@ const HomePage = () => {
                 </label>
                 <input
                   type="text"
-                  placeholder="E.g. Stu/020/25h"
+                  placeholder="E.g. 060201"
                   value={studentID}
                   onChange={(e) => setStudentID(e.target.value)}
                   style={{ fontSize: "16px" }}
@@ -2597,17 +2602,32 @@ const HomePage = () => {
                 {saveStudentError}
               </p>
             )}
-            <button
-              onClick={handleSaveStudent}
-              disabled={!isStudentFormValid || isSavingStudent}
-              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
-                isStudentFormValid && !isSavingStudent
-                  ? "bg-[#FF7B17] cursor-pointer"
-                  : "bg-gray-300 cursor-not-allowed"
-              }`}
-            >
-              {isSavingStudent ? "Adding..." : "Add Student"}
-            </button>
+            {isStudentFormValid && (
+              <div
+                className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+                  isDarkMode
+                    ? "bg-[#000000] border-gray-800"
+                    : "bg-white border-[#E3E3E3]"
+                }`}
+              >
+                {saveStudentError && (
+                  <p className="text-red-500 text-[13px] mb-2">
+                    {saveStudentError}
+                  </p>
+                )}
+                <button
+                  onClick={handleSaveStudent}
+                  disabled={isSavingStudent}
+                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
+                    isSavingStudent
+                      ? "bg-[#FF7B17]/60 cursor-not-allowed"
+                      : "bg-[#FF7B17] cursor-pointer"
+                  }`}
+                >
+                  {isSavingStudent ? "Adding..." : "Add Student"}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Success Modal */}

@@ -1065,7 +1065,7 @@ const Report = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="E.g. Stu/020/25h"
+                    placeholder="E.g. 060201"
                     value={studentID}
                     onChange={(e) => setStudentID(e.target.value)}
                     style={noZoomStyle}
