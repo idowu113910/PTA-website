@@ -40,6 +40,7 @@ import parentImg2 from "../assets/Shayla.svg";
 import parentImg3 from "../assets/Tamara.svg";
 
 registerLocale("en-GB", enGB);
+const STUDENT_ID_PREFIX = "06020";
 
 // Month / year options for the Date Of Birth calendar header
 const DOB_MONTHS = [
@@ -70,7 +71,6 @@ const RESTORABLE_SCREENS = [
   "add-grade",
   "add-students",
 ];
-const [studentID, setStudentID] = useState(STUDENT_ID_PREFIX);
 
 // The student list is saved here (localStorage survives closing the browser)
 // so it still shows even when the login token has expired.
@@ -117,7 +117,6 @@ const extractStudentList = (data) => {
 };
 
 // Every student ID starts with this; the teacher only types the last digit
-const STUDENT_ID_PREFIX = "06020";
 
 // Keeps "06020" fixed and lets only one more digit (1-9) be typed after it
 const handleStudentIdChange = (e) => {
@@ -358,7 +357,7 @@ const HomePage = () => {
   // Add Student form states
   const [studentNameAdd, setStudentNameAdd] = useState("");
   const [studentDOB, setStudentDOB] = useState(null);
-  const [studentID, setStudentID] = useState("");
+  const [studentID, setStudentID] = useState(STUDENT_ID_PREFIX);
   const [studentClass, setStudentClass] = useState("");
   const [academicSession, setAcademicSession] = useState("");
   const [isDOBOpen, setIsDOBOpen] = useState(false);
