@@ -1410,28 +1410,22 @@ const Report = () => {
               </div>
 
               {/* Fixed Add Student button — only appears once the form is complete */}
-              {/* Fixed Add Student button — always visible, enabled once the form is complete */}
-              <div
-                className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-[60] transition-colors duration-200 ${
-                  isDarkMode
-                    ? "bg-[#000000] border-gray-800"
-                    : "bg-white border-[#E3E3E3]"
-                }`}
-              >
-                <button
-                  onClick={handleSaveStudent}
-                  disabled={!isStudentFormValid}
-                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] transition-all ${
-                    isStudentFormValid
-                      ? "bg-[#FF7B17] text-white cursor-pointer"
-                      : isDarkMode
-                        ? "bg-[#2A2A2A] text-gray-500 cursor-not-allowed border border-[#333333]"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              {isStudentFormValid && (
+                <div
+                  className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+                    isDarkMode
+                      ? "bg-[#000000] border-gray-800"
+                      : "bg-white border-[#E3E3E3]"
                   }`}
                 >
-                  Add Student
-                </button>
-              </div>
+                  <button
+                    onClick={handleSaveStudent}
+                    className="w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white bg-[#FF7B17] cursor-pointer"
+                  >
+                    Add Student
+                  </button>
+                </div>
+              )}
 
               {/* Success sheet */}
               {showStudentSuccess && (

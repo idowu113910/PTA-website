@@ -116,23 +116,6 @@ const extractStudentList = (data) => {
   return [];
 };
 
-// Every student ID starts with this; the teacher only types the last digit
-
-// Keeps "06020" fixed and lets only one more digit (1-9) be typed after it
-const handleStudentIdChange = (e) => {
-  const digits = e.target.value.replace(/\D/g, ""); // numbers only
-
-  // Anything typed after the prefix (empty if the prefix was edited)
-  const typed = digits.startsWith(STUDENT_ID_PREFIX)
-    ? digits.slice(STUDENT_ID_PREFIX.length)
-    : "";
-
-  // Only the first typed digit counts, and 0 is not allowed
-  const lastDigit = typed.replace(/0/g, "").slice(0, 1);
-
-  setStudentID(STUDENT_ID_PREFIX + lastDigit);
-};
-
 // Turns whatever image value the backend returns (full URL, relative path with
 // or without a leading slash, or an object with a url) into a usable src
 const resolveImageUrl = (raw) => {
@@ -393,7 +376,7 @@ const HomePage = () => {
   // (status bar) in sync with the device's light/dark mode. The Mark
   // Attendance screen is always black (#000000).
   useEffect(() => {
-    const useBlack = isDarkMode || screen === "mark-attendance";
+    const useBlack = isDarkMode;
     const bg = useBlack ? "#000000" : "#FFFFFF";
     const root = document.documentElement;
 
@@ -588,6 +571,23 @@ const HomePage = () => {
     }
   };
 
+  // Every student ID starts with this; the teacher only types the last digit
+
+  // Keeps "06020" fixed and lets only one more digit (1-9) be typed after it
+  const handleStudentIdChange = (e) => {
+    const digits = e.target.value.replace(/\D/g, ""); // numbers only
+
+    // Anything typed after the prefix (empty if the prefix was edited)
+    const typed = digits.startsWith(STUDENT_ID_PREFIX)
+      ? digits.slice(STUDENT_ID_PREFIX.length)
+      : "";
+
+    // Only the first typed digit counts, and 0 is not allowed
+    const lastDigit = typed.replace(/0/g, "").slice(0, 1);
+
+    setStudentID(STUDENT_ID_PREFIX + lastDigit);
+  };
+
   const handleSelectGender = (gender) => {
     setSelectedGender(gender);
     setIsGenderOpen(false);
@@ -605,7 +605,7 @@ const HomePage = () => {
     studentNameAdd.trim() !== "" &&
     studentDOB !== null &&
     selectedGender !== "" &&
-    studentID.trim() !== "" &&
+    studentID.length === STUDENT_ID_PREFIX.length + 1 &&
     selectedFile !== null &&
     studentClass.trim() !== "" &&
     academicSession.trim() !== "" &&
@@ -752,14 +752,12 @@ const HomePage = () => {
   };
 
   const isFormValid =
-    studentNameAdd.trim() !== "" &&
-    studentDOB !== null &&
-    selectedGender !== "" &&
-    studentID.length === STUDENT_ID_PREFIX.length + 1 &&
-    selectedFile !== null &&
-    studentClass.trim() !== "" &&
-    academicSession.trim() !== "" &&
-    selectedTerm !== "";
+    studentName.trim() !== "" &&
+    selectedSubject !== "" &&
+    selectedAssessment !== "" &&
+    selectedGrade !== "" &&
+    totalMark.trim() !== "" &&
+    selectedDate !== null;
 
   const handleSaveGrade = () => {
     if (isFormValid) {
@@ -1261,7 +1259,6 @@ const HomePage = () => {
           screen only, so it ignores the device's light/dark setting. */}
       {screen === "mark-attendance" &&
         (() => {
-          const isDarkMode = true;
           return (
             <div
               className={`min-h-screen pb-28 transition-colors duration-200 ${
@@ -1637,9 +1634,17 @@ const HomePage = () => {
                     className="absolute inset-0 bg-black/40"
                     onClick={() => setShowAttendanceSuccess(false)}
                   />
-                  <div className="relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl bg-[#1e1e1e] attendance-sheet-up">
+                  <div
+                    className={`relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl attendance-sheet-up ${
+                      isDarkMode ? "bg-[#000000]" : "bg-white"
+                    }`}
+                  >
                     <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-green-900/40">
+                      <div
+                        className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                          isDarkMode ? "bg-green-900/40" : "bg-green-100"
+                        }`}
+                      >
                         <svg
                           className="w-8 h-8 text-green-500"
                           fill="none"
@@ -2710,7 +2715,7 @@ const HomePage = () => {
             </div>
           )}
 
-          <style jsx>{`
+          <style>{`
             @keyframes slide-up {
               from {
                 transform: translateY(100%);
