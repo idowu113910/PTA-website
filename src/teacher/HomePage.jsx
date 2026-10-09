@@ -1548,13 +1548,92 @@ const HomePage = () => {
                     : "bg-white border-[#E3E3E3]"
                 }`}
               >
+                {saveAttendanceError && (
+                  <p className="text-red-500 text-[13px] mb-2">
+                    {saveAttendanceError}
+                  </p>
+                )}
                 <button
                   onClick={handleSaveAttendance}
-                  className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"
+                  disabled={isSavingAttendance || students.length === 0}
+                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white flex items-center justify-center gap-2 transition-all ${
+                    isSavingAttendance || students.length === 0
+                      ? "bg-[#FF7B17]/60 cursor-not-allowed"
+                      : "bg-[#FF7B17] cursor-pointer"
+                  }`}
                 >
-                  Save
+                  {isSavingAttendance && (
+                    <svg
+                      className="w-5 h-5 animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-90"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      />
+                    </svg>
+                  )}
+                  {isSavingAttendance ? "Saving..." : "Save"}
                 </button>
               </div>
+
+              {/* Success sheet */}
+              {showAttendanceSuccess && (
+                <div className="fixed inset-0 flex items-end justify-center z-[60]">
+                  <div
+                    className="absolute inset-0 bg-black/40"
+                    onClick={() => setShowAttendanceSuccess(false)}
+                  />
+                  <div className="relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl bg-[#1e1e1e] attendance-sheet-up">
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-green-900/40">
+                        <svg
+                          className="w-8 h-8 text-green-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="text-[20px] font-bold mb-2 text-white">
+                        Successful!
+                      </h3>
+                      <p className="text-[14px] text-center mb-6 text-gray-400">
+                        Attendance has been saved
+                      </p>
+                      <button
+                        onClick={() => setShowAttendanceSuccess(false)}
+                        className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"
+                      >
+                        Okay
+                      </button>
+                    </div>
+                  </div>
+                  <style>{`
+      @keyframes attendanceSheetUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+      .attendance-sheet-up { animation: attendanceSheetUp 0.3s ease-out; }
+    `}</style>
+                </div>
+              )}
             </div>
           );
         })()}
