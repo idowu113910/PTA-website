@@ -18,12 +18,8 @@ import latee from "../assets/Late2.svg";
 import presC from "../assets/present1.svg";
 import absC from "../assets/absent3.svg";
 import lateC from "../assets/late3.svg";
-import em from "../assets/Emma.svg";
 import sh from "../assets/Shayla.svg";
-import am from "../assets/Amaya.svg";
-import br from "../assets/Bryan.svg";
 import ta from "../assets/Tamara.svg";
-import se from "../assets/sean.svg";
 import arr from "../assets/arr drop down.svg";
 import cal from "../assets/calendar3.svg";
 import DatePicker from "react-datepicker";
@@ -32,14 +28,12 @@ import { registerLocale } from "react-datepicker";
 import enGB from "date-fns/locale/en-GB";
 import ch from "../assets/choose.svg";
 import BottomNavigation from "../components/BottomNavigation";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
 import { getAuthToken, authErrorMessage } from "./utils/auth";
-import parentImg1 from "../assets/divine.svg";
-import parentImg2 from "../assets/Shayla.svg";
-import parentImg3 from "../assets/Tamara.svg";
 
 registerLocale("en-GB", enGB);
+
+// Every student ID starts with this; the teacher only types the last digit
 const STUDENT_ID_PREFIX = "06020";
 
 // Month / year options for the Date Of Birth calendar header
@@ -304,7 +298,7 @@ const HomePage = () => {
   const [showAttendanceSuccess, setShowAttendanceSuccess] = useState(false);
 
   const [showNotifications, setShowNotifications] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date("2025-06-30"));
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   // Remember which screen the teacher is on so a browser refresh keeps them
   // there (still inside the Home page).
   const [screen, setScreen] = useState(() => {
@@ -316,8 +310,6 @@ const HomePage = () => {
     }
   });
   const mainScreens = ["home", "report", "message", "calendar", "profile"];
-  const [isOn, setIsOn] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
   // Starts from the saved list so students show instantly, even offline or
   // with an expired login
   const [students, setStudents] = useState(() => loadCachedStudents());
@@ -325,9 +317,13 @@ const HomePage = () => {
   const [studentsError, setStudentsError] = useState("");
   const [isSavingStudent, setIsSavingStudent] = useState(false);
   const [saveStudentError, setSaveStudentError] = useState("");
-  const { fullName, grade, room, token: contextToken } = useUser();
-
-  const dateRef = useRef(null);
+  const {
+    fullName,
+    grade,
+    room,
+    token: contextToken,
+    profileImage,
+  } = useUser();
 
   // Add Grade form states
   const [studentName, setStudentName] = useState("");
@@ -340,6 +336,7 @@ const HomePage = () => {
   // Add Student form states
   const [studentNameAdd, setStudentNameAdd] = useState("");
   const [studentDOB, setStudentDOB] = useState(null);
+  // Always "06020" + one digit (1-9) typed by the teacher
   const [studentID, setStudentID] = useState(STUDENT_ID_PREFIX);
   const [studentClass, setStudentClass] = useState("");
   const [academicSession, setAcademicSession] = useState("");
@@ -362,22 +359,11 @@ const HomePage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
 
-  const { profileImage } = useUser();
-
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const path = location.pathname.substring(1) || "home";
-    setActiveTab(path);
-  }, [location]);
-
   // Keep html/body background, color-scheme and the browser top bar
-  // (status bar) in sync with the device's light/dark mode. The Mark
-  // Attendance screen is always black (#000000).
+  // (status bar) in sync with the device's light/dark mode. Every screen,
+  // including Mark Attendance, follows the device setting.
   useEffect(() => {
-    const useBlack = isDarkMode;
-    const bg = useBlack ? "#000000" : "#FFFFFF";
+    const bg = isDarkMode ? "#000000" : "#FFFFFF";
     const root = document.documentElement;
 
     const prevRootBg = root.style.backgroundColor;
@@ -389,7 +375,7 @@ const HomePage = () => {
 
     root.style.backgroundColor = bg;
     document.body.style.backgroundColor = bg;
-    root.style.colorScheme = useBlack ? "dark" : "light";
+    root.style.colorScheme = isDarkMode ? "dark" : "light";
 
     // Replace any existing theme-color tags so iOS/Android re-read the color
     document
@@ -409,7 +395,7 @@ const HomePage = () => {
         .forEach((m) => m.remove());
       originalMetas.forEach((m) => document.head.appendChild(m));
     };
-  }, [isDarkMode, screen]);
+  }, [isDarkMode]);
 
   // Save the current screen so a refresh returns to it. The saved value is
   // cleared when the teacher navigates away from this page (unmount), so
@@ -433,7 +419,7 @@ const HomePage = () => {
   }, []);
 
   const handleFileClick = () => {
-    fileInputRef.current.click();
+    fileInputRef.current?.click();
   };
 
   // Load the teacher's students from the backend. A successful load replaces
@@ -571,20 +557,11 @@ const HomePage = () => {
     }
   };
 
-  // Every student ID starts with this; the teacher only types the last digit
-
-  // Keeps "06020" fixed and lets only one more digit (1-9) be typed after it
+  // The "06020" part is shown as fixed text next to the input, so the teacher
+  // only ever types the LAST digit (1-9). Typing again replaces the digit,
+  // and anything that is not 1-9 is ignored.
   const handleStudentIdChange = (e) => {
-    const digits = e.target.value.replace(/\D/g, ""); // numbers only
-
-    // Anything typed after the prefix (empty if the prefix was edited)
-    const typed = digits.startsWith(STUDENT_ID_PREFIX)
-      ? digits.slice(STUDENT_ID_PREFIX.length)
-      : "";
-
-    // Only the first typed digit counts, and 0 is not allowed
-    const lastDigit = typed.replace(/0/g, "").slice(0, 1);
-
+    const lastDigit = e.target.value.replace(/[^1-9]/g, "").slice(-1);
     setStudentID(STUDENT_ID_PREFIX + lastDigit);
   };
 
@@ -598,9 +575,7 @@ const HomePage = () => {
     setIsTermOpen(false);
   };
 
-  // Only what the backend actually requires: name, date of birth, student ID.
-  // Gender, photo, class, session and term are optional.
-  // The whole form must be filled out before the Add Student button appears
+  // The whole Add Student form must be filled out before its button appears
   const isStudentFormValid =
     studentNameAdd.trim() !== "" &&
     studentDOB !== null &&
@@ -610,6 +585,7 @@ const HomePage = () => {
     studentClass.trim() !== "" &&
     academicSession.trim() !== "" &&
     selectedTerm !== "";
+
   // Sends the new student to the backend, then refreshes the list so the
   // student shows up on the Mark Attendance screen.
   const handleSaveStudent = async () => {
@@ -751,6 +727,7 @@ const HomePage = () => {
     setSelectedTerm("");
   };
 
+  // Add Grade form: only the grade fields
   const isFormValid =
     studentName.trim() !== "" &&
     selectedSubject !== "" &&
@@ -774,8 +751,6 @@ const HomePage = () => {
     setTotalMark("");
     setSelectedDate(null);
   };
-
-  const handleToggle = () => setIsOn(!isOn);
 
   useEffect(() => {
     const duration = 2000;
@@ -1183,21 +1158,21 @@ const HomePage = () => {
                 message: "Bryan's diary wasn't found in his bag...",
                 time: "11:10",
                 unread: 4,
-                img: parentImg1,
+                img: dv,
               },
               {
                 name: "Amaya's Mum",
                 message: "Good evening, Ms.Edith. I added some...",
                 time: "Yesterday",
                 unread: 2,
-                img: parentImg2,
+                img: sh,
               },
               {
                 name: "Shayla's Mum",
                 message: "Good evening, Ms.Edith. I added some...",
                 time: "Yesterday",
                 unread: 1,
-                img: parentImg3,
+                img: ta,
               },
             ].map((chat, index) => (
               <div
@@ -1255,436 +1230,428 @@ const HomePage = () => {
       )}
 
       {/* ================= MARK ATTENDANCE SCREEN ================= */}
-      {/* Always black (#000000): isDarkMode is forced to true inside this
-          screen only, so it ignores the device's light/dark setting. */}
-      {screen === "mark-attendance" &&
-        (() => {
-          return (
-            <div
-              className={`min-h-screen pb-28 transition-colors duration-200 ${
-                isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
+      {/* Follows the device's light / dark setting like every other screen. */}
+      {screen === "mark-attendance" && (
+        <div
+          className={`min-h-screen pb-28 transition-colors duration-200 ${
+            isDarkMode ? "bg-[#000000] text-white" : "bg-white text-black"
+          }`}
+        >
+          <div
+            className="flex items-center gap-4 px-5 py-5 cursor-pointer"
+            onClick={() => setScreen("home")}
+          >
+            <img src={back} alt="back" className={isDarkMode ? "invert" : ""} />
+            <h2
+              className={`text-[20px] font-medium ${
+                isDarkMode ? "text-white" : "text-black"
               }`}
             >
-              <div
-                className="flex items-center gap-4 px-5 py-5 cursor-pointer"
-                onClick={() => setScreen("home")}
-              >
-                <img
-                  src={back}
-                  alt="back"
-                  className={isDarkMode ? "invert" : ""}
-                />
-                <h2
-                  className={`text-[20px] font-medium ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  Attendance
-                </h2>
-              </div>
+              Attendance
+            </h2>
+          </div>
 
-              {/* Class Attendance header */}
-              <div className="px-5">
-                <div className="flex justify-between items-center">
-                  <p
-                    className={`font-semibold text-[15px] ${
-                      isDarkMode ? "text-white" : "text-black"
-                    }`}
-                  >
-                    Class Attendance
-                  </p>
-                  <p
-                    className={`font-medium text-[13px] ${
-                      isDarkMode ? "text-white" : "text-black"
-                    }`}
-                  >
-                    Today
-                  </p>
-                </div>
-              </div>
-
-              {/* Date navigator — outlined, transparent in dark mode */}
-              <div
-                className={`rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3 ${
-                  isDarkMode
-                    ? "border border-gray-600 bg-transparent"
-                    : "border border-[#E3E3E3] bg-white"
-                }`}
-              >
-                <img
-                  src={back3}
-                  alt="previous day"
-                  onClick={handlePrevDay}
-                  className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
-                    isDarkMode ? "invert" : ""
-                  }`}
-                />
-                <p
-                  className={`font-medium text-[13px] text-center truncate mx-2 ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  {formatDate(currentDate)}
-                </p>
-                <img
-                  src={front}
-                  alt="next day"
-                  onClick={handleNextDay}
-                  className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
-                    isDarkMode ? "invert" : ""
-                  }`}
-                />
-              </div>
-
-              {/* Today's Summary — outlined, transparent in dark mode */}
-              <div
-                className={`rounded-[6px] mx-5 mt-4 p-3 ${
-                  isDarkMode
-                    ? "border border-gray-600 bg-transparent"
-                    : "border border-[#E3E3E3] bg-white"
-                }`}
-              >
-                <h2
-                  className={`font-medium text-[13px] mb-2 ${
-                    isDarkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  Today's Summary
-                </h2>
-                <div className="flex justify-between gap-2">
-                  {/* Present */}
-                  <div
-                    className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
-                      isDarkMode
-                        ? "border border-gray-700 bg-transparent"
-                        : "bg-[#F0FDF4]"
-                    }`}
-                  >
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
-                        isDarkMode ? "bg-green-900/40" : "bg-green-100"
-                      }`}
-                    >
-                      <svg
-                        className="w-4 h-4 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p
-                      className={`text-[14px] font-semibold ${
-                        isDarkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {counts.present}
-                    </p>
-                    <p
-                      className={`text-[12px] font-medium ${
-                        isDarkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      Present
-                    </p>
-                  </div>
-
-                  {/* Absent */}
-                  <div
-                    className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
-                      isDarkMode
-                        ? "border border-gray-700 bg-transparent"
-                        : "bg-[#FDF1F1]"
-                    }`}
-                  >
-                    <img src={pre} alt="" className="w-6 h-6 mb-1" />
-                    <p
-                      className={`text-[14px] font-semibold ${
-                        isDarkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {counts.absent}
-                    </p>
-                    <p
-                      className={`text-[12px] font-medium ${
-                        isDarkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      Absent
-                    </p>
-                  </div>
-
-                  {/* Late */}
-                  <div
-                    className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
-                      isDarkMode
-                        ? "border border-gray-700 bg-transparent"
-                        : "bg-[#FEFCE9]"
-                    }`}
-                  >
-                    <img src={late} alt="" className="w-6 h-6 mb-1" />
-                    <p
-                      className={`text-[14px] font-semibold ${
-                        isDarkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {counts.late}
-                    </p>
-                    <p
-                      className={`text-[12px] font-medium ${
-                        isDarkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      Late
-                    </p>
-                  </div>
-                </div>
-
-                <div
-                  className={`w-full h-[1px] mt-3 mb-2 ${
-                    isDarkMode ? "bg-gray-700" : "bg-[#D9D9D9]"
-                  }`}
-                />
-
-                <div className="flex justify-between">
-                  <p
-                    className={`font-medium text-[14px] ${
-                      isDarkMode ? "text-white" : "text-black"
-                    }`}
-                  >
-                    Total Students
-                  </p>
-                  <p
-                    className={`font-semibold text-[14px] ${
-                      isDarkMode ? "text-white" : "text-black"
-                    }`}
-                  >
-                    {students.length}
-                  </p>
-                </div>
-              </div>
-
+          {/* Class Attendance header */}
+          <div className="px-5">
+            <div className="flex justify-between items-center">
               <p
-                className={`font-medium text-[17px] px-5 mt-4 mb-2 ${
+                className={`font-semibold text-[15px] ${
                   isDarkMode ? "text-white" : "text-black"
                 }`}
               >
-                Student List
+                Class Attendance
               </p>
-
-              {/* Loading / error / empty states for the student list */}
-              {isLoadingStudents && students.length === 0 && (
-                <p
-                  className={`px-5 text-[13px] ${
-                    isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
-                  }`}
-                >
-                  Loading students...
-                </p>
-              )}
-              {studentsError && (
-                <p className="px-5 text-[13px] text-red-500">{studentsError}</p>
-              )}
-              {!isLoadingStudents &&
-                !studentsError &&
-                students.length === 0 && (
-                  <p
-                    className={`px-5 text-[13px] ${
-                      isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
-                    }`}
-                  >
-                    No students yet. Add a student to see them here.
-                  </p>
-                )}
-
-              {/* Student rows — outlined, transparent in dark mode */}
-              <div className="px-5 flex flex-col gap-3">
-                {students.map((student) => (
-                  <div
-                    key={student.id}
-                    className={`rounded-[6px] px-3 py-2 flex items-center justify-between ${
-                      isDarkMode
-                        ? "border border-gray-600 bg-transparent"
-                        : "border border-[#E3E3E3] bg-white"
-                    }`}
-                  >
-                    {/* Left: avatar + info */}
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <img
-                        src={student.image}
-                        alt={student.name}
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = "/default-avatar.png";
-                        }}
-                        className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
-                      />
-                      <div className="min-w-0">
-                        <p
-                          className={`font-semibold text-[14px] truncate ${
-                            isDarkMode ? "text-white" : "text-black"
-                          }`}
-                        >
-                          {student.name}
-                        </p>
-                        <p
-                          className={`font-medium text-[12px] ${
-                            isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
-                          }`}
-                        >
-                          ID: {student.id}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Right: status icons */}
-                    <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                      <img
-                        src={
-                          studentAttendance[student.id] === "present"
-                            ? presC
-                            : pres
-                        }
-                        onClick={() => handleStatusClick(student.id, "present")}
-                        className="cursor-pointer w-7 h-7"
-                        alt="present"
-                      />
-                      <img
-                        src={
-                          studentAttendance[student.id] === "absent"
-                            ? absC
-                            : abs
-                        }
-                        onClick={() => handleStatusClick(student.id, "absent")}
-                        className="cursor-pointer w-7 h-7"
-                        alt="absent"
-                      />
-                      <img
-                        src={
-                          studentAttendance[student.id] === "late"
-                            ? lateC
-                            : latee
-                        }
-                        onClick={() => handleStatusClick(student.id, "late")}
-                        className="cursor-pointer w-7 h-7"
-                        alt="late"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Fixed Save Button */}
-              <div
-                className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
-                  isDarkMode
-                    ? "bg-[#000000] border-gray-800"
-                    : "bg-white border-[#E3E3E3]"
+              <p
+                className={`font-medium text-[13px] ${
+                  isDarkMode ? "text-white" : "text-black"
                 }`}
               >
-                {saveAttendanceError && (
-                  <p className="text-red-500 text-[13px] mb-2">
-                    {saveAttendanceError}
-                  </p>
-                )}
-                <button
-                  onClick={handleSaveAttendance}
-                  disabled={isSavingAttendance || students.length === 0}
-                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white flex items-center justify-center gap-2 transition-all ${
-                    isSavingAttendance || students.length === 0
-                      ? "bg-[#FF7B17]/60 cursor-not-allowed"
-                      : "bg-[#FF7B17] cursor-pointer"
+                Today
+              </p>
+            </div>
+          </div>
+
+          {/* Date navigator */}
+          <div
+            className={`rounded-[6px] mx-5 mt-4 h-[45px] flex items-center justify-between px-3 ${
+              isDarkMode
+                ? "border border-gray-600 bg-transparent"
+                : "border border-[#E3E3E3] bg-white"
+            }`}
+          >
+            <img
+              src={back3}
+              alt="previous day"
+              onClick={handlePrevDay}
+              className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
+                isDarkMode ? "invert" : ""
+              }`}
+            />
+            <p
+              className={`font-medium text-[13px] text-center truncate mx-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
+              {formatDate(currentDate)}
+            </p>
+            <img
+              src={front}
+              alt="next day"
+              onClick={handleNextDay}
+              className={`cursor-pointer flex-shrink-0 w-5 h-5 ${
+                isDarkMode ? "invert" : ""
+              }`}
+            />
+          </div>
+
+          {/* Today's Summary */}
+          <div
+            className={`rounded-[6px] mx-5 mt-4 p-3 ${
+              isDarkMode
+                ? "border border-gray-600 bg-transparent"
+                : "border border-[#E3E3E3] bg-white"
+            }`}
+          >
+            <h2
+              className={`font-medium text-[13px] mb-2 ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
+              Today's Summary
+            </h2>
+            <div className="flex justify-between gap-2">
+              {/* Present */}
+              <div
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#F0FDF4]"
+                }`}
+              >
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center mb-1 ${
+                    isDarkMode ? "bg-green-900/40" : "bg-green-100"
                   }`}
                 >
-                  {isSavingAttendance && (
-                    <svg
-                      className="w-5 h-5 animate-spin"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-90"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                      />
-                    </svg>
-                  )}
-                  {isSavingAttendance ? "Saving..." : "Save"}
-                </button>
+                  <svg
+                    className="w-4 h-4 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  {counts.present}
+                </p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Present
+                </p>
               </div>
 
-              {/* Success sheet */}
-              {showAttendanceSuccess && (
-                <div className="fixed inset-0 flex items-end justify-center z-[60]">
-                  <div
-                    className="absolute inset-0 bg-black/40"
-                    onClick={() => setShowAttendanceSuccess(false)}
+              {/* Absent */}
+              <div
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#FDF1F1]"
+                }`}
+              >
+                <img src={pre} alt="" className="w-6 h-6 mb-1" />
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  {counts.absent}
+                </p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Absent
+                </p>
+              </div>
+
+              {/* Late */}
+              <div
+                className={`flex-1 rounded-[4px] py-2 flex flex-col items-center ${
+                  isDarkMode
+                    ? "border border-gray-700 bg-transparent"
+                    : "bg-[#FEFCE9]"
+                }`}
+              >
+                <img src={late} alt="" className="w-6 h-6 mb-1" />
+                <p
+                  className={`text-[14px] font-semibold ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  {counts.late}
+                </p>
+                <p
+                  className={`text-[12px] font-medium ${
+                    isDarkMode ? "text-white" : "text-black"
+                  }`}
+                >
+                  Late
+                </p>
+              </div>
+            </div>
+
+            <div
+              className={`w-full h-[1px] mt-3 mb-2 ${
+                isDarkMode ? "bg-gray-700" : "bg-[#D9D9D9]"
+              }`}
+            />
+
+            <div className="flex justify-between">
+              <p
+                className={`font-medium text-[14px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Total Students
+              </p>
+              <p
+                className={`font-semibold text-[14px] ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                {students.length}
+              </p>
+            </div>
+          </div>
+
+          <p
+            className={`font-medium text-[17px] px-5 mt-4 mb-2 ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
+            Student List
+          </p>
+
+          {/* Loading / error / empty states for the student list */}
+          {isLoadingStudents && students.length === 0 && (
+            <p
+              className={`px-5 text-[13px] ${
+                isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+              }`}
+            >
+              Loading students...
+            </p>
+          )}
+          {studentsError && (
+            <p className="px-5 text-[13px] text-red-500">{studentsError}</p>
+          )}
+          {!isLoadingStudents && !studentsError && students.length === 0 && (
+            <p
+              className={`px-5 text-[13px] ${
+                isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+              }`}
+            >
+              No students yet. Add a student to see them here.
+            </p>
+          )}
+
+          {/* Student rows */}
+          <div className="px-5 flex flex-col gap-3">
+            {students.map((student) => (
+              <div
+                key={student.id}
+                className={`rounded-[6px] px-3 py-2 flex items-center justify-between ${
+                  isDarkMode
+                    ? "border border-gray-600 bg-transparent"
+                    : "border border-[#E3E3E3] bg-white"
+                }`}
+              >
+                {/* Left: avatar + info */}
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <img
+                    src={student.image}
+                    alt={student.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "/default-avatar.png";
+                    }}
+                    className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
                   />
+                  <div className="min-w-0">
+                    <p
+                      className={`font-semibold text-[14px] truncate ${
+                        isDarkMode ? "text-white" : "text-black"
+                      }`}
+                    >
+                      {student.name}
+                    </p>
+                    <p
+                      className={`font-medium text-[12px] ${
+                        isDarkMode ? "text-gray-400" : "text-[#9C9C9C]"
+                      }`}
+                    >
+                      ID: {student.id}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right: status icons */}
+                <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                  <img
+                    src={
+                      studentAttendance[student.id] === "present" ? presC : pres
+                    }
+                    onClick={() => handleStatusClick(student.id, "present")}
+                    className="cursor-pointer w-7 h-7"
+                    alt="present"
+                  />
+                  <img
+                    src={
+                      studentAttendance[student.id] === "absent" ? absC : abs
+                    }
+                    onClick={() => handleStatusClick(student.id, "absent")}
+                    className="cursor-pointer w-7 h-7"
+                    alt="absent"
+                  />
+                  <img
+                    src={
+                      studentAttendance[student.id] === "late" ? lateC : latee
+                    }
+                    onClick={() => handleStatusClick(student.id, "late")}
+                    className="cursor-pointer w-7 h-7"
+                    alt="late"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Fixed Save Button */}
+          <div
+            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-50 transition-colors duration-200 ${
+              isDarkMode
+                ? "bg-[#000000] border-gray-800"
+                : "bg-white border-[#E3E3E3]"
+            }`}
+          >
+            {saveAttendanceError && (
+              <p className="text-red-500 text-[13px] mb-2">
+                {saveAttendanceError}
+              </p>
+            )}
+            <button
+              onClick={handleSaveAttendance}
+              disabled={isSavingAttendance || students.length === 0}
+              className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white flex items-center justify-center gap-2 transition-all ${
+                isSavingAttendance || students.length === 0
+                  ? "bg-[#FF7B17]/60 cursor-not-allowed"
+                  : "bg-[#FF7B17] cursor-pointer"
+              }`}
+            >
+              {isSavingAttendance && (
+                <svg
+                  className="w-5 h-5 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-90"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+              )}
+              {isSavingAttendance ? "Saving..." : "Save"}
+            </button>
+          </div>
+
+          {/* Success sheet */}
+          {showAttendanceSuccess && (
+            <div className="fixed inset-0 flex items-end justify-center z-[60]">
+              <div
+                className="absolute inset-0 bg-black/40"
+                onClick={() => setShowAttendanceSuccess(false)}
+              />
+              <div
+                className={`relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl attendance-sheet-up ${
+                  isDarkMode ? "bg-[#000000]" : "bg-white"
+                }`}
+              >
+                <div className="flex flex-col items-center">
                   <div
-                    className={`relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl attendance-sheet-up ${
-                      isDarkMode ? "bg-[#000000]" : "bg-white"
+                    className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                      isDarkMode ? "bg-green-900/40" : "bg-green-100"
                     }`}
                   >
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
-                          isDarkMode ? "bg-green-900/40" : "bg-green-100"
-                        }`}
-                      >
-                        <svg
-                          className="w-8 h-8 text-green-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      </div>
-                      <h3 className="text-[20px] font-bold mb-2 text-white">
-                        Successful!
-                      </h3>
-                      <p className="text-[14px] text-center mb-6 text-gray-400">
-                        Attendance has successfully been saved
-                      </p>
-                      <button
-                        onClick={() => setShowAttendanceSuccess(false)}
-                        className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"
-                      >
-                        Okay
-                      </button>
-                    </div>
+                    <svg
+                      className="w-8 h-8 text-green-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
                   </div>
-                  <style>{`
-      @keyframes attendanceSheetUp {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-      }
-      .attendance-sheet-up { animation: attendanceSheetUp 0.3s ease-out; }
-    `}</style>
+                  <h3
+                    className={`text-[20px] font-bold mb-2 ${
+                      isDarkMode ? "text-white" : "text-[#303030]"
+                    }`}
+                  >
+                    Successful!
+                  </h3>
+                  <p
+                    className={`text-[14px] text-center mb-6 ${
+                      isDarkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    Attendance has successfully been saved
+                  </p>
+                  <button
+                    onClick={() => setShowAttendanceSuccess(false)}
+                    className="w-full bg-[#FF7B17] h-[50px] rounded-[10px] font-bold text-[18px] text-white"
+                  >
+                    Okay
+                  </button>
                 </div>
-              )}
+              </div>
+              <style>{`
+                @keyframes attendanceSheetUp {
+                  from { transform: translateY(100%); }
+                  to { transform: translateY(0); }
+                }
+                .attendance-sheet-up { animation: attendanceSheetUp 0.3s ease-out; }
+              `}</style>
             </div>
-          );
-        })()}
+          )}
+        </div>
+      )}
 
       {/* ================= ADD GRADE SCREEN ================= */}
       {screen === "add-grade" && (
@@ -1929,6 +1896,7 @@ const HomePage = () => {
                 </label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   placeholder="Input Maximum Score"
                   value={totalMark}
                   onChange={(e) => setTotalMark(e.target.value)}
@@ -2088,7 +2056,7 @@ const HomePage = () => {
             </div>
           )}
 
-          <style jsx>{`
+          <style>{`
             @keyframes slide-up {
               from {
                 transform: translateY(100%);
@@ -2437,7 +2405,8 @@ const HomePage = () => {
                 </div>
               </div>
 
-              {/* Student ID */}
+              {/* Student ID — "06020" is fixed text; the teacher types only
+                  the last digit (1-9) in the box next to it */}
               <div>
                 <label
                   className={`block text-[15px] font-medium mb-2 ${
@@ -2446,16 +2415,34 @@ const HomePage = () => {
                 >
                   Student ID
                 </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="E.g. 060201"
-                  value={studentID}
-                  onChange={handleStudentIdChange}
-                  style={{ fontSize: "16px" }}
-                  className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
-                />
+                <label
+                  className={`flex items-center h-[52px] rounded-[8px] border px-3 cursor-text focus-within:border-[#FF7B17] ${
+                    isDarkMode
+                      ? "border-gray-600 bg-transparent"
+                      : "border-[#0000001F] bg-white"
+                  }`}
+                >
+                  <span
+                    style={{ fontSize: "16px" }}
+                    className={`select-none ${
+                      isDarkMode ? "text-white" : "text-[#303030]"
+                    }`}
+                  >
+                    {STUDENT_ID_PREFIX}
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="1-9"
+                    value={studentID.slice(STUDENT_ID_PREFIX.length)}
+                    onChange={handleStudentIdChange}
+                    style={{ fontSize: "16px" }}
+                    className={`flex-1 min-w-0 bg-transparent outline-none placeholder:text-gray-400 ${
+                      isDarkMode ? "text-white" : "text-[#303030]"
+                    }`}
+                  />
+                </label>
               </div>
 
               {/* Upload Photo */}
@@ -2617,46 +2604,33 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Fixed Add Student Button */}
-          <div
-            className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
-              isDarkMode
-                ? "bg-[#000000] border-gray-800"
-                : "bg-white border-[#E3E3E3]"
-            }`}
-          >
-            {saveStudentError && (
-              <p className="text-red-500 text-[13px] mb-2">
-                {saveStudentError}
-              </p>
-            )}
-            {isStudentFormValid && (
-              <div
-                className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
-                  isDarkMode
-                    ? "bg-[#000000] border-gray-800"
-                    : "bg-white border-[#E3E3E3]"
+          {/* Fixed Add Student Button — only appears once the form is complete */}
+          {isStudentFormValid && (
+            <div
+              className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
+                isDarkMode
+                  ? "bg-[#000000] border-gray-800"
+                  : "bg-white border-[#E3E3E3]"
+              }`}
+            >
+              {saveStudentError && (
+                <p className="text-red-500 text-[13px] mb-2">
+                  {saveStudentError}
+                </p>
+              )}
+              <button
+                onClick={handleSaveStudent}
+                disabled={isSavingStudent}
+                className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
+                  isSavingStudent
+                    ? "bg-[#FF7B17]/60 cursor-not-allowed"
+                    : "bg-[#FF7B17] cursor-pointer"
                 }`}
               >
-                {saveStudentError && (
-                  <p className="text-red-500 text-[13px] mb-2">
-                    {saveStudentError}
-                  </p>
-                )}
-                <button
-                  onClick={handleSaveStudent}
-                  disabled={isSavingStudent}
-                  className={`w-full h-[50px] rounded-[10px] font-bold text-[18px] text-white transition-all ${
-                    isSavingStudent
-                      ? "bg-[#FF7B17]/60 cursor-not-allowed"
-                      : "bg-[#FF7B17] cursor-pointer"
-                  }`}
-                >
-                  {isSavingStudent ? "Adding..." : "Add Student"}
-                </button>
-              </div>
-            )}
-          </div>
+                {isSavingStudent ? "Adding..." : "Add Student"}
+              </button>
+            </div>
+          )}
 
           {/* Success Modal */}
           {showStudentSuccess && (

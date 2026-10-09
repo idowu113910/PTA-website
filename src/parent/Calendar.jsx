@@ -22,6 +22,11 @@ import swi2 from "../assets/swi2.svg";
 import time from "../assets/time.svg";
 import arrr from "../assets/arr dwn parent.svg";
 
+// iOS Safari zooms into any input whose font size is below 16px when it is
+// focused. This inline style keeps the inputs at 16px so the page never zooms
+// (an inline style can't be overridden by global CSS).
+const noZoom = { fontSize: "16px" };
+
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTH_NAMES = [
   "January",
@@ -141,6 +146,24 @@ const Calendar = () => {
       document.body.style.overflow = "";
     };
   }, [showScreen]);
+
+  // Stop the browser from auto-zooming into inputs on focus: while this page
+  // is open the viewport is capped at scale 1. The original viewport content
+  // is restored when leaving the page.
+  useEffect(() => {
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (!viewport) return;
+    const originalContent = viewport.getAttribute("content");
+    viewport.setAttribute(
+      "content",
+      "width=device-width, initial-scale=1, maximum-scale=1",
+    );
+    return () => {
+      if (originalContent !== null) {
+        viewport.setAttribute("content", originalContent);
+      }
+    };
+  }, []);
 
   // Remember the original theme-color tags and restore them only when
   // leaving this page.
@@ -488,7 +511,8 @@ const Calendar = () => {
               placeholder="Add title"
               value={taskTitle}
               onChange={(e) => setTaskTitle(e.target.value)}
-              className={`w-full h-13.75 rounded-[10px] px-4 outline-none text-[14px] ${
+              style={noZoom}
+              className={`w-full h-13.75 rounded-[10px] px-4 outline-none text-[16px] ${
                 isDarkMode
                   ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
                   : "border border-[#D9D9D9] bg-white text-[#000000]"
@@ -510,7 +534,8 @@ const Calendar = () => {
               placeholder="Add Note"
               value={taskNote}
               onChange={(e) => setTaskNote(e.target.value)}
-              className={`w-full h-13.75 rounded-[10px] px-4 outline-none text-[14px] ${
+              style={noZoom}
+              className={`w-full h-13.75 rounded-[10px] px-4 outline-none text-[16px] ${
                 isDarkMode
                   ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
                   : "border border-[#D9D9D9] bg-white text-[#000000]"
@@ -633,7 +658,8 @@ const Calendar = () => {
                 placeholder="Select repeat"
                 value={repeatValue}
                 onChange={(e) => setRepeatValue(e.target.value)}
-                className={`w-full h-13.75 rounded-[10px] px-4 pr-12 outline-none text-[14px] ${
+                style={noZoom}
+                className={`w-full h-13.75 rounded-[10px] px-4 pr-12 outline-none text-[16px] ${
                   isDarkMode
                     ? "border border-gray-700 bg-[#000000] text-white placeholder:text-gray-500"
                     : "border border-[#D9D9D9] bg-white text-[#000000]"
