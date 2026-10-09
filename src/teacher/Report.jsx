@@ -171,9 +171,9 @@ const Report = () => {
     loadSavedAttendanceStudents(),
   );
 
-  // Re-read the saved list every time the Mark Attendance screen is opened
+  // Re-read the saved list every time Mark Attendance or My Students is opened
   useEffect(() => {
-    if (screen === "mark-attendance") {
+    if (screen === "mark-attendance" || screen === "my-students") {
       setSavedStudents(loadSavedAttendanceStudents());
     }
   }, [screen]);
@@ -296,8 +296,10 @@ const Report = () => {
     });
   };
 
-  const handleRemoveStudent = (id) =>
+  const handleRemoveStudent = (id) => {
     setStudents((prev) => prev.filter((s) => s.id !== id));
+    setSavedStudents((prev) => prev.filter((s) => s.id !== id));
+  };
 
   const generateInitials = (name) => {
     const parts = name.trim().split(" ");
@@ -376,7 +378,13 @@ const Report = () => {
     selectedGender !== "" &&
     selectedTerm !== "";
 
-  const filteredStudents = students.filter((s) =>
+  // Sample students + students saved from the Home page (no duplicates by ID)
+  const allStudents = [
+    ...students,
+    ...savedStudents.filter((s) => !students.some((x) => x.id === s.id)),
+  ];
+
+  const filteredStudents = allStudents.filter((s) =>
     s.name.toLowerCase().startsWith(searchQuery.toLowerCase()),
   );
 
@@ -854,6 +862,10 @@ const Report = () => {
                     <img
                       src={student.image}
                       alt={student.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/default-avatar.png";
+                      }}
                       className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
@@ -873,6 +885,7 @@ const Report = () => {
                         View
                       </button>
                       <button
+                        onClick={() => handleRemoveStudent(student.id)}
                         className={`text-[13px] transition-colors ${
                           isDarkMode
                             ? "text-gray-400 hover:text-red-400"
