@@ -70,6 +70,7 @@ const RESTORABLE_SCREENS = [
   "add-grade",
   "add-students",
 ];
+const [studentID, setStudentID] = useState(STUDENT_ID_PREFIX);
 
 // The student list is saved here (localStorage survives closing the browser)
 // so it still shows even when the login token has expired.
@@ -113,6 +114,24 @@ const extractStudentList = (data) => {
   if (Array.isArray(data?.data?.students)) return data.data.students;
   if (Array.isArray(data?.data)) return data.data;
   return [];
+};
+
+// Every student ID starts with this; the teacher only types the last digit
+const STUDENT_ID_PREFIX = "06020";
+
+// Keeps "06020" fixed and lets only one more digit (1-9) be typed after it
+const handleStudentIdChange = (e) => {
+  const digits = e.target.value.replace(/\D/g, ""); // numbers only
+
+  // Anything typed after the prefix (empty if the prefix was edited)
+  const typed = digits.startsWith(STUDENT_ID_PREFIX)
+    ? digits.slice(STUDENT_ID_PREFIX.length)
+    : "";
+
+  // Only the first typed digit counts, and 0 is not allowed
+  const lastDigit = typed.replace(/0/g, "").slice(0, 1);
+
+  setStudentID(STUDENT_ID_PREFIX + lastDigit);
 };
 
 // Turns whatever image value the backend returns (full URL, relative path with
@@ -301,6 +320,7 @@ const HomePage = () => {
   const [isSavingAttendance, setIsSavingAttendance] = useState(false);
   const [saveAttendanceError, setSaveAttendanceError] = useState("");
   const [showAttendanceSuccess, setShowAttendanceSuccess] = useState(false);
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date("2025-06-30"));
   // Remember which screen the teacher is on so a browser refresh keeps them
@@ -705,7 +725,7 @@ const HomePage = () => {
 
       setShowStudentSuccess(true);
       setStudentNameAdd("");
-      setStudentID("");
+      setStudentID(STUDENT_ID_PREFIX);
       setSelectedFile(null);
       setStudentClass("");
       setAcademicSession("");
@@ -725,7 +745,7 @@ const HomePage = () => {
     setStudentNameAdd("");
     setStudentDOB(null);
     setSelectedGender("");
-    setStudentID("");
+    setStudentID(STUDENT_ID_PREFIX);
     setSelectedFile(null);
     setStudentClass("");
     setAcademicSession("");
@@ -733,12 +753,14 @@ const HomePage = () => {
   };
 
   const isFormValid =
-    studentName.trim() !== "" &&
-    selectedSubject !== "" &&
-    selectedAssessment !== "" &&
-    selectedGrade !== "" &&
-    totalMark.trim() !== "" &&
-    selectedDate !== null;
+    studentNameAdd.trim() !== "" &&
+    studentDOB !== null &&
+    selectedGender !== "" &&
+    studentID.length === STUDENT_ID_PREFIX.length + 1 &&
+    selectedFile !== null &&
+    studentClass.trim() !== "" &&
+    academicSession.trim() !== "" &&
+    selectedTerm !== "";
 
   const handleSaveGrade = () => {
     if (isFormValid) {
@@ -2422,9 +2444,11 @@ const HomePage = () => {
                 </label>
                 <input
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   placeholder="E.g. 060201"
                   value={studentID}
-                  onChange={(e) => setStudentID(e.target.value)}
+                  onChange={handleStudentIdChange}
                   style={{ fontSize: "16px" }}
                   className={`${inputClass} ${isDarkMode ? inputClassDark : inputClassLight}`}
                 />
