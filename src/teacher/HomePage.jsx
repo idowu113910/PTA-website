@@ -298,6 +298,9 @@ const HomePage = () => {
   const [percentage, setPercentage] = useState(0);
   const [percentage89, setPercentage89] = useState(0);
   const [percentage22, setPercentage22] = useState(0);
+  const [isSavingAttendance, setIsSavingAttendance] = useState(false);
+  const [saveAttendanceError, setSaveAttendanceError] = useState("");
+  const [showAttendanceSuccess, setShowAttendanceSuccess] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date("2025-06-30"));
   // Remember which screen the teacher is on so a browser refresh keeps them
@@ -508,11 +511,25 @@ const HomePage = () => {
 
   // Save button on the Mark Attendance screen: stores the students shown there
   // so the Report page's Mark Attendance screen can display them too.
-  const handleSaveAttendance = () => {
+  const handleSaveAttendance = async () => {
+    if (isSavingAttendance || students.length === 0) return;
+    setIsSavingAttendance(true);
+    setSaveAttendanceError("");
+
     try {
+      // Currently saved on this device only. When you have an attendance
+      // endpoint, replace this line with the fetch() call and send
+      // studentAttendance + currentDate.
       localStorage.setItem(SAVED_ATTENDANCE_KEY, JSON.stringify(students));
+
+      // Short pause so the loading state is visible
+      await wait(600);
+
+      setShowAttendanceSuccess(true);
     } catch (_) {
-      // storage unavailable or full — ignore
+      setSaveAttendanceError("Could not save attendance. Please try again.");
+    } finally {
+      setIsSavingAttendance(false);
     }
   };
 
