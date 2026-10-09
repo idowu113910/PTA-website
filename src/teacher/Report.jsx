@@ -405,14 +405,14 @@ const Report = () => {
   // input whose font size is below 16px when it is focused. The inline
   // style below is applied to every <input> so global CSS can't shrink it.
   const noZoomStyle = { fontSize: "16px" };
-
-  const formInputClass = `${inputClass} placeholder:text-gray-400 focus:border-[#FF7B17] transition-colors ${
-    isDarkMode
-      ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
-      : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
-  }`;
   const inputClass =
-    "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[16px] font-normal focus:outline-none";
+  "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[16px] font-normal focus:outline-none";
+  
+    const formInputClass = `${inputClass} placeholder:text-gray-400 focus:border-[#FF7B17] transition-colors ${
+      isDarkMode
+        ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
+        : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
+    }`;
 
   const dropdownBtnClass = `w-full h-[52px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
     isDarkMode
