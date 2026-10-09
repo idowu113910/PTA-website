@@ -44,6 +44,12 @@ const MONTH_NAMES = [
   "December",
 ];
 
+// Year options for the Add New Event date picker: 5 years back, 10 years ahead
+const EVENT_YEARS = Array.from(
+  { length: 16 },
+  (_, i) => new Date().getFullYear() - 5 + i,
+);
+
 function getDaysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
 }
@@ -719,6 +725,35 @@ const Notifications = () => {
                           isDarkMode ? "bg-[#000000]" : "bg-white"
                         }`}
                       >
+                        {/* Styles for the month / year dropdowns in the header */}
+                        <style>{`
+                          .event-picker-header {
+                            display: flex;
+                            gap: 8px;
+                            padding: 4px 4px 10px;
+                          }
+                          .event-picker-header select {
+                            flex: 1;
+                            min-width: 0;
+                            height: 40px;
+                            padding: 0 8px;
+                            border-radius: 8px;
+                            border: 1px solid #0000001f;
+                            background: #ffffff;
+                            color: #303030;
+                            font-size: 16px;
+                            font-weight: 500;
+                            outline: none;
+                          }
+                          .event-picker-header select:focus {
+                            border-color: #ff7b17;
+                          }
+                          .event-picker-header.event-picker-dark select {
+                            background: #1e1e1e;
+                            border-color: #4b5563;
+                            color: #ffffff;
+                          }
+                        `}</style>
                         <DatePicker
                           selected={studentDOB}
                           onChange={(date) => {
@@ -728,6 +763,42 @@ const Notifications = () => {
                           inline
                           showPopperArrow={false}
                           locale="en-GB"
+                          renderCustomHeader={({
+                            date,
+                            changeYear,
+                            changeMonth,
+                          }) => (
+                            <div
+                              className={`event-picker-header ${
+                                isDarkMode ? "event-picker-dark" : ""
+                              }`}
+                            >
+                              <select
+                                value={date.getMonth()}
+                                onChange={(e) =>
+                                  changeMonth(Number(e.target.value))
+                                }
+                              >
+                                {MONTH_NAMES.map((monthName, index) => (
+                                  <option key={monthName} value={index}>
+                                    {monthName}
+                                  </option>
+                                ))}
+                              </select>
+                              <select
+                                value={date.getFullYear()}
+                                onChange={(e) =>
+                                  changeYear(Number(e.target.value))
+                                }
+                              >
+                                {EVENT_YEARS.map((y) => (
+                                  <option key={y} value={y}>
+                                    {y}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
                         />
                         <button
                           onClick={() => setIsDOBOpen(false)}
