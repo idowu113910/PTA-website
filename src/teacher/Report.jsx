@@ -38,6 +38,8 @@ import ana from "../assets/report rewww.svg";
 import rr from "../assets/report review.svg";
 
 registerLocale("en-GB", enGB);
+// Every student ID starts with this; the teacher only types the last digit
+const STUDENT_ID_PREFIX = "06020";
 
 // The Home page's Save button on its Mark Attendance screen stores the
 // students under this key. This page reads it to show the same students on
@@ -196,7 +198,7 @@ const Report = () => {
 
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [studentNameAdd, setStudentNameAdd] = useState("");
-  const [studentID, setStudentID] = useState("");
+  const [studentID, setStudentID] = useState(STUDENT_ID_PREFIX);
   const [studentClass, setStudentClass] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [isGenderOpen, setIsGenderOpen] = useState(false);
@@ -296,6 +298,16 @@ const Report = () => {
     });
   };
 
+  // Keeps "06020" fixed and lets only one more digit (1-9) be typed after it
+  const handleStudentIdChange = (e) => {
+    const digits = e.target.value.replace(/\D/g, "");
+    const typed = digits.startsWith(STUDENT_ID_PREFIX)
+      ? digits.slice(STUDENT_ID_PREFIX.length)
+      : "";
+    const lastDigit = typed.replace(/0/g, "").slice(0, 1);
+    setStudentID(STUDENT_ID_PREFIX + lastDigit);
+  };
+
   const handleRemoveStudent = (id) => {
     setStudents((prev) => prev.filter((s) => s.id !== id));
     setSavedStudents((prev) => prev.filter((s) => s.id !== id));
@@ -333,7 +345,7 @@ const Report = () => {
     setStudentNameAdd("");
     setStudentDOB(null);
     setSelectedGender("");
-    setStudentID("");
+    setStudentID(STUDENT_ID_PREFIX);
     setSelectedFile(null);
     setStudentClass("");
     setAcademicSession("");
@@ -368,7 +380,7 @@ const Report = () => {
     studentNameAdd.trim() !== "" &&
     studentDOB !== null &&
     selectedGender !== "" &&
-    studentID.trim() !== "" &&
+    studentID.length === STUDENT_ID_PREFIX.length + 1 &&
     studentClass.trim() !== "" &&
     academicSession.trim() !== "" &&
     selectedTerm !== "";
@@ -394,6 +406,11 @@ const Report = () => {
   // style below is applied to every <input> so global CSS can't shrink it.
   const noZoomStyle = { fontSize: "16px" };
 
+  const formInputClass = `${inputClass} placeholder:text-gray-400 focus:border-[#FF7B17] transition-colors ${
+    isDarkMode
+      ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
+      : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
+  }`;
   const inputClass =
     "w-full h-[52px] rounded-[8px] border py-2 px-3 text-[16px] font-normal focus:outline-none";
 
@@ -900,7 +917,6 @@ const Report = () => {
               </div>
             </>
           ) : (
-            /* Add Student form */
             <div
               className={`pb-28 ${isDarkMode ? "bg-[#000000] text-white" : "bg-white text-[#303030]"}`}
             >
@@ -909,7 +925,7 @@ const Report = () => {
                   src={back}
                   alt="back"
                   onClick={() => setShowAddStudent(false)}
-                  className={isDarkMode ? "invert cursor-pointer" : ""}
+                  className={`cursor-pointer ${isDarkMode ? "invert" : ""}`}
                 />
                 <h2 className="text-[20px] font-medium">Add Student</h2>
               </div>
@@ -919,6 +935,7 @@ const Report = () => {
                   Student Information
                 </h4>
 
+                {/* Student Name */}
                 <div>
                   <label className="block text-[15px] font-medium mb-2">
                     Student Name
@@ -929,17 +946,13 @@ const Report = () => {
                     value={studentNameAdd}
                     onChange={(e) => setStudentNameAdd(e.target.value)}
                     style={noZoomStyle}
-                    className={inputClass}
+                    className={formInputClass}
                   />
                 </div>
 
                 {/* DOB — a button (not an input) so iOS never focus-zooms it */}
                 <div>
-                  <label
-                    className={`block text-[15px] font-medium mb-2 ${
-                      isDarkMode ? "text-white" : "text-[#303030]"
-                    }`}
-                  >
+                  <label className="block text-[15px] font-medium mb-2">
                     Date Of Birth
                   </label>
                   <div className="relative">
@@ -947,8 +960,8 @@ const Report = () => {
                       type="button"
                       onClick={() => setIsDOBOpen(true)}
                       style={noZoomStyle}
-                      className={`${inputClass} cursor-pointer pr-10 text-left ${
-                        studentDOB ? "" : "text-gray-400"
+                      className={`${formInputClass} cursor-pointer pr-10 text-left ${
+                        studentDOB ? "" : "!text-gray-400"
                       }`}
                     >
                       {studentDOB
@@ -998,9 +1011,7 @@ const Report = () => {
 
                 {/* Gender */}
                 <div>
-                  <label
-                    className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                  >
+                  <label className="block text-[15px] font-medium mb-2">
                     Gender
                   </label>
                   <div className="relative">
@@ -1013,23 +1024,15 @@ const Report = () => {
                           : "bg-[#FCFCFC] border-[#D9D9D9] text-[#303030]"
                       }`}
                     >
-                      <span
-                        className={
-                          selectedGender
-                            ? isDarkMode
-                              ? "text-white"
-                              : "text-[#303030]"
-                            : isDarkMode
-                              ? "text-gray-400"
-                              : "text-gray-400"
-                        }
-                      >
+                      <span className={selectedGender ? "" : "text-gray-400"}>
                         {selectedGender || "Select a gender"}
                       </span>
                       <img
                         src={arr}
                         alt=""
-                        className={`w-4 h-4 transition-transform duration-200 ${isGenderOpen ? "rotate-180" : ""} ${isDarkMode ? "brightness-0 invert" : ""}`}
+                        className={`w-4 h-4 transition-transform duration-200 ${
+                          isGenderOpen ? "rotate-180" : ""
+                        } ${isDarkMode ? "brightness-0 invert" : ""}`}
                       />
                     </button>
 
@@ -1058,26 +1061,27 @@ const Report = () => {
                     )}
                   </div>
                 </div>
-                {/* Student ID */}
+
+                {/* Student ID — "06020" is fixed, the teacher types only the last digit */}
                 <div>
                   <label className="block text-[15px] font-medium mb-2">
                     Student ID
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="E.g. 060201"
                     value={studentID}
-                    onChange={(e) => setStudentID(e.target.value)}
+                    onChange={handleStudentIdChange}
                     style={noZoomStyle}
-                    className={inputClass}
+                    className={formInputClass}
                   />
                 </div>
 
                 {/* Upload Photo */}
                 <div>
-                  <label
-                    className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                  >
+                  <label className="block text-[15px] font-medium mb-2">
                     Upload Photo
                   </label>
                   <div
@@ -1090,11 +1094,7 @@ const Report = () => {
                   >
                     <span
                       className={`text-[14px] truncate flex-1 ${
-                        selectedFile
-                          ? isDarkMode
-                            ? "text-white"
-                            : "text-[#303030]"
-                          : "text-gray-400"
+                        selectedFile ? "" : "text-gray-400"
                       }`}
                     >
                       {selectedFile ? selectedFile.name : "Choose File"}
@@ -1109,7 +1109,9 @@ const Report = () => {
                     <img
                       src={ch}
                       alt=""
-                      className={`w-[18px] h-[18px] flex-shrink-0 ml-2 ${isDarkMode ? "brightness-200" : ""}`}
+                      className={`w-[18px] h-[18px] flex-shrink-0 ml-2 ${
+                        isDarkMode ? "brightness-200" : ""
+                      }`}
                     />
                   </div>
                 </div>
@@ -1121,9 +1123,7 @@ const Report = () => {
                 {/* Class + Session */}
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label
-                      className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                    >
+                    <label className="block text-[15px] font-medium mb-2">
                       Class
                     </label>
                     <input
@@ -1132,17 +1132,11 @@ const Report = () => {
                       value={studentClass}
                       onChange={(e) => setStudentClass(e.target.value)}
                       style={noZoomStyle}
-                      className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] placeholder:text-gray-400 focus:outline-none transition-colors ${
-                        isDarkMode
-                          ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
-                          : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
-                      }`}
+                      className={formInputClass}
                     />
                   </div>
                   <div className="flex-1">
-                    <label
-                      className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                    >
+                    <label className="block text-[15px] font-medium mb-2">
                       Academic Session
                     </label>
                     <input
@@ -1151,20 +1145,14 @@ const Report = () => {
                       value={academicSession}
                       onChange={(e) => setAcademicSession(e.target.value)}
                       style={noZoomStyle}
-                      className={`w-full h-[52px] rounded-[8px] border px-3 text-[16px] placeholder:text-gray-400 focus:outline-none transition-colors ${
-                        isDarkMode
-                          ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
-                          : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
-                      }`}
+                      className={formInputClass}
                     />
                   </div>
                 </div>
 
                 {/* Term */}
                 <div>
-                  <label
-                    className={`block text-[15px] font-medium mb-2 ${isDarkMode ? "text-white" : "text-gray-800"}`}
-                  >
+                  <label className="block text-[15px] font-medium mb-2">
                     Term
                   </label>
                   <div className="relative">
@@ -1173,25 +1161,19 @@ const Report = () => {
                       onClick={() => setIsTermOpen(!isTermOpen)}
                       className={`w-full h-[52px] px-3 border rounded-[8px] flex items-center justify-between transition-colors ${
                         isDarkMode
-                          ? "bg-[#1E1E1E] border-[#2A2A2A]"
-                          : "bg-[#FCFCFC] border-[#0000001F]"
+                          ? "bg-[#1E1E1E] border-[#2A2A2A] text-white"
+                          : "bg-[#FCFCFC] border-[#0000001F] text-[#303030]"
                       }`}
                     >
-                      <span
-                        className={
-                          selectedTerm
-                            ? isDarkMode
-                              ? "text-white"
-                              : "text-[#303030]"
-                            : "text-gray-400"
-                        }
-                      >
+                      <span className={selectedTerm ? "" : "text-gray-400"}>
                         {selectedTerm || "Select Term"}
                       </span>
                       <img
                         src={arr}
                         alt=""
-                        className={`transition-transform duration-200 ${isTermOpen ? "rotate-180" : ""} ${isDarkMode ? "brightness-0 invert" : ""}`}
+                        className={`transition-transform duration-200 ${
+                          isTermOpen ? "rotate-180" : ""
+                        } ${isDarkMode ? "brightness-0 invert" : ""}`}
                       />
                     </button>
 
@@ -1222,6 +1204,7 @@ const Report = () => {
                 </div>
               </div>
 
+              {/* Fixed Add Student button */}
               <div
                 className={`fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto border-t px-5 py-3 z-40 transition-colors duration-200 ${
                   isDarkMode
@@ -1244,15 +1227,24 @@ const Report = () => {
                 </button>
               </div>
 
+              {/* Success sheet */}
               {showStudentSuccess && (
                 <div className="fixed inset-0 flex items-end justify-center z-50">
                   <div
                     className="absolute inset-0 bg-black/30"
                     onClick={handleCloseStudentSuccess}
                   />
-                  <div className="relative bg-white rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up">
+                  <div
+                    className={`relative rounded-t-[20px] w-full max-w-[430px] p-6 shadow-2xl animate-slide-up ${
+                      isDarkMode ? "bg-[#1E1E1E]" : "bg-white"
+                    }`}
+                  >
                     <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                      <div
+                        className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                          isDarkMode ? "bg-green-900/40" : "bg-green-100"
+                        }`}
+                      >
                         <svg
                           className="w-8 h-8 text-green-500"
                           fill="none"
@@ -1267,10 +1259,18 @@ const Report = () => {
                           />
                         </svg>
                       </div>
-                      <h3 className="text-[20px] font-bold text-[#303030] mb-2">
+                      <h3
+                        className={`text-[20px] font-bold mb-2 ${
+                          isDarkMode ? "text-white" : "text-[#303030]"
+                        }`}
+                      >
                         Successful!
                       </h3>
-                      <p className="text-[14px] text-gray-600 text-center mb-6">
+                      <p
+                        className={`text-[14px] text-center mb-6 ${
+                          isDarkMode ? "text-gray-400" : "text-gray-600"
+                        }`}
+                      >
                         You have successfully added a new student
                       </p>
                       <button
